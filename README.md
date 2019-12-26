@@ -7,7 +7,7 @@ Package for finding contours
 The main algorithm in finding the contours is based on the "CONREC Contouring Subroutine" by Paul Bourke.
 http://paulbourke.net/papers/conrec/
 
-Some of Root libraries & header files are included in "~/dependencies/include/root" & "~/dependencies/lib" for the purpose of generating the pdf plots. See https://root.cern.ch/license for Root license.
+Some of Root libraries & header files are included in "dependencies/include/root" & "dependencies/lib" for the purpose of generating the pdf plots. See https://root.cern.ch/license for Root license.
 
 Rene Brun and Fons Rademakers,
 ROOT - An Object Oriented Data Analysis Framework,
