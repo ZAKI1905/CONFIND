@@ -24,8 +24,7 @@ DEP_INC		:= dependencies/include/root
 DEP_LIB_DIR	:= dependencies/lib
 
 ROOT_FLAG	:= -L$(DEP_LIB_DIR) -lCore.6.18.04 -lHist.6.18.04 -lGpad.6.18.04
-# OPENGL_LIB	:= -framework Cocoa -framework OpenGL -framework IOKit -framework CoreFoundation -framework CoreVideo
-CCFLAGS		:=  -std=c++17 -Wall -g -fopenmp
+CCFLAGS		:=  -std=c++17 -Wall -g -fopenmp -fPIC
 
 # Making library
 OUT_LIB		:= confind
@@ -66,7 +65,8 @@ genlib: mk_lib_dirs complib
 
 complib: $(OBJECTS)
 	# Creating library
-	ar -cvq $(OUT_LIB_DIR)/lib$(OUT_LIB).a $?
+	ar -cvq $(OUT_LIB_DIR)/lib$(OUT_LIB).a $^
+	# gcc -shared  $^ -o $(OUT_LIB_DIR)/lib$(OUT_LIB).so
 
 mk_lib_dirs: 
 	# Make the Directories
