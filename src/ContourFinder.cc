@@ -322,7 +322,7 @@ std::pair<double, double> ContourFinder::GetDeltas() const
 //--------------------------------------------------------------
 void ContourFinder::FindContour(Cont2D& cont)
 {
-  // PROFILE_FUNCTION() ;
+  PROFILE_FUNCTION() ;
 
   char tmp[150] ;
   sprintf(tmp, "==> Finding contour for c = %.2e ...", cont.val) ;

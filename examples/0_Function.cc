@@ -12,12 +12,13 @@ double test_f(double x, double y)
 // ...........................
 int main()
 {
+    Instrumentor::Get().BeginSession("0_Function", "examples/0_Function_Profile.json") ;
     // ...........................
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{1, 15}, 300, "Log"},
-                                {{1, 15}, 300, "Log"}};
+    CONFIND::Grid2D grid_in = {{{1, 25}, 30, "Linear"},
+                                {{1, 25}, 30, "Linear"}};
 
     ContourFinder con    ;
     con.SetGrid(grid_in) ;
@@ -32,7 +33,7 @@ int main()
 
 
     // Setting the contour level values
-    con.SetContVal({10}) ;
+    con.SetContVal({10, 20}) ;
     // ...........................
 
     // ...........................
@@ -42,6 +43,9 @@ int main()
     // con.Print() ;
     // con.ExportContour("independent_threshold_cont",  "w") ; 
 
+    Instrumentor::Get().EndSession();  
+
+    // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.Plot("0_Function", "Testing CONFIND", "X", "Y") ;
 }

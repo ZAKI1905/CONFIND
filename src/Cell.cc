@@ -70,7 +70,7 @@ void Cell::SetVertex(const size_t idx_in, const double val_x,
 //--------------------------------------------------------------
 void Cell::SetVertex(const size_t idx_in, const CONFIND::Coord3D& val)
 {
-  // PROFILE_FUNCTION() ;
+  PROFILE_FUNCTION() ;
   if (idx_in > 4)
   {
     LOG_ERROR("Index out of bound, must be less than 5!") ;
@@ -223,6 +223,7 @@ vertex Cell::operator[](size_t idx_in) const
 //--------------------------------------------------------------
 void Cell::EvalCenter()
 { 
+  PROFILE_FUNCTION() ;
   double cen_x  = (verts_set[1].xyz.x + verts_set[2].xyz.x) / 2 ;
   double cen_y  = (verts_set[1].xyz.y + verts_set[4].xyz.y) / 2 ;
   double cen_z  = (  verts_set[1].xyz.z + verts_set[2].xyz.z
@@ -266,7 +267,7 @@ double Cell::GetLY()  const
 //--------------------------------------------------------------
 double Cell::EvalFunc(const double x, const double y)
 {
-  // PROFILE_FUNCTION() ;
+  PROFILE_FUNCTION() ;
   if ( !ContFindptr->set_mem_func_flag)
     return EvalSimpleFunc(x, y) ;
   else
@@ -320,7 +321,7 @@ double Cell::EvalSimpleFunc(const double x, const double y)
 //--------------------------------------------------------------
 void Cell::FindVerts() 
 {
-  // PROFILE_FUNCTION() ;
+  PROFILE_FUNCTION() ;
   if (!set_grid_ptr_flag)
   {
     LOG_ERROR("ContourFinder pointer not set!") ;
@@ -388,7 +389,7 @@ void Cell::FindVerts()
 //--------------------------------------------------------------
 void Cell::SetTriangles()
 {
-  // PROFILE_FUNCTION() ;
+  PROFILE_FUNCTION() ;
   triangle_set.reserve(4) ;
 
   // 0: Bottom triangle
@@ -425,7 +426,7 @@ double Cell::GetContourValue() const
 //--------------------------------------------------------------
 int Cell::GetStatus()
 {
-  // PROFILE_FUNCTION() ;
+  PROFILE_FUNCTION() ;
   if (!found_verts_flag)
   {
     LOG_ERROR("FindVerts() first!") ;

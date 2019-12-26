@@ -2,22 +2,20 @@
 #define Base_H
 
 #include "Common.h"
-// #include "Logger.h"
 // #include "SaveVectorToFile.h"
-// #include "../pch.h"
-// #include "Instrumentor.h"
+#include "Instrumentor.h"
 
 //==============================================================
 //                    Profiling
-// #define PROFILING 1
-// #if PROFILING
-//   #define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
-//   #define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCTION__)
-// #else
-//   #define PROFILE_SCOPE(name)
-//   #define PROFILE_FUNCTION()
-// #endif
-
+#define PROFILING 1
+#if PROFILING
+  #define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
+  #define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCTION__)
+#else
+  #define PROFILE_SCOPE(name)
+  #define PROFILE_FUNCTION()
+#endif
+//                     Logging
 #define LOG_INFO(message)  logger.Info(message, __func__)
 #define LOG_ERROR(message)  logger.Error(message, __func__)
 #define LOG_WARNING(message)  logger.Warn(message, __func__)

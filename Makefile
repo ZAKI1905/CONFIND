@@ -6,8 +6,11 @@ SRC_EXT      := cc
 OBJ_EXT		 := o
 
 # Target
-LINK_TARGET	:= Function
-EXAMPLE 	:= 0_Function
+# LINK_TARGET	:= function
+# EXAMPLE 	:= 0_Function
+
+LINK_TARGET	:= memfunction
+EXAMPLE 	:= 1_MemFunction
 
 # Directories
 SRC_DIR		:= src
@@ -47,7 +50,7 @@ directories :
 
 $(BIN_DIR)/$(LINK_TARGET):	$(OBJECTS)  $(OBJ_DIR)/$(EXAMPLE).$(OBJ_EXT)
 	# Linking the objects
-	$(COMPILE) $(COMPILE_FLAG) $? -o $@
+	$(COMPILE) $(COMPILE_FLAG) $^ -o $@
 
 $(OBJ_DIR)/%.$(OBJ_EXT) : $(SRC_DIR)/%.$(SRC_EXT)
 	# Compiling the dependencies
