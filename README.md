@@ -13,4 +13,4 @@ Rene Brun and Fons Rademakers,
 ROOT - An Object Oriented Data Analysis Framework,
 Proceedings AIHENP'96 Workshop, Lausanne, Sep. 1996, Nucl. Inst. & Meth. in Phys. Res. A 389 (1997) 81-86. See also http://root.cern.ch/
 ```
-The profiler for measuring & visualizing the performance of the functions in this package is from "[Basic Instrumentation Profiler]"(https://gist.github.com/TheCherno/31f135eea6ee729ab5f26a6908eb3a5e) by TheCherno.
+The profiler for measuring & visualizing the performance of the functions in this package is from "[Basic Instrumentation Profiler](https://gist.github.com/TheCherno/31f135eea6ee729ab5f26a6908eb3a5e)" by TheCherno.
