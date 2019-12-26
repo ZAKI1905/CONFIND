@@ -4,27 +4,27 @@
 #include "MemFuncWrapper.h"
 #include "Cell.h"
 
-namespace CONFIND
-{
+// namespace CONFIND
+// {
 //==============================================================
 struct Cont2D
 {
   double val;
-  std::vector<Coord3D> pts;
+  std::vector<CONFIND::Coord3D> pts;
 
   Cont2D(double) ;
 
-  Coord3D operator[](size_t) const ;
+  CONFIND::Coord3D operator[](size_t) const ;
   size_t size() const ;
 
-  void AddPts(const std::vector<Coord3D>&) ;
+  void AddPts(const std::vector<CONFIND::Coord3D>&) ;
 
   void Export(const std::string& f_name, const char* mode) const ;
 };
 
 std::ostream& operator << ( std::ostream &output, Cont2D c ) ;
 //==============================================================
-class ContourFinder
+class ContourFinder : public Base
 {
 
   friend class Cell ; 
@@ -49,7 +49,7 @@ class ContourFinder
     void SetX_Max(double) ;
     void SetY_Min(double) ;
     void SetY_Max(double) ;
-    void SetGrid(const Grid2D&)  ;
+    void SetGrid(const CONFIND::Grid2D&)  ;
     void SetDeltas()      ;
     void SetGridVals()    ;
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
@@ -78,7 +78,7 @@ class ContourFinder
 
     std::pair<double, double> ij_2_xy(size_t i, size_t j) const ;
     
-    void Print() const;
+    void Print() const override;
     void ExportContour(const std::string& f_name, const char* mode) const ;
     void Plot(const std::string& f_name, const std::string& ="", const std::string& ="X", const std::string& ="Y") const ;
 
@@ -110,6 +110,6 @@ class ContourFinder
     std::vector<Cont2D> cont_set            ;
 };
 
-}
+// }
 //==============================================================
 #endif /*ContourFinder_H*/

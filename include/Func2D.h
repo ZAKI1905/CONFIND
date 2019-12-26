@@ -1,8 +1,13 @@
 #ifndef Func2D_H
 #define Func2D_H
 
+#include "Base.h"
+
 //==============================================================
-class Func2D 
+// namespace CONFIND
+// {
+//==============================================================
+class Func2D : public Base
 {
 
   public:
@@ -14,5 +19,7 @@ class Func2D
     virtual Func2D* Clone() = 0 ;
 };
 
+//==============================================================
+// } // Namespace "CONFIND" ends.
 //==============================================================
 #endif /*Func2D_H*/

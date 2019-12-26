@@ -5,8 +5,8 @@
 #include "Func2D.h"
 
 
-namespace CONFIND
-{
+// namespace CONFIND
+// {
 //==============================================================
 template<typename FuncObj, typename MemFuncPtr >
 class MemFuncWrapper : public Func2D
@@ -43,6 +43,6 @@ class MemFuncWrapper : public Func2D
 
 };
 
-}
+// }
 //==============================================================
 #endif /*MemFuncWrapper_H*/

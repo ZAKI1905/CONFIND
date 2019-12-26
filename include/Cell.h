@@ -4,19 +4,20 @@
 #include <array>
 
 #include "Common.h"
+#include "Base.h"
 
 //==============================================================
 // Forward declaration
 class ContourFinder ;
 //==============================================================
 
-namespace CONFIND
-{
+// namespace CONFIND
+// {
 
 //==============================================================
 struct vertex
 {
-  Coord3D xyz   ;
+  CONFIND::Coord3D xyz   ;
 
   // status with respect to a level ( 1: above, 0: on, -1: below)
   int status(double lvl) const
@@ -98,7 +99,7 @@ struct triangle
 } ;
 
 //==============================================================
-class Cell
+class Cell : public Base
 {
 
   public:
@@ -125,7 +126,7 @@ class Cell
     void SetIdx(const size_t, const size_t)       ;
     void SetSize(const double, const double)      ;
     void SetVertex(const size_t, const double, const double, const double)   ;
-    void SetVertex(const size_t, const Coord3D&)    ;
+    void SetVertex(const size_t, const CONFIND::Coord3D&)    ;
     void SetTriangles()               ;
     void SetGridPtr(ContourFinder* contPtrIn)  ;
     void SetContourValue(const double)      ;
@@ -153,7 +154,7 @@ class Cell
     double GetLY()     const ;  
     
     double GetContourValue() const ;
-    const std::vector<Coord3D>& GetContourCoords() const ;
+    const std::vector<CONFIND::Coord3D>& GetContourCoords() const ;
     int GetStatus() ;
     //............................................
 
@@ -181,7 +182,7 @@ class Cell
                                       {{0, 0, 0}} }};
     
     std::vector<triangle> triangle_set ;
-    std::vector<Coord3D> contour_coords;
+    std::vector<CONFIND::Coord3D> contour_coords;
 
     ContourFinder* ContFindptr = NULL ;
 
@@ -201,5 +202,5 @@ class Cell
 };
 
 //==============================================================
-}
+// }
 #endif /*Contour_H*/

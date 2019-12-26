@@ -5,8 +5,11 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <cmath>
 
-// #include "TColor.h"
+#include <TColor.h>
+
+#include "Logger.h"
 
 namespace CONFIND
 {
@@ -84,17 +87,6 @@ struct Grid2D
 };
 
 //==============================================================
-
-}
-//......................CONFIND namespace ends.........................
-
-std::ostream& operator << (std::ostream &output, CONFIND::Operation o) ;
-std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q );
-std::ostream& operator << (std::ostream &output, CONFIND::Range<double> r) ;
-std::ostream& operator << (std::ostream &output, CONFIND::Range<int> r) ;
-std::ostream& operator << (std::ostream &output, CONFIND::Range<size_t> r) ;
-
-//==============================================================
 struct Coord3D
 {
     double x,y,z ;
@@ -124,17 +116,7 @@ struct Coord3D
 };
 
 //==============================================================
-// Checks if an element exists in the list.
-template <class T>
-bool contains(std::vector<T>& , T) ;
-
-//==============================================================
-// Removes a list of int elements from a T type list
-template <class T> 
-void rm_elem(std::vector<T>&, std::vector<size_t>) ;
-
-//==============================================================
-// EColor RColorMap(size_t) ;
+EColor RColorMap(size_t) ;
 //==============================================================
 // Saves any vector quantity to a file
 template <class T> 
@@ -142,5 +124,26 @@ void saveVec(const std::vector<T>&, std::string, const char* mode = "w") ;
 
 template <class T> 
 void saveVec(const std::vector<T>&, std::string, std::string, const char* mode= "w") ;
+//==============================================================
+
+}
+//......................CONFIND namespace ends.........................
+
+std::ostream& operator << (std::ostream &output, CONFIND::Operation o) ;
+std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q );
+std::ostream& operator << (std::ostream &output, CONFIND::Range<double> r) ;
+std::ostream& operator << (std::ostream &output, CONFIND::Range<int> r) ;
+std::ostream& operator << (std::ostream &output, CONFIND::Range<size_t> r) ;
+
+//==============================================================
+// // Checks if an element exists in the list.
+// template <class T>
+// bool contains(std::vector<T>& , T) ;
+
+//==============================================================
+// Removes a list of int elements from a T type list
+// template <class T> 
+// void rm_elem(std::vector<T>&, std::vector<size_t>) ;
+
 //==============================================================
 #endif /*Common_H*/
