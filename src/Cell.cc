@@ -23,13 +23,10 @@ Cell::Cell(size_t i_in, double lx, size_t j_in, double ly)
 //--------------------------------------------------------------
 // Constructor 3
 Cell::Cell(size_t i_in, double lx, size_t j_in, double ly, ContourFinder* cont_in, double cont_val_in) :
-l_x(lx), l_y(ly), set_size_flag(true), idx(i_in, j_in), set_idx_flag(true),
-ContFindptr(cont_in), set_grid_ptr_flag(true), contour_val(cont_val_in), set_contour_val_flag(true)
+l_x(lx), l_y(ly), idx(i_in, j_in), contour_val(cont_val_in), ContFindptr(cont_in),
+set_idx_flag(true), set_grid_ptr_flag(true), set_size_flag(true), set_contour_val_flag(true)
 {
-  // SetSize(lx, ly) ;
-  // SetIdx(i_in, j_in) ;
-  // SetGridPtr(cont_in) ;
-  FindVerts() ;
+  // FindVerts() ;
 }
 
 //--------------------------------------------------------------
@@ -49,6 +46,23 @@ void Cell::SetIdx(const size_t i_in, const size_t j_in)
   idx = {i_in, j_in} ;
 
   set_idx_flag = true ;
+}
+
+//--------------------------------------------------------------
+void Cell::SetVertexZ(const size_t idx_in, const double val_z)   
+{
+  if (idx_in > 4 || idx_in < 1)
+  {
+    LOG_ERROR("Index out of bound, must be less than 5 and greater than 0!") ;
+    return ;
+  }
+  
+  verts_set[idx_in].xyz.z = val_z ;
+
+  // There is an offset between the defenitions of verts_set & set_vertexZ_flag
+  // because we are nit including the center vertex anymore
+  set_vertexZ_flag[idx_in - 1] = true ;
+
 }
 
 //--------------------------------------------------------------
@@ -219,6 +233,13 @@ vertex Cell::operator[](size_t idx_in) const
 
 //   return tri_set[3] ;
 // }
+//--------------------------------------------------------------
+// Used for optimizing the process
+double Cell::GetFuncVals(const size_t i) const 
+{
+  // Returning the function values at vertex i
+  return verts_set[i].xyz.z ;
+}
 
 //--------------------------------------------------------------
 void Cell::EvalCenter()
@@ -370,14 +391,31 @@ void Cell::FindVerts()
   // SetVertex(3, pos_3 ) ;
   // SetVertex(4, pos_4 ) ;
 
+  //.......................................
+  if (set_vertexZ_flag[0])
+  SetVertex(1, {x_min + idx.first*l_x,  y_min + idx.second*l_y, verts_set[1].xyz.z}) ;
+  else
   SetVertex(1, {x_min + idx.first*l_x,  y_min + idx.second*l_y,
                    EvalFunc(x_min + idx.first*l_x, y_min + idx.second*l_y)}) ;
+  //.......................................
+  if (set_vertexZ_flag[1])
+  SetVertex(2, {x_min + (idx.first+1)*l_x, y_min + idx.second*l_y, verts_set[2].xyz.z} ) ;
+  else
   SetVertex(2, {x_min + (idx.first+1)*l_x, y_min + idx.second*l_y, 
                    EvalFunc(x_min + (idx.first+1)*l_x, y_min + idx.second*l_y)} ) ;
+  //.......................................
+  if (set_vertexZ_flag[2])
+  SetVertex(3, {x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y, verts_set[3].xyz.z} ) ;
+  else
   SetVertex(3, {x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y, 
                    EvalFunc(x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y)} ) ;
+  //.......................................
+  if (set_vertexZ_flag[3])
+  SetVertex(4, {x_min + idx.first*l_x, y_min + (idx.second+1)*l_y,  verts_set[4].xyz.z} ) ;
+  else
   SetVertex(4, {x_min + idx.first*l_x, y_min + (idx.second+1)*l_y, 
                    EvalFunc(x_min + idx.first*l_x, y_min + (idx.second+1)*l_y)} ) ;
+  //.......................................
 
   EvalCenter()         ; // Center of the cell
 

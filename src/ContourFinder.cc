@@ -55,7 +55,7 @@ void Cont2D::Export(const std::string& f_name, const char* mode) const
 {
   char tmp_char[100] ;
   sprintf(tmp_char, "%s_%.2e", f_name.c_str(), val ) ;
-  saveVec(pts, tmp_char, mode) ;
+  SaveVec(pts, tmp_char, mode) ;
 }
 //  Cont2D struct ends
 //==============================================================
@@ -88,11 +88,11 @@ ContourFinder::ContourFinder(const ContourFinder &zc2) :
   set_grid_vals_flag(zc2.set_grid_vals_flag),
   set_func_flag(zc2.set_func_flag),
   set_cont_val_flag(zc2.set_cont_val_flag),
-  set_mem_func_flag(zc2.set_mem_func_flag),
+  set_mem_func_flag(zc2.set_mem_func_flag), func(zc2.func),
   n_x(zc2.n_x), n_y(zc2.n_y), x_min(zc2.x_min), 
   x_max(zc2.x_max), y_min(zc2.y_min), y_max(zc2.y_max),
   delta_x(zc2.delta_x), delta_y(zc2.delta_y), x_scale(zc2.x_scale),
-  y_scale(zc2.y_scale), cont_set(zc2.cont_set), func(zc2.func)
+  y_scale(zc2.y_scale), cont_set(zc2.cont_set)
 {
   // std::cout << "ContourFinder copy constructor from " << &zc2 << " -> " << this << " \n" ;
   genFuncPtr = zc2.genFuncPtr->Clone() ;
@@ -266,7 +266,7 @@ std::pair<double, double> ContourFinder::ij_2_xy(size_t i, size_t j) const
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetGridVals()
+void ContourFinder::SetGridVals(Mode in_mode)
 {
   if(!set_func_flag && !set_mem_func_flag)
   {
@@ -276,10 +276,37 @@ void ContourFinder::SetGridVals()
 
   LOG_INFO("==> Setting grid values ...");
 
-  // contour_coords.reserve( cont_set.size() ) ;
+  if (in_mode == Optimal)
+  {
+    double* m_GridValArr = NULL;
+    //..........................................
+    if (cont_set.size() > 1)
+    {
+      // # of total corners: (n_x+1)*(n_y+1)
+      m_GridValArr = new double[(n_x+1)*(n_y+1)] ;
+    }
+    //..........................................
+    // Finding the first contour
+    FindContourOptimal(cont_set[0], m_GridValArr) ;
+
+    if (cont_set.size() > 1)
+      // Now the function values are all set inside  'm_GridValArr'
+      FindNextContours(m_GridValArr) ;
+
+    set_grid_vals_flag = true ;
+
+    if(m_GridValArr) delete m_GridValArr;
+    return ;
+  }
+
+  //..........................................
+  // Normal & parallel mode
   for (size_t i = 0; i < cont_set.size(); i++)
   {
-    FindContour(cont_set[i]) ;
+    if (in_mode == Normal)
+      FindContour(cont_set[i]) ;
+    else if (in_mode == Parallel)
+      FindContourParallel(cont_set[i]) ;
   }
 
   set_grid_vals_flag = true ;
@@ -335,10 +362,133 @@ void ContourFinder::FindContour(Cont2D& cont)
     for (size_t i = 0; i < n_x; i++)
     {
       Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+      new_cell.FindVerts() ;
       new_cell.GetStatus() ;
       cont.AddPts(new_cell.GetContourCoords()) ;
     }
   }
+}
+
+//--------------------------------------------------------------
+void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
+{
+  PROFILE_FUNCTION() ;
+
+  char tmp[150] ;
+  sprintf(tmp, "==> Finding contour for c = %.2e ...", cont.val) ;
+  LOG_INFO(tmp) ;
+
+  SetDeltas() ;
+
+  std::vector<double> corners;
+  corners.reserve(n_x+1);
+  double tmp_corner ;
+
+  //============LOOP STARTS============ 
+  for (size_t j = 0; j < n_y; j++)
+  {
+    // corners.clear() ;
+    for (size_t i = 0; i < n_x; i++)
+    {
+      // Instantiate a cell
+      Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+
+      // ............................................
+      // Except the first column:
+      if ( i > 0)
+        // Top_Left vertex: (idx = 4), i is the last element added to corners[]
+        new_cell.SetVertexZ(4, corners[i]) ;
+      //............................................
+      // First column (except the first cell):
+      if( j > 0 )
+        // Bottom_Right vertex: (idx = 2), i+1 is to the right of the cell
+        new_cell.SetVertexZ(2, corners[i+1]) ;
+      //............................................
+      // All cells except the first one at (0,0):
+      if( !(i == 0 && j ==0 ) )
+        // Bottom_Left vertex : (idx = 1)
+        new_cell.SetVertexZ(1, tmp_corner) ;
+      //............................................
+
+      new_cell.FindVerts() ;
+      new_cell.GetStatus() ;
+      cont.AddPts(new_cell.GetContourCoords()) ;
+
+      //............................................
+      // Before reaching the wall on the right
+      if ( i < n_x - 1)
+        tmp_corner = new_cell.GetFuncVals(2) ;
+      // If last column, set tmp_corner for the next row
+      else
+        tmp_corner = corners[0] ;
+      //............................................
+
+      if (i==0) // The first vertex in each row
+        corners[0] = new_cell.GetFuncVals(4) ;
+      // The rest of the row
+      corners[i+1] = new_cell.GetFuncVals(3) ;
+      //............................................
+      if (in_gridValArr)
+      {
+        // saving the bottom_left vertex
+        in_gridValArr[i + (n_x + 1)*j] = new_cell.GetFuncVals(1) ;
+
+        // For the last column, we need to save the bottom-right vertex too
+        if( i == n_x - 1)
+          in_gridValArr[n_x + (n_x + 1)*j] = new_cell.GetFuncVals(2) ;
+
+        // For the last row, we need to save the top-left vertex too
+        if( j == n_y - 1)
+          in_gridValArr[i + (n_x + 1)*n_y] = new_cell.GetFuncVals(4) ;
+
+        // For the last top-right corner cell top-right vertex (last element)
+        if ( j == n_y - 1 && i == n_x - 1 )
+          in_gridValArr[(n_x+1)*(n_y+1) - 1] = new_cell.GetFuncVals(3) ;
+        
+      }
+    }
+  }
+  //============END of LOOP============ 
+}
+
+//--------------------------------------------------------------
+void ContourFinder::FindNextContours(double* in_gridValArr)
+{
+  PROFILE_FUNCTION() ;
+
+  for (size_t k = 1 ; k < cont_set.size() ; ++k)
+  {
+
+  char tmp[150] ;
+  sprintf(tmp, "==> Finding contour for c = %.2e ...", cont_set[k].val) ;
+  LOG_INFO(tmp) ;
+
+  SetDeltas() ;
+
+  //============LOOP STARTS============ 
+  for (size_t j = 0; j < n_y; j++)
+  {
+    // corners.clear() ;
+    for (size_t i = 0; i < n_x; i++)
+    {
+      // Instantiate a cell
+      Cell new_cell(i, delta_x, j, delta_y, this, cont_set[k].val) ;
+
+      // ............................................
+      new_cell.SetVertexZ(1, in_gridValArr[i    + (n_x+1) * j     ]) ;
+      new_cell.SetVertexZ(2, in_gridValArr[i+1  + (n_x+1) * j     ]) ;
+      new_cell.SetVertexZ(3, in_gridValArr[i+1  + (n_x+1) * (j+1) ]) ;
+      new_cell.SetVertexZ(4, in_gridValArr[i    + (n_x+1) * (j+1) ]) ;
+      //............................................
+
+      new_cell.FindVerts() ;
+      new_cell.GetStatus() ;
+      cont_set[k].AddPts(new_cell.GetContourCoords()) ;
+    }
+  }
+  //============END of LOOP============ 
+  }
+  //============END of Contour LOOP============ 
 }
 
 //--------------------------------------------------------------
@@ -375,6 +525,7 @@ void ContourFinder::FindContourParallel(Cont2D& cont)
       for (size_t i = 0; i < n_x; i++)
       {
         Cell new_cell(i, delta_x, j, delta_y, &a, cont.val) ;
+        new_cell.FindVerts() ;
         new_cell.GetStatus() ;
         #pragma omp critical
         {cont.AddPts(new_cell.GetContourCoords()) ;}

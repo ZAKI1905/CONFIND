@@ -28,7 +28,7 @@ class test_class
 // ...........................
 int main()
 {
-    Instrumentor::Get().BeginSession("1_MemFunction", "examples/1_MemFunction_Profile.json") ;
+    Instrumentor::Get().BeginSession("2_MemFunctionOptimized", "examples/2_MemFunctionOptimized_Profile.json") ;
     // ...........................
     // Setting up the grid
     // ...........................
@@ -57,7 +57,7 @@ int main()
     // ...........................
     // Generating results
     // ...........................
-    con.SetGridVals() ;
+    con.SetGridVals(ContourFinder::Mode::Optimal) ;
     // con.Print() ;
     // con.ExportContour("independent_threshold_cont",  "w") ; 
 
@@ -65,5 +65,5 @@ int main()
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
-    con.Plot("1_MemFunction", "Testing CONFIND", "X", "Y") ;
+    con.Plot("2_MemFunctionOptimized", "Testing CONFIND", "X", "Y") ;
 }

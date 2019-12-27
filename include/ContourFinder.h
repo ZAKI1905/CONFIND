@@ -37,6 +37,11 @@ class ContourFinder : public Base
     // Copy constructor
     ContourFinder(const ContourFinder &zc2) ;
 
+    enum Mode
+    {
+      Optimal = 0, Normal, Parallel    
+    } ;
+
     //............................................
     // Setters
     //............................................
@@ -51,13 +56,15 @@ class ContourFinder : public Base
     void SetY_Max(double) ;
     void SetGrid(const CONFIND::Grid2D&)  ;
     void SetDeltas()      ;
-    void SetGridVals()    ;
+    void SetGridVals(Mode = Normal)    ;
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
     void SetMemFunc(Func2D*) ;  // Non-static mem-funcs
     void SetContVal(const std::vector<double>&) ;
     //............................................
 
     void FindContour(Cont2D& cont) ;
+    void FindContourOptimal(Cont2D& cont, double*) ;
+    void FindNextContours(double*) ;
     void FindContourParallel(Cont2D& cont) ;
 
     //............................................
@@ -107,7 +114,7 @@ class ContourFinder : public Base
     size_t n_x, n_y ;
     double x_min, x_max, y_min, y_max, delta_x, delta_y ;
     std::string x_scale = "Linear" ; std::string y_scale = "Linear"     ;
-    std::vector<Cont2D> cont_set            ;
+    std::vector<Cont2D> cont_set ;
 };
 
 // }

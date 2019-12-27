@@ -12,6 +12,9 @@ OBJ_EXT		 := o
 LINK_TARGET	:= memfunction
 EXAMPLE 	:= 1_MemFunction
 
+# LINK_TARGET	:= memfunctionOptimized
+# EXAMPLE 	:= 2_MemFunctionOptimized
+
 # Directories
 SRC_DIR		:= src
 EXAMPLE_DIR	:= examples

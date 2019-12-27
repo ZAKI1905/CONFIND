@@ -126,6 +126,7 @@ class Cell : public Base
     void SetSize(const double, const double)      ;
     void SetVertex(const size_t, const double, const double, const double)   ;
     void SetVertex(const size_t, const CONFIND::Coord3D&)    ;
+    void SetVertexZ(const size_t, const double)   ;
     void SetTriangles()               ;
     void SetGridPtr(ContourFinder* contPtrIn)  ;
     void SetContourValue(const double)      ;
@@ -152,6 +153,7 @@ class Cell : public Base
     double GetLX()     const ;
     double GetLY()     const ;  
     
+    double GetFuncVals(const size_t) const ;
     double GetContourValue() const ;
     const std::vector<CONFIND::Coord3D>& GetContourCoords() const ;
     int GetStatus() ;
@@ -159,14 +161,6 @@ class Cell : public Base
 
 
   private:
-
-    // flags
-    bool set_idx_flag             = false ;
-    std::array<bool,5> set_vertex_flag       = {{false, false, false, false, false}} ;
-    bool set_grid_ptr_flag        = false ;
-    bool set_size_flag            = false ;
-    bool found_verts_flag         = false ;
-    bool set_contour_val_flag     = false ;
 
     // size_t idx_x, idx_y;
     double l_x, l_y ;
@@ -184,6 +178,17 @@ class Cell : public Base
     std::vector<CONFIND::Coord3D> contour_coords;
 
     ContourFinder* ContFindptr = NULL ;
+
+    // flags
+    bool set_idx_flag             = false ;
+    std::array<bool,5> set_vertex_flag       = {{false, false, false, false, false}} ;
+    std::array<bool,4> set_vertexZ_flag       = {{false, false, false, false}} ;
+    bool set_grid_ptr_flag        = false ;
+    bool set_size_flag            = false ;
+    bool found_verts_flag         = false ;
+    bool set_contour_val_flag     = false ;
+
+    //..........................................................................
 
     double EvalSimpleFunc(const double x, const double y) ;
     double EvalMemFunc(const double x, const double y)    ;

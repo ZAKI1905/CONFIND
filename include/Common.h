@@ -120,10 +120,10 @@ EColor RColorMap(size_t) ;
 //==============================================================
 // Saves any vector quantity to a file
 template <class T> 
-void saveVec(const std::vector<T>&, std::string, const char* mode = "w") ;
+void SaveVec(const std::vector<T>&, std::string, const char* mode = "w") ;
 
 template <class T> 
-void saveVec(const std::vector<T>&, std::string, std::string, const char* mode= "w") ;
+void SaveVec(const std::vector<T>&, std::string, std::string, const char* mode= "w") ;
 //==============================================================
 
 }
