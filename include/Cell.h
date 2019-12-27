@@ -13,7 +13,6 @@ class ContourFinder ;
 
 // namespace CONFIND
 // {
-
 //==============================================================
 struct vertex
 {

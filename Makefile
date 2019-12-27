@@ -43,33 +43,36 @@ OBJECTS     := $(patsubst $(SRC_DIR)/%,$(OBJ_DIR)/%,$(SOURCES:.$(SRC_EXT)=.$(OBJ
 all: directories $(BIN_DIR)/$(LINK_TARGET)
 
 directories :
-	# Make the Directories
+	@echo "Creating the directories..." 
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(BIN_DIR)
 
 $(BIN_DIR)/$(LINK_TARGET):	$(OBJECTS)  $(OBJ_DIR)/$(EXAMPLE).$(OBJ_EXT)
-	# Linking the objects
+	@echo "Linking the objects..."
 	$(COMPILE) $(COMPILE_FLAG) $^ -o $@
 
-$(OBJ_DIR)/%.$(OBJ_EXT) : $(SRC_DIR)/%.$(SRC_EXT)
-	# Compiling the dependencies
+$(OBJ_DIR)/%.$(OBJ_EXT) : $(SRC_DIR)/%.$(SRC_EXT) $(INC_DIR)/%.h
+	@echo "Compiling the dependencies..."
 	$(COMPILE) -c -o $@ $<
 
 $(OBJ_DIR)/$(EXAMPLE).$(OBJ_EXT) : $(EXAMPLE_DIR)/$(EXAMPLE).$(SRC_EXT)
-	# Compiling Main EXAMPLE
+	@echo "Compiling the Main file..."
 	$(COMPILE) -c -o $@ $<
 
+# in case only header file changes
+$(INC_DIR)/%.h : 
+	$(COMPILE) -c -o $(OBJ_DIR)/%.$(OBJ_EXT) $(SRC_DIR)/%.$(SRC_EXT)
 # .......................................................................
 
 genlib: mk_lib_dirs complib
 
 complib: $(OBJECTS)
-	# Creating library
+	@echo "Creating static library..."
 	ar -cvq $(OUT_LIB_DIR)/lib$(OUT_LIB).a $^
 	# gcc -shared  $^ -o $(OUT_LIB_DIR)/lib$(OUT_LIB).so
 
 mk_lib_dirs: 
-	# Make the Directories
+	@echo "Creating directories..."
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OUT_LIB_DIR)
 
