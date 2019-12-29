@@ -17,16 +17,16 @@ class MemFuncWrapper : public Func2D
     MemFuncWrapper(const MemFuncWrapper &mfw2) : fMemFunc(mfw2.fMemFunc)
     {
       // std::cout << "MemFuncWrapper copy constructor from " << &mfw2 << " -> " << this << " \n" ;
-      fObj = new FuncObj ;
-
-      memcpy(fObj, mfw2.fObj, sizeof(*mfw2.fObj)) ;
+      // fObj = new FuncObj ;
+      *fObj = *mfw2.fObj ;
+      // memcpy(fObj, mfw2.fObj, sizeof(*mfw2.fObj)) ;
       cpy_const_called = true ;
     }
 
     ~MemFuncWrapper() 
     {
       // std::cout << " MemFuncWrap Destructor at address:" << this << ", fObj:"<< fObj << ", copy : "<< cpy_const_called << "\n" ;
-      if (cpy_const_called) delete fObj;
+      // if (cpy_const_called) delete fObj;
     }
 
     double Eval(double x, double y) override { return ((*fObj).*fMemFunc)( x , y) ;}
