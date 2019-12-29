@@ -9,7 +9,11 @@
 // ...........................
 double test_f(double x, double y)
 {
-    return sqrt(x*x + y*y) ;
+    // Parabola
+    return y - 0.15*(x - 20)*(x - 20) + 1; 
+
+    // Circle
+    // return sqrt(x*x + y*y);
 }
 
 // ...........................
@@ -36,11 +40,11 @@ int main()
 
 
     // Setting the contour level values
-    double colorArr[30];
-    std::iota(colorArr, colorArr + 30, 1);
-    std::vector<double> colorVec(colorArr, colorArr + sizeof(colorArr) / sizeof (colorArr[0]));
+    // double colorArr[2];
+    // std::iota(colorArr, colorArr + 2, 1);
+    // std::vector<double> colorVec(colorArr, colorArr + sizeof(colorArr) / sizeof (colorArr[0]));
 
-    con.SetContVal(colorVec) ;
+    con.SetContVal({5, 10, 25}) ;
     // ...........................
 
     // ...........................
@@ -48,7 +52,7 @@ int main()
     // ...........................
     con.SetGridVals(ContourFinder::Mode::Optimal) ;
     // con.Print() ;
-    // con.ExportContour("independent_threshold_cont",  "w") ; 
+    // con.ExportContour("0_Function_Contour_Pts",  "w") ; 
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label

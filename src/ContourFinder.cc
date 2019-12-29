@@ -60,10 +60,56 @@ void Cont2D::Export(const std::string& f_name, const char* mode)
 }
 
 //--------------------------------------------------------------
-bool Cont2D::cmp_dist(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const
+// Ref: 
+// https://www.geeksforgeeks.org/find-simple-closed-path-for-a-given-set-of-points/
+//
+// To find orientation of ordered triplet (p, q, r). 
+// The function returns following values 
+// 0 --> p, q and r are colinear 
+// 1 --> Clockwise 
+// 2 --> Counterclockwise 
+int Cont2D::Orientation(const CONFIND::Coord3D& p, const CONFIND::Coord3D& q, const CONFIND::Coord3D& r) const
+{ 
+  double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y); 
+
+  if (val == 0) return 0;  // colinear 
+  return (val > 0)? 1: 2; // clockwise or counterclock wise 
+} 
+
+//--------------------------------------------------------------
+bool Cont2D::comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const
 {
-  return ( pow(a.x - pts[0].x, 2) + pow(a.y - pts[0].y, 2) < pow(b.x - pts[0].x, 2) + pow(b.y - pts[0].y, 2)) ;
+  // if ( a == bottom_left )
+  //   return true;
+  // else if ( b == bottom_left)
+  //   return false;
+
+  // std::cout << " --> comp_CW " << "\n"<< std::flush ;
+  // Find orientation 
+  int o = Orientation(bottom_left, a, b); 
+  // std::cout << " --> Orientation: " << o << ", a: " << a << ", b: " << b<< "\n"<< std::flush ;
+
+  if (o == 0) 
+    // std::cout << " --> Orientation: " << o << ", a: " << a << ", b: " << b<< "\n"<< std::flush ;
+    return (bottom_left.XYDist2(a) < bottom_left.XYDist2(b) )? true : false; 
+
+  // CW
+  if(sort_cw)
+    return (o == 2) ? false: true; 
+  else
+  // CCW
+    return (o == 2) ? true: false; 
+
+  // return ( pow(a.x - pts[0].x, 2) + pow(a.y - pts[0].y, 2) < pow(b.x - pts[0].x, 2) + pow(b.y - pts[0].y, 2)) ;
 }
+//--------------------------------------------------------------
+// // A utility function to swap two points 
+// void Cont2D::swap(CONFIND::Coord3D &p1, CONFIND::Coord3D &p2) 
+// { 
+//   CONFIND::Coord3D temp = p1; 
+//   p1 = p2; 
+//   p2 = temp; 
+// } 
 
 //--------------------------------------------------------------
 void Cont2D::Sort()
@@ -73,8 +119,58 @@ void Cont2D::Sort()
   if (already_sorted)
     return;
 
-  std::sort(pts.begin(), pts.end(), [this] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) {
-    return cmp_dist(a, b); }) ;
+  // std::vector<CONFIND::Coord3D>::iterator BotLef_it ;
+
+  // // Finding the bottom left point as a reference
+  // BotLef_it = std::min_element(pts.begin(), pts.end(), [] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) 
+  // {
+  //   if ( a.y == b.y )
+  //     return a.x < b.x;
+
+  //   return a.y < b.y ;
+  // } ) ;
+
+  // bottom_left = *BotLef_it ;
+
+
+  //.......xXXXXXXXXX
+    // Find the bottom_left point 
+  //  double ymin = pts[0].y ; size_t min = 0; 
+  //  for (size_t i = 1; i < pts.size() ; i++) 
+  //  { 
+  //   // Pick the bottom-most. In case of tie, chose the 
+  //   // left most point 
+  //   if ( (pts[i].y < ymin) || (ymin == pts[i].y && pts[i].x < pts[min].x)) 
+  //     ymin = pts[i].y, min = i; 
+  //  } 
+
+  // Find the upper_left point 
+    double ymax = pts[0].y ; size_t max = 0; 
+   for (size_t i = 1; i < pts.size() ; i++) 
+   { 
+    // Pick the bottom-most. In case of tie, chose the 
+    // left most point 
+    if ( (pts[i].y > ymax) || (ymax == pts[i].y && pts[i].x < pts[max].x)) 
+      ymax = pts[i].y, max = i; 
+   } 
+  
+   // Place the bottom-most point at first position 
+   std::swap(pts[0], pts[max]); 
+  //.......xXXXXXXXXX
+
+  bottom_left =  pts[0];
+  // std::cout << " bottom_left: " <<bottom_left << ", min_idx: " << min << "\n" ;
+
+  std::sort(pts.begin() + 1, pts.end(), [this] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) {
+    return comp_Orient(a, b); }) ;
+
+  // Checking if the orientation was correct:
+  if ( pts[0].XYDist2(pts[1]) >  pts[0].XYDist2(pts[pts.size() - 1]) )
+  {
+    sort_cw = !sort_cw ;
+    std::sort(pts.begin() + 1, pts.end(), [this] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) 
+      { return comp_Orient(a, b); }) ;
+  }
 }
 
 //--------------------------------------------------------------

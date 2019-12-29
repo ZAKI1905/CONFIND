@@ -43,6 +43,15 @@ void CONFIND::ReportTiming()
 // }
 
 //==============================================================
+std::ostream& operator << (std::ostream &output, CONFIND::Coord3D c)
+{ 
+  char tmp[50] ;
+  sprintf(tmp, "%.3e \t %.3e \t %.3e ", c.x, c.y, c.z) ;
+  output << tmp ;
+  return output;            
+}
+
+//==============================================================
 std::ostream& operator << ( std::ostream &output, CONFIND::Range<double> r )
 { 
   char tmp[50] ;

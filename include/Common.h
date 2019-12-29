@@ -99,6 +99,10 @@ struct Coord3D
         return ( x == rhs.x && y == rhs.y && z == rhs.z ) ;
     }
 
+    double XYDist2(const Coord3D& rhs) const
+    {
+        return pow(x - rhs.x, 2) + pow(y - rhs.y, 2) ;
+    }
   // coords operator+(const coords& rhs) const
   // {
   //   return {x + rhs.x, y + rhs.y, z + rhs.z } ;
@@ -129,11 +133,12 @@ void SaveVec(const std::vector<T>&, std::string, std::string, const char* mode= 
 }
 //......................CONFIND namespace ends.........................
 
-// std::ostream& operator << (std::ostream &output, CONFIND::Operation o) ;
+std::ostream& operator << (std::ostream &output, CONFIND::Operation o) ;
 // std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q );
 std::ostream& operator << (std::ostream &output, CONFIND::Range<double> r) ;
+std::ostream& operator << (std::ostream &output, CONFIND::Range<double> r) ;
 std::ostream& operator << (std::ostream &output, CONFIND::Range<int> r) ;
-std::ostream& operator << (std::ostream &output, CONFIND::Range<size_t> r) ;
+std::ostream& operator << (std::ostream &output, CONFIND::Coord3D c) ;
 
 //==============================================================
 #endif /*Common_H*/

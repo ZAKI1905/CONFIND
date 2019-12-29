@@ -20,6 +20,10 @@ class Cont2D
     double val;
     std::vector<CONFIND::Coord3D> pts;
 
+    // The most bottom_left point (used for sorting)
+    CONFIND::Coord3D bottom_left ;
+    int Orientation(const CONFIND::Coord3D&, const CONFIND::Coord3D&, const CONFIND::Coord3D&) const;
+
     CONFIND::Coord3D operator[](size_t) const ;
     size_t size() const ;
 
@@ -28,7 +32,10 @@ class Cont2D
     void Export(const std::string& f_name, const char* mode) ;
 
     void Sort() ;
-    bool cmp_dist(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const; 
+    // A utility function to swap two points 
+    // void swap(CONFIND::Coord3D &p1, CONFIND::Coord3D &p2) ;
+    bool comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const; 
+    bool sort_cw = true ;
     bool already_sorted = false ;
     void Clear() ;
 };
