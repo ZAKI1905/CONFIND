@@ -15,9 +15,9 @@ class test_class
         {
             m_var = 10 ;  // Some dummy change in the state of class
             // usleep(500) ; // in ms
-            using namespace std::this_thread ;
-            using namespace std::chrono_literals ;
-            sleep_for(1ms);
+            // using namespace std::this_thread ;
+            // using namespace std::chrono_literals ;
+            // sleep_for(1ms);
             return x*y + m_var;
         }
     
@@ -61,9 +61,9 @@ int main()
     // con.Print() ;
     // con.ExportContour("independent_threshold_cont",  "w") ; 
 
-    Instrumentor::Get().EndSession();  
-
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.Plot("2_MemFunctionOptimized", "Testing CONFIND", "X", "Y") ;
+
+    Instrumentor::Get().EndSession();  
 }

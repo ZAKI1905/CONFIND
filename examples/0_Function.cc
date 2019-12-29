@@ -3,6 +3,9 @@
 #include "../include/Logger.h"
 #include "../include/ContourFinder.h"
 
+// Just for std::iota
+#include <numeric>
+
 // ...........................
 double test_f(double x, double y)
 {
@@ -17,8 +20,8 @@ int main()
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{1, 25}, 30, "Linear"},
-                                {{1, 25}, 30, "Linear"}};
+    CONFIND::Grid2D grid_in = {{{0, 35}, 50, "Linear"},
+                                {{0, 35}, 50, "Linear"}};
 
     ContourFinder con    ;
     con.SetGrid(grid_in) ;
@@ -33,19 +36,23 @@ int main()
 
 
     // Setting the contour level values
-    con.SetContVal({10, 20}) ;
+    double colorArr[30];
+    std::iota(colorArr, colorArr + 30, 1);
+    std::vector<double> colorVec(colorArr, colorArr + sizeof(colorArr) / sizeof (colorArr[0]));
+
+    con.SetContVal(colorVec) ;
     // ...........................
 
     // ...........................
     // Generating results
     // ...........................
-    con.SetGridVals() ;
+    con.SetGridVals(ContourFinder::Mode::Optimal) ;
     // con.Print() ;
     // con.ExportContour("independent_threshold_cont",  "w") ; 
-
-    Instrumentor::Get().EndSession();  
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.Plot("0_Function", "Testing CONFIND", "X", "Y") ;
+
+    Instrumentor::Get().EndSession();  
 }

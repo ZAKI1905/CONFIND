@@ -6,11 +6,11 @@ SRC_EXT      := cc
 OBJ_EXT		 := o
 
 # Target
-# LINK_TARGET	:= function
-# EXAMPLE 	:= 0_Function
+LINK_TARGET	:= function
+EXAMPLE 	:= 0_Function
 
-LINK_TARGET	:= memfunction
-EXAMPLE 	:= 1_MemFunction
+# LINK_TARGET	:= memfunction
+# EXAMPLE 	:= 1_MemFunction
 
 # LINK_TARGET	:= memfunctionOptimized
 # EXAMPLE 	:= 2_MemFunctionOptimized

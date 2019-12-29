@@ -13,9 +13,9 @@
 
 namespace CONFIND
 {
-//==============================================================
+// ==============================================================
 void ReportTiming();
-//==============================================================
+// ==============================================================
 struct Operation
 {
     std::string name ;
@@ -25,7 +25,7 @@ struct Operation
         : name(in_name), duration(in_dur) {} 
 };
 
-//==============================================================
+// ==============================================================
 struct Timer
 {
     std::string scope ;
@@ -54,10 +54,10 @@ struct Timer
 };
 
 //==============================================================
-struct Quantity
-{
-    double val, err ;
-};
+// struct Quantity
+// {
+//     double val, err ;
+// };
 
 //==============================================================
 template <typename T>
@@ -129,21 +129,11 @@ void SaveVec(const std::vector<T>&, std::string, std::string, const char* mode= 
 }
 //......................CONFIND namespace ends.........................
 
-std::ostream& operator << (std::ostream &output, CONFIND::Operation o) ;
-std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q );
+// std::ostream& operator << (std::ostream &output, CONFIND::Operation o) ;
+// std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q );
 std::ostream& operator << (std::ostream &output, CONFIND::Range<double> r) ;
 std::ostream& operator << (std::ostream &output, CONFIND::Range<int> r) ;
 std::ostream& operator << (std::ostream &output, CONFIND::Range<size_t> r) ;
-
-//==============================================================
-// // Checks if an element exists in the list.
-// template <class T>
-// bool contains(std::vector<T>& , T) ;
-
-//==============================================================
-// Removes a list of int elements from a T type list
-// template <class T> 
-// void rm_elem(std::vector<T>&, std::vector<size_t>) ;
 
 //==============================================================
 #endif /*Common_H*/

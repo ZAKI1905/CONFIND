@@ -7,22 +7,33 @@
 // namespace CONFIND
 // {
 //==============================================================
-struct Cont2D
+class Cont2D
 {
-  double val;
-  std::vector<CONFIND::Coord3D> pts;
 
-  Cont2D(double) ;
+  friend class ContourFinder  ;
+  friend std::ostream  & operator<<(std::ostream &os, const Cont2D& p);
+  //--------------------------------------------------------------
+  public:
+    Cont2D(double) ;
 
-  CONFIND::Coord3D operator[](size_t) const ;
-  size_t size() const ;
+  private:
+    double val;
+    std::vector<CONFIND::Coord3D> pts;
 
-  void AddPts(const std::vector<CONFIND::Coord3D>&) ;
+    CONFIND::Coord3D operator[](size_t) const ;
+    size_t size() const ;
 
-  void Export(const std::string& f_name, const char* mode) const ;
+    void AddPts(const std::vector<CONFIND::Coord3D>&) ;
+
+    void Export(const std::string& f_name, const char* mode) ;
+
+    void Sort() ;
+    bool cmp_dist(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const; 
+    bool already_sorted = false ;
+    void Clear() ;
 };
 
-std::ostream& operator << ( std::ostream &output, Cont2D c ) ;
+std::ostream& operator << ( std::ostream &output, const Cont2D& c ) ;
 //==============================================================
 class ContourFinder : public Base
 {
@@ -67,6 +78,8 @@ class ContourFinder : public Base
     void FindNextContours(double*) ;
     void FindContourParallel(Cont2D& cont) ;
 
+    void Clear() ;
+
     //............................................
     // Getters
     //............................................
@@ -79,15 +92,12 @@ class ContourFinder : public Base
     double GetX_Max() const ;
     double GetY_Min() const ;
     double GetY_Max() const ;
-    // std::vector<std::vector<double> > GetGridVals() const ;
-    // std::vector<double> GetContVal() const ;
-    void GetSortedContourCoords() const ;
 
     std::pair<double, double> ij_2_xy(size_t i, size_t j) const ;
     
     void Print() const override;
-    void ExportContour(const std::string& f_name, const char* mode) const ;
-    void Plot(const std::string& f_name, const std::string& ="", const std::string& ="X", const std::string& ="Y") const ;
+    void ExportContour(const std::string& f_name, const char* mode) ;
+    void Plot(const std::string& f_name, const std::string& ="", const std::string& ="X", const std::string& ="Y") ;
 
  //--------------------------------------------------------------
   private:

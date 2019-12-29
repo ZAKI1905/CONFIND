@@ -23,7 +23,7 @@ size_t Cont2D::size() const
   return pts.size() ;
 }
 //--------------------------------------------------------------
-std::ostream& operator << ( std::ostream &output, Cont2D c)
+std::ostream& operator << ( std::ostream &output, const Cont2D& c)
 { 
   output << "\n*        c = " << c.val << "        *\n" ;
 
@@ -51,11 +51,37 @@ void Cont2D::AddPts(const std::vector<CONFIND::Coord3D>& in_pts)
 }
 
 //--------------------------------------------------------------
-void Cont2D::Export(const std::string& f_name, const char* mode) const
+void Cont2D::Export(const std::string& f_name, const char* mode)
 {
   char tmp_char[100] ;
   sprintf(tmp_char, "%s_%.2e", f_name.c_str(), val ) ;
+  Sort() ;
   SaveVec(pts, tmp_char, mode) ;
+}
+
+//--------------------------------------------------------------
+bool Cont2D::cmp_dist(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const
+{
+  return ( pow(a.x - pts[0].x, 2) + pow(a.y - pts[0].y, 2) < pow(b.x - pts[0].x, 2) + pow(b.y - pts[0].y, 2)) ;
+}
+
+//--------------------------------------------------------------
+void Cont2D::Sort()
+{
+  PROFILE_FUNCTION() ;
+
+  if (already_sorted)
+    return;
+
+  std::sort(pts.begin(), pts.end(), [this] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) {
+    return cmp_dist(a, b); }) ;
+}
+
+//--------------------------------------------------------------
+void Cont2D::Clear()
+{
+  pts.clear() ;
+  already_sorted = false ;
 }
 //  Cont2D struct ends
 //==============================================================
@@ -599,7 +625,7 @@ void ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
 // }
 
 //--------------------------------------------------------------
-void ContourFinder::ExportContour(const std::string& f_name, const char* mode) const
+void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
 {
   if (! set_grid_vals_flag )
   {
@@ -619,8 +645,10 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode) c
 
 //--------------------------------------------------------------
 void ContourFinder::Plot(const std::string& f_name, const std::string& main_title,
-                const std::string& x_title, const std::string& y_title) const
+                const std::string& x_title, const std::string& y_title)
 {
+  PROFILE_FUNCTION() ;
+
   if (! set_grid_vals_flag )
   {
     LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
@@ -640,6 +668,8 @@ void ContourFinder::Plot(const std::string& f_name, const std::string& main_titl
 
   for(size_t i = 0 ; i < cont_set.size() ; ++i)
   {
+    cont_set[i].Sort();
+
     x_vals.reserve(cont_set[i].size()) ;
     y_vals.reserve(cont_set[i].size()) ;
     for(size_t j = 0 ; j < cont_set[i].size() ; ++j)
@@ -686,7 +716,7 @@ void ContourFinder::Plot(const std::string& f_name, const std::string& main_titl
   // gStyle->SetTitleFontSize(.08);
   // gStyle->SetLabelSize(.005, "XY");
 
-  mg->Draw("AP") ;
+  mg->Draw("AL") ;
 
   c.Update() ;
 
@@ -719,19 +749,25 @@ std::string ContourFinder::GetYScale()  const
 // }
 
 //--------------------------------------------------------------
-void ContourFinder::GetSortedContourCoords() const
+void ContourFinder::Clear()
 {
-  // std::vector<coords> test_list ;
-  // double tmp_dis = DistSq(test_list[0], test_list[1]);
+  cont_set.clear() ;
+  set_n_x_flag         = false ;
+  set_n_y_flag         = false ;
+  set_x_min_flag       = false ;
+  set_x_scale_flag     = false ;
+  set_y_scale_flag     = false ;
+  set_x_max_flag       = false ;
+  set_y_min_flag       = false ;
+  set_y_max_flag       = false ;
+  set_grid_vals_flag   = false ;
+  set_func_flag        = false ;
+  set_cont_val_flag    = false ;
+  set_mem_func_flag    = false ;
+  cpy_cons_called      = false ;
 
-  // for(size_t i = 0 ; i < test_list.size() - 1 ; ++i)
-  // {
-  //   for(size_t j = i+1 ; j < test_list.size() - 1 ; ++j)
-  //     if( tmp_dis > DistSq(test_list[i], test_list[j]) )
-  //       tmp_dis = DistSq(test_list[i], test_list[j]);
-
-  // }
-  
+  func = NULL ;
+  genFuncPtr = NULL ;
 }
 
 //==============================================================

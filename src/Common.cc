@@ -34,13 +34,13 @@ void CONFIND::ReportTiming()
 }
 
 //==============================================================
-std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q )
-{ 
-  char tmp[50] ;
-  sprintf(tmp, "%.3e \u00B1 %.3e", q.val, q.err) ;
-  output << tmp ;
-  return output;            
-}
+// std::ostream& operator << ( std::ostream &output, CONFIND::Quantity q )
+// { 
+//   char tmp[50] ;
+//   sprintf(tmp, "%.3e \u00B1 %.3e", q.val, q.err) ;
+//   output << tmp ;
+//   return output;            
+// }
 
 //==============================================================
 std::ostream& operator << ( std::ostream &output, CONFIND::Range<double> r )
@@ -190,34 +190,6 @@ void CONFIND::SaveVec<std::vector<int> >(const std::vector<std::vector<int> >& l
 }
 
 //==============================================================
-// template <class T> 
-// bool contains( std::vector<T>& Vec, T Element ) 
-// {
-//   if (std::find(Vec.begin(), Vec.end(), Element) != Vec.end())
-//       return true ;
-
-//   return false ;
-// }
-
-//==============================================================
-// template <class T> void rm_elem(std::vector<T>& list, 
-//                                 std::vector<size_t> rm_index_list)
-// // Removing certain members of a vector, 
-// // given another vector containing an index set.
-// {
-//       size_t    j = 0 ;
-//   for(size_t i = 0 ; i < list.size() ; ++i)
-//   {
-//     if( contains(rm_index_list, i+j) )
-//     {
-//       list.erase(list.begin()+i) ;
-//       i--                        ;
-//       j++                        ;
-//     }
-//   }
-// }
-
-//==============================================================
 // Root color mapping 
 // Ref: https://root.cern.ch/doc/master/classTColor.html
 std::array<EColor, 13> RColor = {kRed, kGreen, kBlue, kMagenta,
@@ -226,7 +198,7 @@ std::array<EColor, 13> RColor = {kRed, kGreen, kBlue, kMagenta,
 
 EColor CONFIND::RColorMap(size_t i) 
 { 
-  return static_cast<EColor>(RColor[i % 13] + 5*i/13) ;
+  return static_cast<EColor>(RColor[i % 13] + 2*(i/13)) ;
 }
 
 //==============================================================

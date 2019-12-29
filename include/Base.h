@@ -7,7 +7,7 @@
 
 //==============================================================
 //                    Profiling
-#define PROFILING 0
+#define PROFILING 1
 #if PROFILING
   #define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
   #define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCTION__)
