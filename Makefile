@@ -1,6 +1,3 @@
-# Compiler and Linker
-CC          := clang++-mp-9.0
-
 # Extensions
 SRC_EXT      := cc
 OBJ_EXT		 := o
@@ -15,6 +12,7 @@ EXAMPLE 	:= 0_Function
 # LINK_TARGET	:= memfunctionOptimized
 # EXAMPLE 	:= 2_MemFunctionOptimized
 
+# ----------------------------------
 # Directories
 SRC_DIR		:= src
 EXAMPLE_DIR	:= examples
@@ -22,19 +20,34 @@ OBJ_DIR		:= obj
 BIN_DIR		:= bin
 INC_DIR		:= include
 
-# Flags, Libraries and Includes
-DEP_INC		:= dependencies/include/root
-DEP_LIB_DIR	:= dependencies/lib
+# ----------------------------------
+# Compiler and Libraries
+ifeq ($(shell uname), Linux)
+	CC 			:= g++
+	ROOT_LIB	:= /home/zaki/HEP_Tools/root_dir/lib
+	ROOT_INC	:= /home/zaki/HEP_Tools/root_dir/include
+	OUT_LIB_DIR	:= lib/linux
+else
+	CC 			:= clang++-mp-9.0
+	ROOT_LIB	:= /opt/local/lib/root6
+	ROOT_INC	:= /opt/local/include/root6
+	OUT_LIB_DIR	:= lib/darwin
+endif
+# ----------------------------------
 
-ROOT_FLAG	:= -L$(DEP_LIB_DIR) -lCore.6.18.04 -lHist.6.18.04 -lGpad.6.18.04
-CCFLAGS		:=  -std=c++17 -Wall -g -fopenmp -fPIC
+# Flags, Libraries and Includes
+# DEP_INC		:= -Idependencies/include -Idependencies/include/root
+# DEP_LIB_DIR	:= dependencies/lib
+
+ROOT_FLAG	:= -L$(ROOT_LIB) -lCore -lHist -lGpad
+CCFLAGS		:= --std=c++14 -Wall -g -fopenmp -fPIC
 
 # Making library
 OUT_LIB		:= confind
-OUT_LIB_DIR	:= lib
+
 
 # Compile command
-COMPILE		:= $(CC) $(CCFLAGS) -I$(DEP_INC) -I$(INC_DIR) 
+COMPILE		:= $(CC) $(CCFLAGS) -I$(INC_DIR) -I$(ROOT_INC) 
 COMPILE_FLAG:= $(ROOT_FLAG)
 # ================================================================================
 
@@ -52,7 +65,7 @@ directories :
 
 $(BIN_DIR)/$(LINK_TARGET):	$(OBJECTS)  $(OBJ_DIR)/$(EXAMPLE).$(OBJ_EXT)
 	@echo "Linking the objects..."
-	$(COMPILE) $(COMPILE_FLAG) $^ -o $@
+	$(COMPILE)  $^ -o $@ $(COMPILE_FLAG)
 
 $(OBJ_DIR)/%.$(OBJ_EXT) : $(SRC_DIR)/%.$(SRC_EXT) $(INC_DIR)/%.h
 	@echo "Compiling the dependencies..."

@@ -1,8 +1,8 @@
-#include "../include/Cell.h"
-#include "../include/ContourFinder.h"
-
 #include <iterator>
 #include <algorithm>
+
+#include "../include/Cell.h"
+#include "../include/ContourFinder.h"
 
 //==============================================================
 // default Constructor

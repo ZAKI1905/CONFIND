@@ -1,10 +1,10 @@
 #include <omp.h>
 
 // Root
-#include "TGraph.h"
-#include "TMultiGraph.h"
-#include "TAxis.h"
-#include "TCanvas.h"
+#include <TGraph.h>
+#include <TMultiGraph.h>
+#include <TAxis.h>
+#include <TCanvas.h>
 #include "TStyle.h"
 
 // Local headers

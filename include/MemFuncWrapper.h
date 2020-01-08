@@ -1,9 +1,9 @@
 #ifndef MemFuncWrapper_H
 #define MemFuncWrapper_H
 
-#include <iostream>
-#include "Func2D.h"
+// #include <iostream>
 
+#include "Func2D.h"
 
 // namespace CONFIND
 // {
