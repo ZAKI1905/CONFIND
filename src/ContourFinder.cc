@@ -2,10 +2,9 @@
 
 // Root
 #include <TGraph.h>
-#include <TMultiGraph.h>
 #include <TAxis.h>
 #include <TCanvas.h>
-#include "TStyle.h"
+#include <TStyle.h>
 
 // Local headers
 #include "../include/ContourFinder.h"
@@ -16,7 +15,7 @@
 // Cont2D struct begins
 //--------------------------------------------------------------
 // Constructors
-Cont2D::Cont2D(double in_val) : val(in_val) {} 
+Cont2D::Cont2D(double in_val) : val(in_val) { } 
 //--------------------------------------------------------------
 size_t Cont2D::size() const 
 {
@@ -186,7 +185,11 @@ void Cont2D::Clear()
 //  ContourFinder Class begins
 //--------------------------------------------------------------
 // default Constructor
-ContourFinder::ContourFinder() { logger.SetUnit("ContourFinder") ; } 
+ContourFinder::ContourFinder() 
+{
+  logger.SetUnit("ContourFinder") ; 
+  graph = new TMultiGraph()  ; 
+} 
 
 //--------------------------------------------------------------
 // default Destructor
@@ -194,7 +197,8 @@ ContourFinder::~ContourFinder()
 { 
 // Log.Warn("\n ====>>> ContourFinder  destructor called! \n") ;
 // std::cout<< "\n genFuncPtr: " << genFuncPtr  << " \n" ;
-if (cpy_cons_called)  delete genFuncPtr; 
+  delete graph ;
+  if (cpy_cons_called)  delete genFuncPtr; 
 } 
 //--------------------------------------------------------------
 // Copy constructor
@@ -738,10 +742,41 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
   sprintf(tmp_char, "Contours exported to %s_[CONT].dat.", f_name.c_str() ) ;
   LOG_INFO(tmp_char) ;
 }
-
 //--------------------------------------------------------------
-void ContourFinder::Plot(const std::string& f_name, const std::string& main_title,
-                const std::string& x_title, const std::string& y_title)
+// Plot options
+void ContourFinder::SetPlotXLabel(const char* const in_x_label)
+{
+  x_label = in_x_label;
+  set_plotX_label_flag = true ;
+}
+//--------------------------------------------------------------
+void ContourFinder::SetPlotYLabel(const char* const in_y_label)
+{
+  y_label = in_y_label;
+  set_plotY_label_flag = true ;
+}
+//--------------------------------------------------------------
+void ContourFinder::SetPlotLabel(const char* const in_label) 
+{
+  plot_label = in_label ;
+  set_plot_label_flag = true ;
+}
+//--------------------------------------------------------------
+void ContourFinder::SetPlotConnected(const bool in_connected)     
+{
+  connected_plot = in_connected ;
+  set_plot_connected_flag = true ;
+}
+//--------------------------------------------------------------
+TMultiGraph* ContourFinder::GetGraph() 
+{
+  return graph ;
+}
+//--------------------------------------------------------------
+void ContourFinder::Plot(const std::string& f_name, 
+                         const char* const in_main_title,
+                         const char* const in_x_title,
+                         const char* const in_y_title)
 {
   PROFILE_FUNCTION() ;
 
@@ -756,7 +791,8 @@ void ContourFinder::Plot(const std::string& f_name, const std::string& main_titl
   
   gStyle->SetOptStat(0);
 
-  TMultiGraph *mg = new TMultiGraph()  ;
+  // TMultiGraph *mg = new TMultiGraph()  ;
+  
   TGraph *g[cont_set.size()] ;
 
   std::vector<double> x_vals ;
@@ -784,7 +820,7 @@ void ContourFinder::Plot(const std::string& f_name, const std::string& main_titl
     g[i] ->SetMarkerColor(CONFIND::RColorMap(i)) ;
     // g.SetMarkerSize(2) ;
     // g.SetMarkerStyle(29) ;
-    mg->Add(g[i]) ;
+    graph->Add(g[i]) ;
 
     x_vals.clear() ;
     y_vals.clear() ;
@@ -796,23 +832,54 @@ void ContourFinder::Plot(const std::string& f_name, const std::string& main_titl
   if (y_scale == "Log")
     c.SetLogy() ;
 
-  mg->GetXaxis()->SetLimits(x_min, x_max);
-  mg->GetYaxis()->SetLimits(y_min, y_max);
+  graph->GetXaxis()->SetLimits(x_min, x_max);
+  graph->GetYaxis()->SetLimits(y_min, y_max);
 
-  mg->SetTitle(main_title.c_str()) ;
+  //.....................................
+  // Main Ttile
+  //.....................................
+  if(in_main_title != NULL)
+    graph->SetTitle(in_main_title) ; 
+  else
+    graph->SetTitle(plot_label.c_str()) ;  
+  //.....................................
 
-  mg->GetXaxis()->SetTitle(x_title.c_str()) ; 
-  mg->GetXaxis()->SetTitleSize(0.03) ;
-  mg->GetXaxis()-> SetTitleOffset(1.6);
+  //.....................................
+  // X Axis
+  //.....................................
+  // Ttile
+  //......................
+  if(in_x_title != NULL)
+    graph->GetXaxis()->SetTitle(in_x_title) ; 
+  else
+    graph->GetXaxis()->SetTitle(x_label.c_str()) ; 
+  //......................
+  graph->GetXaxis()->SetTitleSize(0.03) ;
+  graph->GetXaxis()-> SetTitleOffset(1.6);
+  //.....................................
 
-  mg->GetYaxis()->SetTitle(y_title.c_str()) ;
-  mg->GetYaxis()->SetTitleSize(0.03) ;
-  mg->GetYaxis()-> SetTitleOffset(1.5);
+  //.....................................
+  // Y Axis
+  //.....................................
+  // Title
+  //......................
+  if(in_y_title != NULL)
+    graph->GetYaxis()->SetTitle(in_y_title) ; 
+  else
+    graph->GetYaxis()->SetTitle(y_label.c_str()) ; 
+  //......................
+  graph->GetYaxis()->SetTitleSize(0.03) ;
+  graph->GetYaxis()-> SetTitleOffset(1.5);
+  //.....................................
 
   // gStyle->SetTitleFontSize(.08);
   // gStyle->SetLabelSize(.005, "XY");
 
-  mg->Draw("AL") ;
+  if(connected_plot)
+    graph->Draw("AL") ;
+  else
+    graph->Draw("AP") ;
+  
 
   c.Update() ;
 
@@ -822,7 +889,7 @@ void ContourFinder::Plot(const std::string& f_name, const std::string& main_titl
 
   c.SaveAs(out_file_char) ;
 
-  delete mg ;
+  // delete graph ;
   
 }
 

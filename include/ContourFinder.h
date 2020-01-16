@@ -1,6 +1,10 @@
 #ifndef ContourFinder_H
 #define ContourFinder_H
 
+// Root
+#include <TMultiGraph.h>
+
+// Local headers
 #include "MemFuncWrapper.h"
 #include "Cell.h"
 
@@ -78,6 +82,11 @@ class ContourFinder : public Base
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
     void SetMemFunc(Func2D*) ;  // Non-static mem-funcs
     void SetContVal(const std::vector<double>&) ;
+    // Plot options
+    void SetPlotXLabel(const char*) ;
+    void SetPlotYLabel(const char*) ;
+    void SetPlotLabel(const char*)  ;
+    void SetPlotConnected(const bool=true) ;
     //............................................
 
     void FindContour(Cont2D& cont) ;
@@ -104,7 +113,10 @@ class ContourFinder : public Base
     
     void Print() const override;
     void ExportContour(const std::string& f_name, const char* mode) ;
-    void Plot(const std::string& f_name, const std::string& ="", const std::string& ="X", const std::string& ="Y") ;
+
+    TMultiGraph* GetGraph() ;
+
+    void Plot(const std::string& f_name, const char* const=NULL, const char* const=NULL, const char* const=NULL) ;
 
  //--------------------------------------------------------------
   private:
@@ -122,15 +134,21 @@ class ContourFinder : public Base
     bool set_func_flag        = false ;
     bool set_cont_val_flag    = false ;
     bool set_mem_func_flag    = false ;
-
+    bool set_plotX_label_flag = false ;
+    bool set_plotY_label_flag = false ;
+    bool set_plot_label_flag  = false ;
+    bool set_plot_connected_flag = false ;
     bool cpy_cons_called      = false ;
 
     double (*func) (double, double)   ;
     Func2D* genFuncPtr = NULL ;
+    TMultiGraph *graph = NULL ;
 
     size_t n_x, n_y ;
     double x_min, x_max, y_min, y_max, delta_x, delta_y ;
     std::string x_scale = "Linear" ; std::string y_scale = "Linear"     ;
+    std::string x_label="X", y_label ="Y", plot_label="" ;
+    bool connected_plot = false  ;
     std::vector<Cont2D> cont_set ;
 };
 

@@ -28,7 +28,9 @@ class test_class
 // ...........................
 int main()
 {
+#if PROFILING
     Instrumentor::Get().BeginSession("2_MemFunctionOptimized", "examples/2_MemFunctionOptimized_Profile.json") ;
+#endif
     // ...........................
     // Setting up the grid
     // ...........................
@@ -63,7 +65,10 @@ int main()
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
+    con.SetPlotConnected() ;
     con.Plot("2_MemFunctionOptimized", "Testing CONFIND", "X", "Y") ;
 
+#if PROFILING
     Instrumentor::Get().EndSession();  
+#endif
 }

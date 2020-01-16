@@ -19,7 +19,9 @@ double test_f(double x, double y)
 // ...........................
 int main()
 {
+#if PROFILING
     Instrumentor::Get().BeginSession("0_Function", "examples/0_Function_Profile.json") ;
+#endif
     // ...........................
     // Setting up the grid
     // ...........................
@@ -56,7 +58,10 @@ int main()
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
+    con.SetPlotConnected() ;
     con.Plot("0_Function", "Testing CONFIND", "X", "Y") ;
 
+#if PROFILING
     Instrumentor::Get().EndSession();  
+#endif
 }
