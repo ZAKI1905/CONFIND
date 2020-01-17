@@ -3,6 +3,9 @@
 
 */
 
+// Creating directory
+#include <sys/stat.h>
+
 #include "../include/Base.h"
 
 //==============================================================
@@ -22,6 +25,18 @@ void Base::SetWrkDir(const char* input)
 {
   wrk_dir_str = input;
   set_wrk_dir_flag = true ;
+
+  // ............ Creating a directory ............
+  if (mkdir(wrk_dir_str.c_str(), ACCESSPERMS) == -1) 
+  {
+    char tmp[75] ;
+    sprintf(tmp, "Directory '%s' wasn't created, because: %s.", wrk_dir_str.c_str(), strerror(errno)) ;
+    LOG_WARNING(tmp) ; 
+  }
+  else
+    LOG_INFO(("Directory '" + wrk_dir_str + "' created.").c_str()); 
+  // .................................................
+
   char tmp[75];
   sprintf(tmp, "Work directory set to '%s'.", input) ;
   LOG_INFO(tmp) ;

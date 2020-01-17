@@ -3,6 +3,7 @@
 
 // Root
 #include <TMultiGraph.h>
+#include <TLegend.h>
 
 // Local headers
 #include "MemFuncWrapper.h"
@@ -19,10 +20,15 @@ class Cont2D
   //--------------------------------------------------------------
   public:
     Cont2D(double) ;
+    void SetColor(const CONFIND::Color) ;
+    void SetColor(const size_t) ;
+    CONFIND::Color GetColor() const ;
 
   private:
     double val;
     std::vector<CONFIND::Coord3D> pts;
+    CONFIND::Color color ;
+
 
     // The most bottom_left point (used for sorting)
     CONFIND::Coord3D bottom_left ;
@@ -41,7 +47,7 @@ class Cont2D
     bool comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const; 
     bool sort_cw = true ;
     bool already_sorted = false ;
-    void Clear() ;
+    void Clear() ; 
 };
 
 std::ostream& operator << ( std::ostream &output, const Cont2D& c ) ;
@@ -82,11 +88,15 @@ class ContourFinder : public Base
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
     void SetMemFunc(Func2D*) ;  // Non-static mem-funcs
     void SetContVal(const std::vector<double>&) ;
+    void SetScanMode(const char) ;
+
     // Plot options
     void SetPlotXLabel(const char*) ;
     void SetPlotYLabel(const char*) ;
     void SetPlotLabel(const char*)  ;
     void SetPlotConnected(const bool=true) ;
+    void SetLegendLabels(std::vector<std::string> ); 
+    void MakeLegend(const bool=true, const char* const=NULL, const char* const=NULL) ;
     //............................................
 
     void FindContour(Cont2D& cont) ;
@@ -108,6 +118,7 @@ class ContourFinder : public Base
     double GetX_Max() const ;
     double GetY_Min() const ;
     double GetY_Max() const ;
+    char GetScanMode() const;
 
     std::pair<double, double> ij_2_xy(size_t i, size_t j) const ;
     
@@ -115,6 +126,7 @@ class ContourFinder : public Base
     void ExportContour(const std::string& f_name, const char* mode) ;
 
     TMultiGraph* GetGraph() ;
+    TLegend* GetLegend() ;
 
     void Plot(const std::string& f_name, const char* const=NULL, const char* const=NULL, const char* const=NULL) ;
 
@@ -139,10 +151,19 @@ class ContourFinder : public Base
     bool set_plot_label_flag  = false ;
     bool set_plot_connected_flag = false ;
     bool cpy_cons_called      = false ;
+    bool set_scan_mode_flage  = false ;
+    bool set_leg_lab_flag     = false ;
+    bool make_legend_flag     = false  ;
+
+    char scan_mode = 'X' ; 
 
     double (*func) (double, double)   ;
     Func2D* genFuncPtr = NULL ;
     TMultiGraph *graph = NULL ;
+    TLegend *legend    = NULL ;
+    std::vector<std::string> legend_label_set ;
+    std::string legend_header = "Contours" ;
+    bool default_legend_opt = true ; 
 
     size_t n_x, n_y ;
     double x_min, x_max, y_min, y_max, delta_x, delta_y ;

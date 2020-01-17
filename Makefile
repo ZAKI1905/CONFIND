@@ -39,7 +39,7 @@ endif
 # DEP_INC		:= -Idependencies/include -Idependencies/include/root
 # DEP_LIB_DIR	:= dependencies/lib
 
-ROOT_FLAG	:= -L$(ROOT_LIB) -lCore -lHist -lGpad
+ROOT_FLAG	:= -L$(ROOT_LIB) -lCore -lHist -lGpad -lGraf
 CCFLAGS		:= --std=c++14 -Wall -g -fopenmp -fPIC
 
 # Making library

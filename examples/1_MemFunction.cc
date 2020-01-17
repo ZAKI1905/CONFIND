@@ -29,7 +29,7 @@ class test_class
 int main()
 {
 #if PROFILING
-    Instrumentor::Get().BeginSession("1_MemFunction", "examples/1_MemFunction_Profile.json") ;
+    Instrumentor::Get().BeginSession("1_MemFunction", "examples/1_MemberFunction/1_MemFunction_Profile.json") ;
 #endif
     // ...........................
     // Setting up the grid
@@ -43,7 +43,7 @@ int main()
 
     // Setting the work directory
     char tmp[75] ;
-    sprintf(tmp, "%s", "examples") ;
+    sprintf(tmp, "%s", "examples/1_MemberFunction") ;
     con.SetWrkDir(tmp) ;
 
     test_class tc;

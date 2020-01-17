@@ -3,9 +3,6 @@
 #include "../include/Logger.h"
 #include "../include/ContourFinder.h"
 
-// Just for std::iota
-#include <numeric>
-
 // ...........................
 double test_f(double x, double y)
 {
@@ -20,8 +17,9 @@ double test_f(double x, double y)
 int main()
 {
 #if PROFILING
-    Instrumentor::Get().BeginSession("0_Function", "examples/0_Function_Profile.json") ;
+    Instrumentor::Get().BeginSession("0_Function", "examples/0_Basic_Function/0_Function_Profile.json") ;
 #endif
+
     // ...........................
     // Setting up the grid
     // ...........................
@@ -34,19 +32,16 @@ int main()
 
     // Setting the work directory
     char tmp[75] ;
-    sprintf(tmp, "%s", "examples") ;
+    sprintf(tmp, "%s", "examples/0_Basic_Function") ;
     con.SetWrkDir(tmp) ;
 
     // Setting the function 
     con.SetFunc(test_f);
 
-
     // Setting the contour level values
-    // double colorArr[2];
-    // std::iota(colorArr, colorArr + 2, 1);
-    // std::vector<double> colorVec(colorArr, colorArr + sizeof(colorArr) / sizeof (colorArr[0]));
-
     con.SetContVal({5, 10, 25}) ;
+    // You can keep adding contours 
+    con.SetContVal({7.5}) ;
     // ...........................
 
     // ...........................
@@ -54,11 +49,12 @@ int main()
     // ...........................
     con.SetGridVals(ContourFinder::Mode::Optimal) ;
     // con.Print() ;
-    // con.ExportContour("0_Function_Contour_Pts",  "w") ; 
+    con.ExportContour("0_Function_Contour_Pts",  "w") ; 
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.SetPlotConnected() ;
+    // con.MakeLegend() ;
     con.Plot("0_Function", "Testing CONFIND", "X", "Y") ;
 
 #if PROFILING

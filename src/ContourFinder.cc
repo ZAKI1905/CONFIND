@@ -5,6 +5,7 @@
 #include <TAxis.h>
 #include <TCanvas.h>
 #include <TStyle.h>
+#include <TLegend.h>
 
 // Local headers
 #include "../include/ContourFinder.h"
@@ -21,6 +22,33 @@ size_t Cont2D::size() const
 {
   return pts.size() ;
 }
+
+//--------------------------------------------------------------
+void Cont2D::SetColor(const CONFIND::Color in_color)
+{
+  color = in_color ;
+
+  // char tmp[100] ;
+  // sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
+  // LOG_INFO(tmp) ;
+}
+
+//--------------------------------------------------------------
+void Cont2D::SetColor(const size_t in_idx)
+{
+  color.idx = in_idx ;
+
+  // char tmp[100] ;
+  // sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
+  // LOG_INFO(tmp) ;
+}
+
+//--------------------------------------------------------------    
+CONFIND::Color Cont2D::GetColor() const 
+{
+  return color;
+}
+
 //--------------------------------------------------------------
 std::ostream& operator << ( std::ostream &output, const Cont2D& c)
 { 
@@ -202,6 +230,7 @@ ContourFinder::~ContourFinder()
 } 
 //--------------------------------------------------------------
 // Copy constructor
+// It will set the graph pointer to NULL
 ContourFinder::ContourFinder(const ContourFinder &zc2) :
   set_n_x_flag(zc2.set_n_x_flag),
   set_n_y_flag(zc2.set_n_y_flag),
@@ -222,6 +251,7 @@ ContourFinder::ContourFinder(const ContourFinder &zc2) :
 {
   // std::cout << "ContourFinder copy constructor from " << &zc2 << " -> " << this << " \n" ;
   genFuncPtr = zc2.genFuncPtr->Clone() ;
+  graph = NULL;
   // cpy_cons_called = true ;
 }
 
@@ -473,26 +503,67 @@ std::pair<double, double> ContourFinder::GetDeltas() const
 }
 
 //--------------------------------------------------------------
+void ContourFinder::SetScanMode(const char in_scan_mode)
+{
+  if(in_scan_mode != 'X' || in_scan_mode != 'Y')
+  {
+    LOG_ERROR("Valid scan modes are 'X' & 'Y' only!\
+    Ignoring the input scan mode, 'X' is assumed.") ;
+    return;
+  }
+
+  scan_mode = in_scan_mode ;
+  set_scan_mode_flage = true ;
+  char tmp[100] ;
+  sprintf(tmp, "Scan mode is set to '%c'.", in_scan_mode) ;
+  LOG_INFO(tmp) ;
+}
+
+//--------------------------------------------------------------
+char ContourFinder::GetScanMode() const
+{
+  return scan_mode ;
+}
+
+//--------------------------------------------------------------
 void ContourFinder::FindContour(Cont2D& cont)
 {
   PROFILE_FUNCTION() ;
 
   char tmp[150] ;
-  sprintf(tmp, "==> Finding contour for c = %.2e ...", cont.val) ;
+  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
+          cont.color.name().c_str()) ;
   LOG_INFO(tmp) ;
 
   SetDeltas() ;
 
-  for (size_t j = 0; j < n_y; j++)
+  if(scan_mode == 'X')
+  {
+    for (size_t j = 0; j < n_y; j++)
+    {
+      for (size_t i = 0; i < n_x; i++)
+      {
+        Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+        new_cell.FindVerts() ;
+        new_cell.GetStatus() ;
+        cont.AddPts(new_cell.GetContourCoords()) ;
+      }
+    }
+  }
+  else // if(scan_mode == 'Y')
   {
     for (size_t i = 0; i < n_x; i++)
     {
-      Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
-      new_cell.FindVerts() ;
-      new_cell.GetStatus() ;
-      cont.AddPts(new_cell.GetContourCoords()) ;
+      for (size_t j = 0; j < n_y; j++)
+      {
+        Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+        new_cell.FindVerts() ;
+        new_cell.GetStatus() ;
+        cont.AddPts(new_cell.GetContourCoords()) ;
+      }
     }
   }
+
 }
 
 //--------------------------------------------------------------
@@ -501,7 +572,8 @@ void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
   PROFILE_FUNCTION() ;
 
   char tmp[150] ;
-  sprintf(tmp, "==> Finding contour for c = %.2e ...", cont.val) ;
+  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
+          cont.color.name().c_str()) ;
   LOG_INFO(tmp) ;
 
   SetDeltas() ;
@@ -586,7 +658,8 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
   {
 
   char tmp[150] ;
-  sprintf(tmp, "==> Finding contour for c = %.2e ...", cont_set[k].val) ;
+  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont_set[k].val, 
+          cont_set[k].color.name().c_str()) ;
   LOG_INFO(tmp) ;
 
   SetDeltas() ;
@@ -622,7 +695,8 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
 void ContourFinder::FindContourParallel(Cont2D& cont)
 {
   char tmp[150] ;
-  sprintf(tmp, "==> Finding contour for c = %.2e ...", cont.val) ;
+  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
+          cont.color.name().c_str()) ;
   LOG_INFO(tmp);
 
   SetDeltas() ;
@@ -704,10 +778,11 @@ void ContourFinder::SetMemFunc(Func2D* gen_Fun)
 //--------------------------------------------------------------
 void ContourFinder::SetContVal(const std::vector<double>& cont_val_in) 
 {
-  cont_set.clear() ;
+  // cont_set.clear() ;
   for (size_t i = 0; i < cont_val_in.size(); i++)
   {
     cont_set.emplace_back(cont_val_in[i]) ;
+    cont_set[cont_set.size()-1].SetColor(cont_set.size()-1) ;
   }
   
   set_cont_val_flag = true ;
@@ -772,6 +847,34 @@ TMultiGraph* ContourFinder::GetGraph()
 {
   return graph ;
 }
+
+//--------------------------------------------------------------
+void ContourFinder::MakeLegend(const bool in_make_leg,
+                               const char* const in_head,
+                               const char* const in_option) 
+{
+  make_legend_flag = in_make_leg ;
+
+  // if(in_head != NULL)
+  //   legend_header = in_head ;
+  
+  // if(strcmp(in_option, "user") == 0)
+  //   default_legend_opt = false ;
+}
+
+//--------------------------------------------------------------
+TLegend* ContourFinder::GetLegend() 
+{
+  return legend;
+}
+
+//--------------------------------------------------------------
+void ContourFinder::SetLegendLabels(std::vector<std::string> in_labels) 
+{
+  legend_label_set = in_labels ;
+  set_leg_lab_flag = true ;
+}
+
 //--------------------------------------------------------------
 void ContourFinder::Plot(const std::string& f_name, 
                          const char* const in_main_title,
@@ -798,6 +901,24 @@ void ContourFinder::Plot(const std::string& f_name,
   std::vector<double> x_vals ;
   std::vector<double> y_vals ;
 
+  if(make_legend_flag)
+  {
+    //.....................................
+    // Adding Legend
+    if(default_legend_opt)
+    {
+      // legend->SetDefaults() ;
+      legend->SetX1(0.7) ;
+      legend->SetX2(0.9) ;
+      legend->SetY1(0.7) ;
+      legend->SetY2(0.9) ;
+      legend->SetTextSize(0.03);
+    }
+
+    legend->SetHeader(legend_header.c_str(), "C");
+    //.....................................
+  }
+
   for(size_t i = 0 ; i < cont_set.size() ; ++i)
   {
     cont_set[i].Sort();
@@ -821,6 +942,21 @@ void ContourFinder::Plot(const std::string& f_name,
     // g.SetMarkerSize(2) ;
     // g.SetMarkerStyle(29) ;
     graph->Add(g[i]) ;
+
+    if(make_legend_flag)
+    {
+      //...................................
+      // Adding the legend labels
+      if(set_leg_lab_flag)
+        legend->AddEntry(g[i], legend_label_set[i].c_str(), "l");
+      else
+      {
+        char tmp_label[30] ;
+        sprintf(tmp_label, "%.2e", cont_set[i].val) ;
+        legend->AddEntry(g[i], tmp_label, "l");
+      } 
+      //...................................
+    }
 
     x_vals.clear() ;
     y_vals.clear() ;
@@ -880,6 +1016,8 @@ void ContourFinder::Plot(const std::string& f_name,
   else
     graph->Draw("AP") ;
   
+  if(make_legend_flag)
+    legend->Draw(); 
 
   c.Update() ;
 
@@ -912,6 +1050,7 @@ std::string ContourFinder::GetYScale()  const
 // }
 
 //--------------------------------------------------------------
+// Will clear everything!
 void ContourFinder::Clear()
 {
   cont_set.clear() ;
