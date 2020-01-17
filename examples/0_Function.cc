@@ -51,11 +51,18 @@ int main()
     // con.Print() ;
     con.ExportContour("0_Function_Contour_Pts",  "w") ; 
 
+    //..............................................................
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.SetPlotConnected() ;
-    // con.MakeLegend() ;
-    con.Plot("0_Function", "Testing CONFIND", "X", "Y") ;
+
+    // If choosing "user" option make sure to set the coordinates!
+    con.MakeLegend(true, "Function", "user") ;
+    con.GetLegend()->SetX1(0.75) ; con.GetLegend()->SetY1(0.75) ;
+    con.GetLegend()->SetX2(0.90) ; con.GetLegend()->SetY2(0.90) ;
+    con.GetLegend()->SetTextSize(0.025) ;
+    con.Plot("0_Function", "CONFIND Example 0", "X", "Y") ;
+    //..............................................................
 
 #if PROFILING
     Instrumentor::Get().EndSession();  

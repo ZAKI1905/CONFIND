@@ -12,6 +12,9 @@ EXAMPLE 	:= 0_Function
 # LINK_TARGET	:= memfunctionOptimized
 # EXAMPLE 	:= 2_MemFunctionOptimized
 
+# LINK_TARGET	:= modify_object
+# EXAMPLE 	:= 3_Modify_Object
+
 # ----------------------------------
 # Directories
 SRC_DIR		:= src

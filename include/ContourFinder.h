@@ -12,7 +12,7 @@
 // namespace CONFIND
 // {
 //==============================================================
-class Cont2D
+class Cont2D : public Base
 {
 
   friend class ContourFinder  ;
@@ -22,12 +22,16 @@ class Cont2D
     Cont2D(double) ;
     void SetColor(const CONFIND::Color) ;
     void SetColor(const size_t) ;
+    void SetFound(const bool=true) ;
+
     CONFIND::Color GetColor() const ;
+    bool GetFound() const ;
 
   private:
     double val;
     std::vector<CONFIND::Coord3D> pts;
     CONFIND::Color color ;
+    bool is_found_flag = false ;
 
 
     // The most bottom_left point (used for sorting)
@@ -171,6 +175,8 @@ class ContourFinder : public Base
     std::string x_label="X", y_label ="Y", plot_label="" ;
     bool connected_plot = false  ;
     std::vector<Cont2D> cont_set ;
+
+    int unfound_contours = 0 ;
 };
 
 // }

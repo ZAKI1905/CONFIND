@@ -66,7 +66,7 @@ int main()
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.SetPlotConnected() ;
-    con.Plot("2_MemFunctionOptimized", "Testing CONFIND", "X", "Y") ;
+    con.Plot("2_MemFunctionOptimized", "CONFIND Example 2", "X", "Y") ;
 
 #if PROFILING
     Instrumentor::Get().EndSession();  

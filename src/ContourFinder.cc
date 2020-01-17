@@ -16,7 +16,7 @@
 // Cont2D struct begins
 //--------------------------------------------------------------
 // Constructors
-Cont2D::Cont2D(double in_val) : val(in_val) { } 
+Cont2D::Cont2D(double in_val) : val(in_val) {   logger.SetUnit("Cont2D") ; } 
 //--------------------------------------------------------------
 size_t Cont2D::size() const 
 {
@@ -28,9 +28,9 @@ void Cont2D::SetColor(const CONFIND::Color in_color)
 {
   color = in_color ;
 
-  // char tmp[100] ;
-  // sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
-  // LOG_INFO(tmp) ;
+  char tmp[100] ;
+  sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
+  LOG_INFO(tmp) ;
 }
 
 //--------------------------------------------------------------
@@ -38,15 +38,27 @@ void Cont2D::SetColor(const size_t in_idx)
 {
   color.idx = in_idx ;
 
-  // char tmp[100] ;
-  // sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
-  // LOG_INFO(tmp) ;
+  char tmp[100] ;
+  sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
+  LOG_INFO(tmp) ;
 }
 
 //--------------------------------------------------------------    
 CONFIND::Color Cont2D::GetColor() const 
 {
   return color;
+}
+
+//--------------------------------------------------------------
+bool Cont2D::GetFound() const 
+{
+  return is_found_flag ;
+}
+
+//--------------------------------------------------------------
+void Cont2D::SetFound(const bool in_flag) 
+{
+  is_found_flag = in_flag;
 }
 
 //--------------------------------------------------------------
@@ -80,6 +92,14 @@ void Cont2D::AddPts(const std::vector<CONFIND::Coord3D>& in_pts)
 //--------------------------------------------------------------
 void Cont2D::Export(const std::string& f_name, const char* mode)
 {
+  if (pts.size() == 0)
+  {
+    char tmp[150] ;
+    sprintf(tmp, "Contour '%.2e' has no points within the specified range.", val) ;
+    LOG_ERROR(tmp) ;
+    return ;
+  }  
+
   char tmp_char[100] ;
   sprintf(tmp_char, "%s_%.2e", f_name.c_str(), val ) ;
   Sort() ;
@@ -146,6 +166,11 @@ void Cont2D::Sort()
   if (already_sorted)
     return;
 
+  if (!is_found_flag)
+  {
+    LOG_ERROR("Contour values hasn't been found yet!") ;
+    return ; 
+  }
   // std::vector<CONFIND::Coord3D>::iterator BotLef_it ;
 
   // // Finding the bottom left point as a reference
@@ -217,20 +242,20 @@ ContourFinder::ContourFinder()
 {
   logger.SetUnit("ContourFinder") ; 
   graph = new TMultiGraph()  ; 
+  legend = new TLegend(0.7, 0.9, 0.7, 0.9) ;
 } 
 
 //--------------------------------------------------------------
 // default Destructor
 ContourFinder::~ContourFinder() 
 { 
-// Log.Warn("\n ====>>> ContourFinder  destructor called! \n") ;
-// std::cout<< "\n genFuncPtr: " << genFuncPtr  << " \n" ;
   delete graph ;
+  delete legend ;
   if (cpy_cons_called)  delete genFuncPtr; 
 } 
 //--------------------------------------------------------------
 // Copy constructor
-// It will set the graph pointer to NULL
+// It will set the graph & legend pointers to NULL
 ContourFinder::ContourFinder(const ContourFinder &zc2) :
   set_n_x_flag(zc2.set_n_x_flag),
   set_n_y_flag(zc2.set_n_y_flag),
@@ -252,6 +277,7 @@ ContourFinder::ContourFinder(const ContourFinder &zc2) :
   // std::cout << "ContourFinder copy constructor from " << &zc2 << " -> " << this << " \n" ;
   genFuncPtr = zc2.genFuncPtr->Clone() ;
   graph = NULL;
+  legend = NULL ;
   // cpy_cons_called = true ;
 }
 
@@ -436,16 +462,18 @@ void ContourFinder::SetGridVals(Mode in_mode)
   {
     double* m_GridValArr = NULL;
     //..........................................
-    if (cont_set.size() > 1)
+    // if (cont_set.size() > 1)
+    if (unfound_contours > 1)
     {
       // # of total corners: (n_x+1)*(n_y+1)
       m_GridValArr = new double[(n_x+1)*(n_y+1)] ;
     }
     //..........................................
-    // Finding the first contour
-    FindContourOptimal(cont_set[0], m_GridValArr) ;
+    // Finding the first 'unfound' contour
+    FindContourOptimal(cont_set[cont_set.size()-unfound_contours], m_GridValArr) ;
 
-    if (cont_set.size() > 1)
+    // if (cont_set.size() > 1)
+    if (unfound_contours > 0)
       // Now the function values are all set inside  'm_GridValArr'
       FindNextContours(m_GridValArr) ;
 
@@ -459,6 +487,13 @@ void ContourFinder::SetGridVals(Mode in_mode)
   // Normal & parallel mode
   for (size_t i = 0; i < cont_set.size(); i++)
   {
+    // If the contour is already found
+    if (cont_set[i].GetFound())
+    {
+      // skip to the next contour
+      continue ;
+    }
+    
     if (in_mode == Normal)
       FindContour(cont_set[i]) ;
     else if (in_mode == Parallel)
@@ -564,6 +599,9 @@ void ContourFinder::FindContour(Cont2D& cont)
     }
   }
 
+  // Marking the contour as found
+  cont.SetFound();
+  unfound_contours--;
 }
 
 //--------------------------------------------------------------
@@ -647,6 +685,10 @@ void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
     }
   }
   //============END of LOOP============ 
+
+  // Marking the contour as found
+  cont.SetFound();
+  unfound_contours--;
 }
 
 //--------------------------------------------------------------
@@ -657,35 +699,44 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
   for (size_t k = 1 ; k < cont_set.size() ; ++k)
   {
 
-  char tmp[150] ;
-  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont_set[k].val, 
-          cont_set[k].color.name().c_str()) ;
-  LOG_INFO(tmp) ;
-
-  SetDeltas() ;
-
-  //============LOOP STARTS============ 
-  for (size_t j = 0; j < n_y; j++)
-  {
-    // corners.clear() ;
-    for (size_t i = 0; i < n_x; i++)
+    // Skip the contours that are already found
+    if (cont_set[k].GetFound())
     {
-      // Instantiate a cell
-      Cell new_cell(i, delta_x, j, delta_y, this, cont_set[k].val) ;
-
-      // ............................................
-      new_cell.SetVertexZ(1, in_gridValArr[i    + (n_x+1) * j     ]) ;
-      new_cell.SetVertexZ(2, in_gridValArr[i+1  + (n_x+1) * j     ]) ;
-      new_cell.SetVertexZ(3, in_gridValArr[i+1  + (n_x+1) * (j+1) ]) ;
-      new_cell.SetVertexZ(4, in_gridValArr[i    + (n_x+1) * (j+1) ]) ;
-      //............................................
-
-      new_cell.FindVerts() ;
-      new_cell.GetStatus() ;
-      cont_set[k].AddPts(new_cell.GetContourCoords()) ;
+      continue ;
     }
-  }
-  //============END of LOOP============ 
+    
+    char tmp[150] ;
+    sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont_set[k].val, 
+            cont_set[k].color.name().c_str()) ;
+    LOG_INFO(tmp) ;
+
+    SetDeltas() ;
+
+    //============LOOP STARTS============ 
+    for (size_t j = 0; j < n_y; j++)
+    {
+      // corners.clear() ;
+      for (size_t i = 0; i < n_x; i++)
+      {
+        // Instantiate a cell
+        Cell new_cell(i, delta_x, j, delta_y, this, cont_set[k].val) ;
+
+        // ............................................
+        new_cell.SetVertexZ(1, in_gridValArr[i    + (n_x+1) * j     ]) ;
+        new_cell.SetVertexZ(2, in_gridValArr[i+1  + (n_x+1) * j     ]) ;
+        new_cell.SetVertexZ(3, in_gridValArr[i+1  + (n_x+1) * (j+1) ]) ;
+        new_cell.SetVertexZ(4, in_gridValArr[i    + (n_x+1) * (j+1) ]) ;
+        //............................................
+
+        new_cell.FindVerts() ;
+        new_cell.GetStatus() ;
+        cont_set[k].AddPts(new_cell.GetContourCoords()) ;
+      }
+    }
+    //============END of LOOP============ 
+    // Marking the contour as found
+    cont_set[k].SetFound();
+    unfound_contours--;
   }
   //============END of Contour LOOP============ 
 }
@@ -733,6 +784,10 @@ void ContourFinder::FindContourParallel(Cont2D& cont)
     }
   }
   // ............... PARALLEL REGION ENDS......................
+
+  // Marking the contour as found
+  cont.SetFound();
+  unfound_contours--;
 }
 
 //--------------------------------------------------------------
@@ -784,7 +839,9 @@ void ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
     cont_set.emplace_back(cont_val_in[i]) ;
     cont_set[cont_set.size()-1].SetColor(cont_set.size()-1) ;
   }
-  
+
+  // Kepping track of contours
+  unfound_contours += cont_val_in.size() ;
   set_cont_val_flag = true ;
 }
 
@@ -809,7 +866,14 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
   }
 
   for(size_t i = 0 ; i < cont_set.size() ; ++i)
-  {  
+  {
+    if (!cont_set[i].GetFound())
+    {
+      char tmp[150] ;
+      sprintf(tmp, "Contour '%.2e' hasn't been found yet, skipping to the next one.", cont_set[i].val) ;
+      LOG_WARNING(tmp) ;
+      continue ;
+    }  
     cont_set[i].Export(wrk_dir_str + "/" + f_name, mode) ;
   }
 
@@ -855,13 +919,12 @@ void ContourFinder::MakeLegend(const bool in_make_leg,
 {
   make_legend_flag = in_make_leg ;
 
-  // if(in_head != NULL)
-  //   legend_header = in_head ;
+  if(in_head != NULL)
+    legend_header = in_head ;
   
-  // if(strcmp(in_option, "user") == 0)
-  //   default_legend_opt = false ;
+  if(strcmp(in_option, "user") == 0)
+    default_legend_opt = false ;
 }
-
 //--------------------------------------------------------------
 TLegend* ContourFinder::GetLegend() 
 {
@@ -903,11 +966,11 @@ void ContourFinder::Plot(const std::string& f_name,
 
   if(make_legend_flag)
   {
+
     //.....................................
     // Adding Legend
     if(default_legend_opt)
     {
-      // legend->SetDefaults() ;
       legend->SetX1(0.7) ;
       legend->SetX2(0.9) ;
       legend->SetY1(0.7) ;
@@ -916,11 +979,29 @@ void ContourFinder::Plot(const std::string& f_name,
     }
 
     legend->SetHeader(legend_header.c_str(), "C");
+    std::cout << "\n legend_header: " << legend_header <<"\n" ;
     //.....................................
   }
 
   for(size_t i = 0 ; i < cont_set.size() ; ++i)
   {
+
+    if (!cont_set[i].GetFound())
+    {
+      char tmp[150] ;
+      sprintf(tmp, "Contour '%.2e' hasn't been found yet, skipping to the next one.", cont_set[i].val) ;
+      LOG_WARNING(tmp) ;
+      continue ;
+    }
+
+    if (cont_set[i].pts.size() == 0)
+    {
+      char tmp[150] ;
+      sprintf(tmp, "Contour '%.2e' has no points within the specified range.", cont_set[i].val) ;
+      LOG_ERROR(tmp) ;
+      continue ;
+    }  
+
     cont_set[i].Sort();
 
     x_vals.reserve(cont_set[i].size()) ;
