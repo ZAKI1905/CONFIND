@@ -61,7 +61,7 @@ int main()
     con.GetLegend()->SetX1(0.75) ; con.GetLegend()->SetY1(0.75) ;
     con.GetLegend()->SetX2(0.90) ; con.GetLegend()->SetY2(0.90) ;
     con.GetLegend()->SetTextSize(0.025) ;
-    con.Plot("0_Function", "CONFIND Example 0", "X", "Y") ;
+    con.Plot("0_Function", "Basic Function", "X", "Y") ;
     //..............................................................
 
 #if PROFILING

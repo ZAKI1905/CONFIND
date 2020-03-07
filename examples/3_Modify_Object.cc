@@ -13,7 +13,7 @@ class test_class
     public:
         double DoSth(double x, double y)
         {
-            return (x*y + m_var);
+            return (x*y + (3 + m_var)*sin(x));
         }
     
         void modify(const double in_var) { m_var = in_var ;}
@@ -32,8 +32,8 @@ int main()
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{1, 30}, 50, "Log"},
-                                {{1, 30}, 50, "Log"}};
+    CONFIND::Grid2D grid_in = {{{1, 30}, 500, "Log"},
+                                {{1, 30}, 500, "Log"}};
 
     ContourFinder con    ;
     con.SetGrid(grid_in) ;
@@ -50,13 +50,13 @@ int main()
 
 
     // Setting the contour level values (m_var = 0)
-    con.SetContVal({2, 5}) ;
+    con.SetContVal({40, 50}) ;
     con.SetGridVals(ContourFinder::Mode::Optimal) ;
 
     // Changing the state of the object 'tc' for the other contours
-    // m_var = -5
-    tc.modify(-5) ;
-    con.SetContVal({15, 1500}) ;
+    // m_var += 3
+    tc.modify(10) ;
+    con.SetContVal({60, 70}) ;
     con.SetGridVals(ContourFinder::Mode::Optimal) ;
  
     // ...........................
@@ -69,8 +69,11 @@ int main()
 
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
+    con.SetHeight(1000) ;
+    con.SetWidth(1000)   ;
     con.SetPlotConnected() ;
-    con.Plot("3_Modify_Object", "CONFIND Example 3", "X", "Y") ;
+    // con.Plot("3_Modify_Object", "#splitline{f(x,y) = x*y + (var + 5) sin(x)}{Member function can modify the object for each contour}", "X", "Y") ;
+    con.Plot("3_Modify_Object", "f(x,y) = x*y + (var + 5) sin(x)", "X", "Y") ;
 
 #if PROFILING
     Instrumentor::Get().EndSession();  

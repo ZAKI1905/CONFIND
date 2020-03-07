@@ -78,8 +78,8 @@ class ContourFinder : public Base
     // Setters
     //............................................
     // void SetWrkDir(const std::string&) ;
-    void SetN_X(size_t)   ;
-    void SetN_Y(size_t)   ;
+    void SetN_X(const size_t)   ;
+    void SetN_Y(const size_t)   ;
     void SetXScale(const std::string&) ;
     void SetYScale(const std::string&) ;
     void SetX_Min(double) ;
@@ -87,6 +87,8 @@ class ContourFinder : public Base
     void SetY_Min(double) ;
     void SetY_Max(double) ;
     void SetGrid(const CONFIND::Grid2D&)  ;
+    void SetWidth(const size_t) ;
+    void SetHeight(const size_t) ;
     void SetDeltas()      ;
     void SetGridVals(Mode = Normal)    ;
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
@@ -140,6 +142,8 @@ class ContourFinder : public Base
     // flags
     bool set_n_x_flag         = false ;
     bool set_n_y_flag         = false ;
+    bool set_height_flag      = false ;
+    bool set_width_flag       = false ;
     bool set_x_min_flag       = false ;
     bool set_x_scale_flag     = false ;
     bool set_y_scale_flag     = false ;
@@ -170,8 +174,9 @@ class ContourFinder : public Base
     bool default_legend_opt = true ; 
 
     size_t n_x, n_y ;
+    size_t width = 1000, height = 1000 ;
     double x_min, x_max, y_min, y_max, delta_x, delta_y ;
-    std::string x_scale = "Linear" ; std::string y_scale = "Linear"     ;
+    std::string x_scale = "Linear" ; std::string y_scale = "Linear" ;
     std::string x_label="X", y_label ="Y", plot_label="" ;
     bool connected_plot = false  ;
     std::vector<Cont2D> cont_set ;

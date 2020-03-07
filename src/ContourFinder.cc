@@ -307,17 +307,31 @@ void ContourFinder::SetGrid(const CONFIND::Grid2D& g)
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetN_X(size_t nx_in)  
+void ContourFinder::SetN_X(const size_t nx_in)  
 {
   n_x = nx_in ;
   set_n_x_flag = true ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetN_Y(size_t ny_in)  
+void ContourFinder::SetN_Y(const size_t ny_in)  
 {
   n_y = ny_in ;
   set_n_y_flag = true ;
+}
+
+//--------------------------------------------------------------
+void ContourFinder::SetWidth(const size_t width_in)  
+{
+  width = width_in ;
+  set_width_flag = true ;
+}
+
+//--------------------------------------------------------------
+void ContourFinder::SetHeight(const size_t height_in)  
+{
+  height = height_in ;
+  set_height_flag = true ;
 }
 
 //--------------------------------------------------------------
@@ -953,7 +967,7 @@ void ContourFinder::Plot(const std::string& f_name,
     return ;
   }
 
-  TCanvas c("c", "Contour Plot", 1200, 1200) ;
+  TCanvas c("c", "Contour Plot", width, height) ;
   c.SetGrid();
   
   gStyle->SetOptStat(0);
@@ -967,7 +981,10 @@ void ContourFinder::Plot(const std::string& f_name,
     graph->SetTitle(plot_label.c_str()) ;  
   //.....................................
 
-  
+  // gStyle->SetTitleAlign(33)  ;
+  // gStyle->SetTitleX(.99)     ;
+  gStyle->SetTitleOffset(10) ;
+
   TGraph *g[cont_set.size()] ;
 
   std::vector<double> x_vals ;

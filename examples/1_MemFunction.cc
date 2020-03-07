@@ -66,7 +66,7 @@ int main()
     // Generating plot using Root
     // File name, plot name, x-axis label, y-axis label
     con.SetPlotConnected() ;
-    con.Plot("1_MemFunction", "CONFIND Example 1", "X", "Y") ;
+    con.Plot("1_MemFunction", "Member Function", "X", "Y") ;
 
 #if PROFILING
     Instrumentor::Get().EndSession();  
