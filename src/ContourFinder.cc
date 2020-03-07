@@ -2,6 +2,7 @@
 
 // Root
 #include <TGraph.h>
+#include <TMultiGraph.h>
 #include <TAxis.h>
 #include <TCanvas.h>
 #include <TStyle.h>
@@ -957,7 +958,15 @@ void ContourFinder::Plot(const std::string& f_name,
   
   gStyle->SetOptStat(0);
 
-  // TMultiGraph *mg = new TMultiGraph()  ;
+  // .....................................
+  // Main Ttile
+  //.....................................
+  if(in_main_title != NULL)
+    graph->SetTitle(in_main_title) ; 
+  else
+    graph->SetTitle(plot_label.c_str()) ;  
+  //.....................................
+
   
   TGraph *g[cont_set.size()] ;
 
@@ -979,7 +988,6 @@ void ContourFinder::Plot(const std::string& f_name,
     }
 
     legend->SetHeader(legend_header.c_str(), "C");
-    std::cout << "\n legend_header: " << legend_header <<"\n" ;
     //.....................................
   }
 
@@ -1042,25 +1050,7 @@ void ContourFinder::Plot(const std::string& f_name,
     x_vals.clear() ;
     y_vals.clear() ;
   }
-
   
-  if (x_scale == "Log")
-    c.SetLogx() ;
-  if (y_scale == "Log")
-    c.SetLogy() ;
-
-  graph->GetXaxis()->SetLimits(x_min, x_max);
-  graph->GetYaxis()->SetLimits(y_min, y_max);
-
-  //.....................................
-  // Main Ttile
-  //.....................................
-  if(in_main_title != NULL)
-    graph->SetTitle(in_main_title) ; 
-  else
-    graph->SetTitle(plot_label.c_str()) ;  
-  //.....................................
-
   //.....................................
   // X Axis
   //.....................................
@@ -1091,6 +1081,18 @@ void ContourFinder::Plot(const std::string& f_name,
 
   // gStyle->SetTitleFontSize(.08);
   // gStyle->SetLabelSize(.005, "XY");
+
+  // .....................................
+  // Axis Scale  & Limits
+  //.....................................
+  if (x_scale == "Log")
+    c.SetLogx() ;
+  if (y_scale == "Log")
+    c.SetLogy() ;
+  //...............
+  graph->GetXaxis()->SetLimits(x_min, x_max);
+  graph->GetYaxis()->SetLimits(y_min, y_max);
+  // .....................................
 
   if(connected_plot)
     graph->Draw("AL") ;

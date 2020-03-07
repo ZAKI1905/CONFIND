@@ -36,7 +36,7 @@ int main()
     con.SetWrkDir(tmp) ;
 
     // Setting the function 
-    con.SetFunc(test_f);
+    con.SetFunc(test_f) ;
 
     // Setting the contour level values
     con.SetContVal({5, 10, 25}) ;
