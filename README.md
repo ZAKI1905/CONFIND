@@ -2,7 +2,7 @@
 Package for finding contours
 
 
-<img src=/img/0_Function.jpg  width="400" height="790">
+<img src=/img/0_Function.jpg  width="400" height="400">
 
 
 # References
