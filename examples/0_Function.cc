@@ -24,8 +24,8 @@ int main()
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{0, 35}, 50, "Linear"},
-                                {{0, 35}, 50, "Linear"}};
+    CONFIND::Grid2D grid_in = {{{0, 35}, 100, "Linear"},
+                                {{0, 35}, 100, "Linear"}};
 
     ContourFinder con    ;
     con.SetGrid(grid_in) ;
@@ -57,7 +57,7 @@ int main()
     con.SetPlotConnected() ;
 
     // If choosing "user" option make sure to set the coordinates!
-    con.MakeLegend(true, "Function", "user") ;
+    con.MakeLegend(true, "Contours", "user") ;
     con.GetLegend()->SetX1(0.75) ; con.GetLegend()->SetY1(0.75) ;
     con.GetLegend()->SetX2(0.90) ; con.GetLegend()->SetY2(0.90) ;
     con.GetLegend()->SetTextSize(0.025) ;
