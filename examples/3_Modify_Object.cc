@@ -72,6 +72,11 @@ int main()
     con.SetHeight(1000) ;
     con.SetWidth(1000)   ;
     con.SetPlotConnected() ;
+
+    con.MakeLegend(true, "Contours", "user") ;
+    con.GetLegend()->SetX1(0.75) ; con.GetLegend()->SetY1(0.75) ;
+    con.GetLegend()->SetX2(0.90) ; con.GetLegend()->SetY2(0.90) ;
+    con.GetLegend()->SetTextSize(0.025) ;
     // con.Plot("3_Modify_Object", "#splitline{f(x,y) = x*y + (var + 5) sin(x)}{Member function can modify the object for each contour}", "X", "Y") ;
     con.Plot("3_Modify_Object", "f(x,y) = x*y + (var + 5) sin(x)", "X", "Y") ;
 
