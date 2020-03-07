@@ -1,6 +1,8 @@
 # CONFIND
 Package for finding contours
 
+![GitHub Logo](/images/logo.png)
+Format: ![Alt Text](url)
 
 
 # References
