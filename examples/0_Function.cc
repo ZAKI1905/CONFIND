@@ -61,7 +61,7 @@ int main()
     con.GetLegend()->SetX1(0.75) ; con.GetLegend()->SetY1(0.75) ;
     con.GetLegend()->SetX2(0.90) ; con.GetLegend()->SetY2(0.90) ;
     con.GetLegend()->SetTextSize(0.025) ;
-    con.Plot("0_Function", "Basic Function", "X", "Y") ;
+    con.Plot("0_Function", "f(x,y) = y - 0.15*(x - 20)*(x - 20) + 1", "X", "Y") ;
     //..............................................................
 
 #if PROFILING
