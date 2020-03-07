@@ -3,7 +3,7 @@ Package for finding contours
 
 
 <img src=/img/0_Function.jpg  width="400" height="400">
-
+<img src=/img/3_Modify_Object.jpg  width="400" height="400">
 
 # References
 The main algorithm in finding the contours is based on the "[CONREC Contouring Subroutine](http://paulbourke.net/papers/conrec/)" by Paul Bourke.
