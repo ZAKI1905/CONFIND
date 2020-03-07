@@ -1,7 +1,7 @@
 # CONFIND
 Package for finding contours
 
-![Sample](/img/0_Function.jpg)
+![Sample](/img/0_Function.jpg | width=100)
 
 
 # References
