@@ -1,7 +1,8 @@
 # CONFIND
 Package for finding contours
 
-![Sample](/img/0_Function.jpg){:height="50%" width="50%"}
+
+<img src=/img/0_Function.jpg  width="400" height="790">
 
 
 # References
