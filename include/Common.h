@@ -67,6 +67,9 @@ struct Range
 
     Range() : min(0), max(0) {}
     Range(T in_min, T in_max) : min(in_min), max(in_max) {}
+
+    T Len() { return max - min ; }
+    T LenAbs() {return abs(max - min) ; }
 };
 
 //==============================================================
