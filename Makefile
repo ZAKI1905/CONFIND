@@ -22,6 +22,7 @@ EXAMPLE_DIR	:= examples
 OBJ_DIR		:= obj
 BIN_DIR		:= bin
 INC_DIR		:= include
+BACKUP_DIR	:= ../Backup
 
 # ----------------------------------
 # Compiler and Libraries
@@ -94,6 +95,19 @@ mk_lib_dirs:
 	@echo "Creating directories..."
 	@mkdir -p $(OBJ_DIR)
 	@mkdir -p $(OUT_LIB_DIR)
+
+# .......................................................................
+
+backup:	
+	@echo "Backing up..."
+	@mkdir -p $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@cp -r $(SRC_DIR) $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@cp -r $(INC_DIR) $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@cp Makefile $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@cp -r $(EXAMPLE_DIR) $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@zip -r $(BACKUP_DIR)/$(BACK_SUB_DIR).zip $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@$(RM) -rf $(BACKUP_DIR)/$(BACK_SUB_DIR)
+	@echo "Backed up in:" $(BACKUP_DIR)/$(BACK_SUB_DIR).zip
 
 # .......................................................................
 
