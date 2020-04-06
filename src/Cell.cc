@@ -6,7 +6,7 @@
 
 //==============================================================
 // default Constructor
-Cell::Cell() { logger.SetUnit("Cell") ; } 
+Cell::Cell() {} 
 
 //--------------------------------------------------------------
 // default Destructor
@@ -53,7 +53,7 @@ void Cell::SetVertexZ(const size_t idx_in, const double val_z)
 {
   if (idx_in > 4 || idx_in < 1)
   {
-    LOG_ERROR("Index out of bound, must be less than 5 and greater than 0!") ;
+    Z_LOG_ERROR("Index out of bound, must be less than 5 and greater than 0!") ;
     return ;
   }
   
@@ -71,7 +71,7 @@ void Cell::SetVertex(const size_t idx_in, const double val_x,
 {
   if (idx_in > 4)
   {
-    LOG_ERROR("Index out of bound, must be less than 5!") ;
+    Z_LOG_ERROR("Index out of bound, must be less than 5!") ;
     return ;
   }
   verts_set[idx_in].xyz.x = val_x ;
@@ -82,12 +82,12 @@ void Cell::SetVertex(const size_t idx_in, const double val_x,
 }
 
 //--------------------------------------------------------------
-void Cell::SetVertex(const size_t idx_in, const CONFIND::Coord3D& val)
+void Cell::SetVertex(const size_t idx_in, const Zaki::Physics::Coord3D& val)
 {
   PROFILE_FUNCTION() ;
   if (idx_in > 4)
   {
-    LOG_ERROR("Index out of bound, must be less than 5!") ;
+    Z_LOG_ERROR("Index out of bound, must be less than 5!") ;
     return ;
   }
 
@@ -103,7 +103,7 @@ std::pair<size_t, size_t> Cell::GetIdx() const
 {
   if(!set_idx_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return {-1, -1};
   }
 
@@ -115,7 +115,7 @@ std::pair<size_t, size_t> Cell::GetIdx() const
 // {
 //     if(!set_idx_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return -1;
 //   }
 
@@ -127,7 +127,7 @@ std::pair<size_t, size_t> Cell::GetIdx() const
 // {
 //     if(!set_idx_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return -1;
 //   }
 
@@ -139,7 +139,7 @@ std::pair<size_t, size_t> Cell::GetIdx() const
 // {
 //     if(!set_idx_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return -1;
 //   }
 
@@ -152,7 +152,7 @@ std::pair<size_t, size_t> Cell::GetIdx() const
 // {
 //     if(!set_idx_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return -1;
 //   }
 
@@ -165,7 +165,7 @@ std::pair<size_t, size_t> Cell::GetIdx() const
 // {
 //   if( set_corners_flag != 4)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return ;
 //   }
 
@@ -177,7 +177,7 @@ vertex Cell::operator[](size_t idx_in) const
 {
   if( set_vertex_flag[idx_in] )
   {
-    LOG_ERROR("vertex not set!") ;
+    Z_LOG_ERROR("vertex not set!") ;
   }
   
   return verts_set[idx_in] ;
@@ -188,7 +188,7 @@ vertex Cell::operator[](size_t idx_in) const
 // {
 //   if(!set_triangle_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return ;
 //   }
 
@@ -201,7 +201,7 @@ vertex Cell::operator[](size_t idx_in) const
 // {
 //   if(!set_triangle_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return ;
 //   }
 
@@ -213,7 +213,7 @@ vertex Cell::operator[](size_t idx_in) const
 // {
 //     if(!set_triangle_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return ;
 //   }
 
@@ -226,7 +226,7 @@ vertex Cell::operator[](size_t idx_in) const
 // {
 //     if(!set_triangle_flag)
 //   {
-//     LOG_ERROR("variable not set!") ;
+//     Z_LOG_ERROR("variable not set!") ;
 //     return ;
 //   }
 
@@ -266,7 +266,7 @@ double Cell::GetLX()  const
 {
   if ( !set_size_flag )
   {
-    LOG_ERROR("Cell size not set!") ;
+    Z_LOG_ERROR("Cell size not set!") ;
     return -1;
   }  
 
@@ -278,7 +278,7 @@ double Cell::GetLY()  const
 {
   if ( !set_size_flag )
   {
-    LOG_ERROR("Cell size not set!") ;
+    Z_LOG_ERROR("Cell size not set!") ;
     return -1;
   }  
 
@@ -312,7 +312,7 @@ double Cell::EvalMemFunc(const double x, const double y)
   
   else
   {
-   LOG_ERROR("Invalid axis scale!") ;
+   Z_LOG_ERROR("Invalid axis scale!") ;
     return -1 ;
   } 
 }
@@ -334,7 +334,7 @@ double Cell::EvalSimpleFunc(const double x, const double y)
   
   else
   {
-   LOG_ERROR("Invalid axis scale!") ;
+   Z_LOG_ERROR("Invalid axis scale!") ;
     return -1 ;
   } 
 }
@@ -345,17 +345,17 @@ void Cell::FindVerts()
   PROFILE_FUNCTION() ;
   if (!set_grid_ptr_flag)
   {
-    LOG_ERROR("ContourFinder pointer not set!") ;
+    Z_LOG_ERROR("ContourFinder pointer not set!") ;
     return ;
   }
   if(!set_idx_flag)
   {
-    LOG_ERROR("Cell index is not set!") ;
+    Z_LOG_ERROR("Cell index is not set!") ;
     return ;
   }
   if(!set_size_flag)
   {
-    LOG_ERROR("Cell size is not set!") ;
+    Z_LOG_ERROR("Cell size is not set!") ;
     return ;
   }
 
@@ -371,18 +371,18 @@ void Cell::FindVerts()
   // double del_x = GetLX();
   // double del_y = GetLY();
 
-  // CONFIND::Coord3D pos_1 = {x_min + idx.first*l_x,  y_min + idx.second*l_y,
+  // Zaki::Physics::Coord3D pos_1 = {x_min + idx.first*l_x,  y_min + idx.second*l_y,
   //                  EvalFunc(x_min + idx.first*l_x, y_min + idx.second*l_y)} ;
   
-  // CONFIND::Coord3D pos_2 = {x_min + (idx.first+1)*l_x, y_min + idx.second*l_y, 
+  // Zaki::Physics::Coord3D pos_2 = {x_min + (idx.first+1)*l_x, y_min + idx.second*l_y, 
   //                  EvalFunc(x_min + (idx.first+1)*l_x, y_min + idx.second*l_y)} ;
     // pos_2.z      = EvalFunc(pos_2.x, pos_2.y) ;
 
-  // CONFIND::Coord3D pos_3 = {x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y, 
+  // Zaki::Physics::Coord3D pos_3 = {x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y, 
   //                  EvalFunc(x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y)} ;
     // pos_3.z      = EvalFunc(pos_3.x, pos_3.y) ;
 
-  // CONFIND::Coord3D pos_4 = {x_min + idx.first*l_x, y_min + (idx.second+1)*l_y, 
+  // Zaki::Physics::Coord3D pos_4 = {x_min + idx.first*l_x, y_min + (idx.second+1)*l_y, 
   //                  EvalFunc(x_min + idx.first*l_x, y_min + (idx.second+1)*l_y)} ;
     // pos_4.z      = EvalFunc(pos_4.x, pos_4.y) ;
 
@@ -455,7 +455,7 @@ double Cell::GetContourValue() const
 {
   if (!set_contour_val_flag)
   {
-    LOG_ERROR("Contour value not set!") ;
+    Z_LOG_ERROR("Contour value not set!") ;
     return -1;
   }
   return contour_val  ;
@@ -467,13 +467,13 @@ int Cell::GetStatus()
   PROFILE_FUNCTION() ;
   if (!found_verts_flag)
   {
-    LOG_ERROR("FindVerts() first!") ;
+    Z_LOG_ERROR("FindVerts() first!") ;
     return -1;
   }
 
   if (!set_contour_val_flag)
   {
-    LOG_ERROR("Contour value not set!") ;
+    Z_LOG_ERROR("Contour value not set!") ;
     return -1;
   }
 
@@ -532,7 +532,7 @@ int Cell::GetStatus()
 void Cell::case36(const triangle& tri, const int odd_sign)
 {
   // double c = GetContourValue() ;
-  CONFIND::Coord3D p_top, p_1, p_2 ;
+  Zaki::Physics::Coord3D p_top, p_1, p_2 ;
 
   if (tri.v[0].status(contour_val) == odd_sign)
     { p_top = tri.v[0].xyz ; p_1 = tri.v[1].xyz ; p_2 = tri.v[2].xyz; }
@@ -546,14 +546,14 @@ void Cell::case36(const triangle& tri, const int odd_sign)
   double ratio_1 = (contour_val - p_1.z) / ( p_top.z - p_1.z) ;
   double ratio_2 = (contour_val - p_2.z) / ( p_top.z - p_2.z) ;
 
-  CONFIND::Coord3D o_1 = 
+  Zaki::Physics::Coord3D o_1 = 
   {
     ratio_1 * (p_top.x - p_1.x) + p_1.x ,
     ratio_1 * (p_top.y - p_1.y) + p_1.y ,
     contour_val
   } ;
 
-  CONFIND::Coord3D o_2 = 
+  Zaki::Physics::Coord3D o_2 = 
   {
     ratio_2 * (p_top.x - p_2.x) + p_2.x ,
     ratio_2 * (p_top.y - p_2.y) + p_2.y ,
@@ -575,7 +575,7 @@ void Cell::case36(const triangle& tri, const int odd_sign)
 void Cell::case5(const triangle& tri)
 {
   // double c = GetContourValue() ;
-  CONFIND::Coord3D o_on, p_1, p_2 ;
+  Zaki::Physics::Coord3D o_on, p_1, p_2 ;
 
   if (tri.v[0].status(contour_val) == 0)
     { o_on = tri.v[0].xyz ; p_1 = tri.v[1].xyz; p_2 = tri.v[2].xyz; }
@@ -589,7 +589,7 @@ void Cell::case5(const triangle& tri)
   double ratio = (contour_val - p_1.z) / ( p_2.z - p_1.z) ;
 
   
-  CONFIND::Coord3D o_other = 
+  Zaki::Physics::Coord3D o_other = 
   {
     ratio * (p_2.x - p_1.x) + p_1.x ,
     ratio * (p_2.y - p_1.y) + p_1.y ,
@@ -610,7 +610,7 @@ void Cell::case5(const triangle& tri)
 void Cell::case48(const triangle& tri)
 {
   // double c = GetContourValue() ;
-  CONFIND::Coord3D o_1, o_2 ;
+  Zaki::Physics::Coord3D o_1, o_2 ;
 
   if (abs(tri.v[0].status(contour_val)) == 1)
     { o_1 = tri.v[1].xyz ; o_2 = tri.v[2].xyz; }
@@ -632,7 +632,7 @@ void Cell::case48(const triangle& tri)
 }
 
 //--------------------------------------------------------------
-const std::vector<CONFIND::Coord3D>& Cell::GetContourCoords() const
+const std::vector<Zaki::Physics::Coord3D>& Cell::GetContourCoords() const
 {
   return contour_coords;
 }

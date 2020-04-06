@@ -5,8 +5,13 @@
 #include <TMultiGraph.h>
 #include <TLegend.h>
 
+
+#include <zaki/Math/Func2D.h>
+#include <zaki/Math/MemFuncWrapper.h>
+
+#include <zaki/Math/Math_Core.h>
+
 // Local headers
-#include "MemFuncWrapper.h"
 #include "Cell.h"
 
 // namespace CONFIND
@@ -27,28 +32,40 @@ class Cont2D : public Base
     CONFIND::Color GetColor() const ;
     bool GetFound() const ;
 
+    // temproray public
+    void AddPts(const std::vector<Zaki::Physics::Coord3D>&) ;
+    void RMDuplicates() ;
+    Zaki::Physics::Coord3D operator[](size_t) const ;
+    size_t size() const ;
+    void SortNew(const std::pair<double, double>) ;
+
+
+
   private:
     double val;
-    std::vector<CONFIND::Coord3D> pts;
+    std::vector<Zaki::Physics::Coord3D> pts;
     CONFIND::Color color ;
     bool is_found_flag = false ;
 
 
     // The most bottom_left point (used for sorting)
-    CONFIND::Coord3D bottom_left ;
-    int Orientation(const CONFIND::Coord3D&, const CONFIND::Coord3D&, const CONFIND::Coord3D&) const;
+    Zaki::Physics::Coord3D bottom_left ;
+    int Orientation(const Zaki::Physics::Coord3D&, const Zaki::Physics::Coord3D&, const Zaki::Physics::Coord3D&) const;
 
-    CONFIND::Coord3D operator[](size_t) const ;
-    size_t size() const ;
+    // Zaki::Physics::Coord3D operator[](size_t) const ;
+    // size_t size() const ;
 
-    void AddPts(const std::vector<CONFIND::Coord3D>&) ;
+    // void AddPts(const std::vector<Zaki::Physics::Coord3D>&) ;
 
     void Export(const std::string& f_name, const char* mode) ;
 
     void Sort() ;
+    // void SortNew(const std::pair<double, double>) ;
+    // void RMDuplicates() ;
+
     // A utility function to swap two points 
-    // void swap(CONFIND::Coord3D &p1, CONFIND::Coord3D &p2) ;
-    bool comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const; 
+    // void swap(Zaki::Physics::Coord3D &p1, Zaki::Physics::Coord3D &p2) ;
+    bool comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::Physics::Coord3D &b) const; 
     bool sort_cw = true ;
     bool already_sorted = false ;
     void Clear() ; 
@@ -86,13 +103,13 @@ class ContourFinder : public Base
     void SetX_Max(double) ;
     void SetY_Min(double) ;
     void SetY_Max(double) ;
-    void SetGrid(const CONFIND::Grid2D&)  ;
+    void SetGrid(const Zaki::Math::Grid2D&)  ;
     void SetWidth(const size_t) ;
     void SetHeight(const size_t) ;
     void SetDeltas()      ;
     void SetGridVals(Mode = Normal)    ;
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
-    void SetMemFunc(Func2D*) ;  // Non-static mem-funcs
+    void SetMemFunc(Zaki::Math::Func2D*) ;  // Non-static mem-funcs
     void SetContVal(const std::vector<double>&) ;
     void SetScanMode(const char) ;
 
@@ -101,7 +118,7 @@ class ContourFinder : public Base
     void SetPlotYLabel(const char*) ;
     void SetPlotLabel(const char*)  ;
     void SetPlotConnected(const bool=true) ;
-    void SetLegendLabels(std::vector<std::string> ); 
+    void SetLegendLabels(const std::vector<std::string>& ); 
     void MakeLegend(const bool=true, const char* const=NULL, const char* const=NULL) ;
     //............................................
 
@@ -166,7 +183,7 @@ class ContourFinder : public Base
     char scan_mode = 'X' ; 
 
     double (*func) (double, double)   ;
-    Func2D* genFuncPtr = NULL ;
+    Zaki::Math::Func2D* genFuncPtr = NULL ;
     TMultiGraph *graph = NULL ;
     TLegend *legend    = NULL ;
     std::vector<std::string> legend_label_set ;

@@ -3,6 +3,8 @@
 
 #include <array>
 
+#include <zaki/Physics/Coordinate.h>
+
 // #include "Common.h"
 #include "Base.h"
 
@@ -11,12 +13,10 @@
 class ContourFinder ;
 //==============================================================
 
-// namespace CONFIND
-// {
 //==============================================================
 struct vertex
 {
-  CONFIND::Coord3D xyz   ;
+  Zaki::Physics::Coord3D xyz   ;
 
   // status with respect to a level ( 1: above, 0: on, -1: below)
   int status(double lvl) const
@@ -125,7 +125,7 @@ class Cell : public Base
     void SetIdx(const size_t, const size_t)       ;
     void SetSize(const double, const double)      ;
     void SetVertex(const size_t, const double, const double, const double)   ;
-    void SetVertex(const size_t, const CONFIND::Coord3D&)    ;
+    void SetVertex(const size_t, const Zaki::Physics::Coord3D&)    ;
     void SetVertexZ(const size_t, const double)   ;
     void SetTriangles()               ;
     void SetGridPtr(ContourFinder* contPtrIn)  ;
@@ -155,7 +155,7 @@ class Cell : public Base
     
     double GetFuncVals(const size_t) const ;
     double GetContourValue() const ;
-    const std::vector<CONFIND::Coord3D>& GetContourCoords() const ;
+    const std::vector<Zaki::Physics::Coord3D>& GetContourCoords() const ;
     int GetStatus() ;
     //............................................
 
@@ -175,7 +175,7 @@ class Cell : public Base
                                       {{0, 0, 0}} }};
     
     std::vector<triangle> triangle_set ;
-    std::vector<CONFIND::Coord3D> contour_coords;
+    std::vector<Zaki::Physics::Coord3D> contour_coords;
 
     ContourFinder* ContFindptr = NULL ;
 

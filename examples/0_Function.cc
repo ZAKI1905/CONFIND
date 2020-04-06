@@ -1,31 +1,35 @@
 #include <iostream>
 
-#include "../include/Logger.h"
+#include <zaki/Util/Logger.h>
+// #include <zaki/Util/Instrumentor.h>
+
 #include "../include/ContourFinder.h"
 
 // ...........................
 double test_f(double x, double y)
 {
     // Parabola
-    return y - 0.15*(x - 20)*(x - 20) + 1; 
+    // return y - 0.15*(x - 20)*(x - 10) + 1; 
 
     // Circle
     // return sqrt(x*x + y*y);
+
+    return y - 3*sin(x) ;
 }
 
 // ...........................
 int main()
 {
 #if PROFILING
-    Instrumentor::Get().BeginSession("0_Function", "examples/0_Basic_Function/0_Function_Profile.json") ;
+    Zaki::Util::Instrumentor::BeginSession("0_Function", "examples/0_Basic_Function/0_Function_Profile.json") ;
 #endif
 
     // ...........................
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{0, 35}, 100, "Linear"},
-                                {{0, 35}, 100, "Linear"}};
+    Zaki::Math::Grid2D grid_in = {{{2, 10}, 100, "Linear"},
+                                {{0, 10}, 100, "Linear"}};
 
     ContourFinder con    ;
     con.SetGrid(grid_in) ;
@@ -39,9 +43,11 @@ int main()
     con.SetFunc(test_f) ;
 
     // Setting the contour level values
-    con.SetContVal({5, 10, 25}) ;
+    // con.SetContVal({5, 10, 25}) ;
+    con.SetContVal({5}) ;
+
     // You can keep adding contours 
-    con.SetContVal({7.5}) ;
+    // con.SetContVal({7.5}) ;
     // ...........................
 
     // ...........................
@@ -65,6 +71,6 @@ int main()
     //..............................................................
 
 #if PROFILING
-    Instrumentor::Get().EndSession();  
+    Zaki::Util::Instrumentor::EndSession();  
 #endif
 }

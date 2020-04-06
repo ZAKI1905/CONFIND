@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include "../include/Logger.h"
+#include <zaki/Util/Logger.h>
+
 #include "../include/ContourFinder.h"
 
 #include <unistd.h>
@@ -29,13 +30,13 @@ class test_class
 int main()
 {
 #if PROFILING
-    Instrumentor::Get().BeginSession("1_MemFunction", "examples/1_MemberFunction/1_MemFunction_Profile.json") ;
+    Zaki::Util::Instrumentor::BeginSession("1_MemFunction", "examples/1_MemberFunction/1_MemFunction_Profile.json") ;
 #endif
     // ...........................
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{1, 15}, 200, "Log"},
+    Zaki::Math::Grid2D grid_in = {{{1, 15}, 200, "Log"},
                                 {{1, 15}, 200, "Log"}};
 
     ContourFinder con    ;
@@ -48,7 +49,7 @@ int main()
 
     test_class tc;
     // Setting the member function 
-    MemFuncWrapper<test_class, double (test_class::*) (double, double)> w(tc, &test_class::DoSth) ;
+    Zaki::Math::MemFuncWrapper<test_class, double (test_class::*) (double, double)> w(tc, &test_class::DoSth) ;
     con.SetMemFunc(&w);
 
 
@@ -69,6 +70,6 @@ int main()
     con.Plot("1_MemFunction", "Member Function", "X", "Y") ;
 
 #if PROFILING
-    Instrumentor::Get().EndSession();  
+    Zaki::Util::Instrumentor::EndSession();  
 #endif
 }

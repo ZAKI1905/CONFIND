@@ -1,6 +1,7 @@
 #include <iostream>
 
-#include "../include/Logger.h"
+#include <zaki/Util/Logger.h>
+
 #include "../include/ContourFinder.h"
 
 #include <unistd.h>
@@ -13,7 +14,7 @@ class test_class
     public:
         double DoSth(double x, double y)
         {
-            return (x*y + (3 + m_var)*sin(x));
+            return (x*y + (10 + m_var)*sin(x));
         }
     
         void modify(const double in_var) { m_var = in_var ;}
@@ -26,14 +27,14 @@ class test_class
 int main()
 {
 #if PROFILING
-    Instrumentor::Get().BeginSession("2_MemFunctionOptimized", "examples/3_Modify_Object/3_Modify_Object_Profile.json") ;
+    Zaki::Util::Instrumentor::BeginSession("2_MemFunctionOptimized", "examples/3_Modify_Object/3_Modify_Object_Profile.json") ;
 #endif
     // ...........................
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    CONFIND::Grid2D grid_in = {{{1, 30}, 500, "Log"},
-                                {{1, 30}, 500, "Log"}};
+    Zaki::Math::Grid2D grid_in = {{{1e-1, 30}, 100, "Linear"},
+                                {{1e-1, 30}, 100, "Linear"}};
 
     ContourFinder con    ;
     con.SetGrid(grid_in) ;
@@ -45,12 +46,12 @@ int main()
 
     test_class tc;
     // Setting the member function 
-    MemFuncWrapper<test_class, double (test_class::*) (double, double)> w(tc, &test_class::DoSth) ;
+    Zaki::Math::MemFuncWrapper<test_class, double (test_class::*) (double, double)> w(tc, &test_class::DoSth) ;
     con.SetMemFunc(&w);
 
 
     // Setting the contour level values (m_var = 0)
-    con.SetContVal({40, 50}) ;
+    con.SetContVal({20, 40, 50}) ;
     con.SetGridVals(ContourFinder::Mode::Optimal) ;
 
     // Changing the state of the object 'tc' for the other contours
@@ -81,6 +82,6 @@ int main()
     con.Plot("3_Modify_Object", "f(x,y) = x*y + (var + 5) sin(x)", "X", "Y") ;
 
 #if PROFILING
-    Instrumentor::Get().EndSession();  
+    Zaki::Util::Instrumentor::EndSession();  
 #endif
 }

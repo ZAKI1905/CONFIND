@@ -1,4 +1,5 @@
 #include <omp.h>
+#include <unordered_set>
 
 // Root
 #include <TGraph.h>
@@ -8,16 +9,20 @@
 #include <TStyle.h>
 #include <TLegend.h>
 
+#include <zaki/Util/Logger.h>
+#include <zaki/File/SaveVec.h>
+#include <zaki/Vector/Vector_Basic.h>
+
+
 // Local headers
 #include "../include/ContourFinder.h"
 #include "../include/Common.h"
-// #include "Instrumentor.h"
 
 //==============================================================
 // Cont2D struct begins
 //--------------------------------------------------------------
 // Constructors
-Cont2D::Cont2D(double in_val) : val(in_val) {   logger.SetUnit("Cont2D") ; } 
+Cont2D::Cont2D(double in_val) : val(in_val) { } 
 //--------------------------------------------------------------
 size_t Cont2D::size() const 
 {
@@ -31,7 +36,7 @@ void Cont2D::SetColor(const CONFIND::Color in_color)
 
   char tmp[100] ;
   sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
-  LOG_INFO(tmp) ;
+  Z_LOG_INFO(tmp) ;
 }
 
 //--------------------------------------------------------------
@@ -41,7 +46,7 @@ void Cont2D::SetColor(const size_t in_idx)
 
   char tmp[100] ;
   sprintf(tmp, "Contour color set to '%s'.", color.name().c_str()) ;
-  LOG_INFO(tmp) ;
+  Z_LOG_INFO(tmp) ;
 }
 
 //--------------------------------------------------------------    
@@ -76,13 +81,13 @@ std::ostream& operator << ( std::ostream &output, const Cont2D& c)
 }
 
 //--------------------------------------------------------------
-CONFIND::Coord3D Cont2D::operator[](size_t idx_in) const
+Zaki::Physics::Coord3D Cont2D::operator[](size_t idx_in) const
 { 
   return pts[idx_in] ;
 }
 
 //--------------------------------------------------------------
-void Cont2D::AddPts(const std::vector<CONFIND::Coord3D>& in_pts) 
+void Cont2D::AddPts(const std::vector<Zaki::Physics::Coord3D>& in_pts) 
 {
   for (size_t i = 0; i < in_pts.size(); i++)
   {
@@ -97,14 +102,14 @@ void Cont2D::Export(const std::string& f_name, const char* mode)
   {
     char tmp[150] ;
     sprintf(tmp, "Contour '%.2e' has no points within the specified range.", val) ;
-    LOG_ERROR(tmp) ;
+    Z_LOG_ERROR(tmp) ;
     return ;
   }  
 
   char tmp_char[100] ;
   sprintf(tmp_char, "%s_%.2e", f_name.c_str(), val ) ;
-  Sort() ;
-  SaveVec(pts, tmp_char, mode) ;
+  // Sort() ;
+  Zaki::File::SaveVec(pts, tmp_char, mode) ;
 }
 
 //--------------------------------------------------------------
@@ -116,16 +121,20 @@ void Cont2D::Export(const std::string& f_name, const char* mode)
 // 0 --> p, q and r are colinear 
 // 1 --> Clockwise 
 // 2 --> Counterclockwise 
-int Cont2D::Orientation(const CONFIND::Coord3D& p, const CONFIND::Coord3D& q, const CONFIND::Coord3D& r) const
+int Cont2D::Orientation(const Zaki::Physics::Coord3D& p, const Zaki::Physics::Coord3D& q, const Zaki::Physics::Coord3D& r) const
 { 
   double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y); 
 
   if (val == 0) return 0;  // colinear 
+
+  if (0 < val && val < 5*(r.x - q.x)*(q.x - p.x)) return 3;
+  if (0 > val && val > -5*(r.x - q.x)*(q.x - p.x)) return 4;
+
   return (val > 0)? 1: 2; // clockwise or counterclock wise 
 } 
 
 //--------------------------------------------------------------
-bool Cont2D::comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) const
+bool Cont2D::comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::Physics::Coord3D &b) const
 {
   // if ( a == bottom_left )
   //   return true;
@@ -137,9 +146,24 @@ bool Cont2D::comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) c
   int o = Orientation(bottom_left, a, b); 
   // std::cout << " --> Orientation: " << o << ", a: " << a << ", b: " << b<< "\n"<< std::flush ;
 
+  float dis = 6;
+  Zaki::Physics::Coord3D test_pt = {2, 2, 0} ;
   if (o == 0) 
     // std::cout << " --> Orientation: " << o << ", a: " << a << ", b: " << b<< "\n"<< std::flush ;
     return (bottom_left.XYDist2(a) < bottom_left.XYDist2(b) )? true : false; 
+
+  if (o == 3 && sort_cw) 
+    return (test_pt.XYDist2(a) - test_pt.XYDist2(b) > dis )? false : true; 
+
+  if (o == 4 && sort_cw) 
+    return (test_pt.XYDist2(b) - test_pt.XYDist2(a) > dis )? true : false;
+
+  if (o == 3 && !sort_cw) 
+    return (test_pt.XYDist2(a) - test_pt.XYDist2(b) > dis )? true : false; 
+
+  if (o == 4 && !sort_cw) 
+    return (test_pt.XYDist2(b) - test_pt.XYDist2(a) > dis )? false : true;
+
 
   // CW
   if(sort_cw)
@@ -152,12 +176,182 @@ bool Cont2D::comp_Orient(const CONFIND::Coord3D &a, const CONFIND::Coord3D &b) c
 }
 //--------------------------------------------------------------
 // // A utility function to swap two points 
-// void Cont2D::swap(CONFIND::Coord3D &p1, CONFIND::Coord3D &p2) 
+// void Cont2D::swap(Zaki::Physics::Coord3D &p1, Zaki::Physics::Coord3D &p2) 
 // { 
-//   CONFIND::Coord3D temp = p1; 
+//   Zaki::Physics::Coord3D temp = p1; 
 //   p1 = p2; 
 //   p2 = temp; 
 // } 
+//--------------------------------------------------------------
+// 
+// struct Point
+// {
+//   // Main point
+//   Zaki::Physics::Coord3D p ;
+//   // Neighbour
+//   std::vector<Zaki::Physics::Coord3D> n ;
+// };
+//--------------------------------------------------------------
+
+void Cont2D::RMDuplicates()
+{
+  std::set<Zaki::Physics::Coord3D> tmp_set(pts.begin(), pts.end());
+
+  pts.clear() ;
+  pts.insert(pts.end(), tmp_set.begin(), tmp_set.end());
+
+  // std::vector<int> x = {1, 2, 3, 4, 5, 1, 2,3} ;
+  // std::unordered_set<int> s;
+  // for (int i : x)
+  //     s.insert(i);
+
+  // std::cout << "\nOriginal Set x with size =  "<< x.size() << "\n" ; 
+  // for (size_t i = 0; i < x.size(); i++)
+  // {
+  //   std::cout << x[i] ; 
+  //   if ( i == x.size() - 1)
+  //     std::cout << "\n" ;
+  //   else 
+  //     std::cout << ", " ; 
+  // }
+
+  // x.clear() ;    
+  // // pts.assign( s.begin(), s.end() );
+  // x.reserve(s.size());
+  // // std::copy(s.begin(), s.end(), x.begin());
+  // x.insert(x.end(), s.begin(), s.end());
+// for (auto it = s.begin(); it != s.end(); ) {
+//     x.push_back(std::move(s.extract(it++).value()));
+// }
+
+  // std::cout << "\nFinal Set x with size =  "<< x.size() << "\n"; 
+  // for (size_t i = 0; i < x.size(); i++)
+  // {
+  //   std::cout << x[i] ; 
+  //   if ( i == x.size() - 1)
+  //     std::cout << "\n" ;
+  //   else 
+  //     std::cout << ", " ; 
+  // }
+
+}
+
+//--------------------------------------------------------------
+
+void Cont2D::SortNew(const std::pair<double, double> del) 
+{
+  PROFILE_FUNCTION() ;
+
+  if (already_sorted)
+    return;
+
+  if (!is_found_flag)
+  {
+    Z_LOG_ERROR("Contour values hasn't been found yet!") ;
+    return ; 
+  }
+
+  RMDuplicates() ;
+
+  // double eps = -0.9 ;
+
+  // int first_idx = -1 ;
+  // std::vector<std::vector<size_t>> neighbors_set;
+  // neighbors_set.reserve(pts.size()) ;
+  std::vector<Zaki::Physics::Coord3D> out ;
+  out.reserve(pts.size());
+
+
+  // Top
+  // double ymax = pts[0].y ; size_t max = 0; 
+  // for (size_t i = 1; i < pts.size() ; i++) 
+  // { 
+  //   if ( (pts[i].y > ymax) || (ymax == pts[i].y && pts[i].x < pts[max].x)) 
+  //     ymax = pts[i].y, max = i; 
+  // } 
+
+  // Left 
+  double xmin = pts[0].x ; size_t min = 0; 
+  for (size_t i = 1; i < pts.size() ; i++) 
+  { 
+    if ( (pts[i].x < xmin) || (xmin == pts[i].x && pts[i].y > pts[min].y)) 
+      xmin = pts[i].x, min = i; 
+  } 
+
+
+  size_t j = min ;
+  out.push_back(pts[j]) ;
+
+  while(out.size() < pts.size())
+  {
+    // myvector.erase (myvector.begin()+5);
+    double d_min = INFINITY ;
+    size_t idx = 0 ;
+    for(size_t i = 0 ; i< pts.size() ; i++)
+    {
+      if( pts[j].XYDist2(pts[i]) < d_min && !Zaki::Vector::Exists(pts[i], out))
+        {
+          idx = i ; d_min = pts[j].XYDist2(pts[i]) ;
+        }
+    }
+    out.push_back(pts[idx]) ;
+    j = idx ;
+  }
+
+
+
+    // neighbors_set.push_back({}) ;
+    // for(size_t j = 0 ; j< pts.size() ; j++)
+    // {
+    //   if (j == i) continue ;
+
+    //   if(fabs(pts[i].x - pts[j].x) < (1+eps)*del.first 
+    //       && fabs(pts[i].y - pts[j].y) < (1+eps)*del.second)
+    //     {
+    //       std::cout << "  -"<< j <<"  del_x: " <<fabs(pts[i].x - pts[j].x) 
+    //         << ", del_y: "<< fabs(pts[i].y - pts[j].y)<< "\n" ;
+    //       neighbors_set[i].push_back(j) ;
+    //     }
+    // }
+
+  //   std::cout << i+1 << ") in the loop: size: " <<neighbors_set[i].size()<< "\n" ;
+
+  //   if (neighbors_set[i].size() == 1 && first_idx == -1)
+  //   {
+  //     first_idx = i ;
+  //   }
+  // }
+
+  // std::vector<Zaki::Physics::Coord3D> out ;
+  // out.reserve(pts.size()) ;
+
+  // size_t next_idx = first_idx ;
+  // while (out.size() < pts.size())
+  // {
+  //   // std::cout << "Next idx: " << next_idx << ", neighbors_set[next_idx].size(): " 
+  //   // << neighbors_set[next_idx].size() ;
+
+  //   out.push_back(pts[next_idx]) ;
+  //   for (size_t i = 0; i < neighbors_set[next_idx].size(); i++)
+  //   {
+
+  //     if(neighbors_set[next_idx][i] != next_idx)
+  //     {
+  //       next_idx = neighbors_set[next_idx][0] ;
+  //     }
+  //   }
+  // }
+  
+  // char tmp[100] ;
+  // sprintf(tmp, "pts.size(): %lu, out.size(): %lu", pts.size(), out.size()) ;
+  // Z_LOG_INFO(tmp);
+
+  already_sorted = true ;
+  Zaki::File::SaveVec(pts, "test_pts_not_sorted", "w") ;
+  pts = out ;
+  Zaki::File::SaveVec(pts, "test_pts_sorted", "w") ;
+
+}
 
 //--------------------------------------------------------------
 void Cont2D::Sort()
@@ -169,13 +363,13 @@ void Cont2D::Sort()
 
   if (!is_found_flag)
   {
-    LOG_ERROR("Contour values hasn't been found yet!") ;
+    Z_LOG_ERROR("Contour values hasn't been found yet!") ;
     return ; 
   }
-  // std::vector<CONFIND::Coord3D>::iterator BotLef_it ;
+  // std::vector<Zaki::Physics::Coord3D>::iterator BotLef_it ;
 
   // // Finding the bottom left point as a reference
-  // BotLef_it = std::min_element(pts.begin(), pts.end(), [] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) 
+  // BotLef_it = std::min_element(pts.begin(), pts.end(), [] (const Zaki::Physics::Coord3D& a, const Zaki::Physics::Coord3D& b) 
   // {
   //   if ( a.y == b.y )
   //     return a.x < b.x;
@@ -196,32 +390,33 @@ void Cont2D::Sort()
   //   if ( (pts[i].y < ymin) || (ymin == pts[i].y && pts[i].x < pts[min].x)) 
   //     ymin = pts[i].y, min = i; 
   //  } 
+  RMDuplicates() ;
 
   // Find the upper_left point 
     double ymax = pts[0].y ; size_t max = 0; 
    for (size_t i = 1; i < pts.size() ; i++) 
    { 
-    // Pick the bottom-most. In case of tie, chose the 
+    // Pick the upper_left. In case of tie, choose the 
     // left most point 
     if ( (pts[i].y > ymax) || (ymax == pts[i].y && pts[i].x < pts[max].x)) 
       ymax = pts[i].y, max = i; 
    } 
   
-   // Place the bottom-most point at first position 
+   // Place the upper_left point at first position 
    std::swap(pts[0], pts[max]); 
   //.......xXXXXXXXXX
 
   bottom_left =  pts[0];
   // std::cout << " bottom_left: " <<bottom_left << ", min_idx: " << min << "\n" ;
 
-  std::sort(pts.begin() + 1, pts.end(), [this] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) {
+  std::sort(pts.begin() + 1, pts.end(), [this] (const Zaki::Physics::Coord3D& a, const Zaki::Physics::Coord3D& b) {
     return comp_Orient(a, b); }) ;
 
   // Checking if the orientation was correct:
   if ( pts[0].XYDist2(pts[1]) >  pts[0].XYDist2(pts[pts.size() - 1]) )
   {
     sort_cw = !sort_cw ;
-    std::sort(pts.begin() + 1, pts.end(), [this] (const CONFIND::Coord3D& a, const CONFIND::Coord3D& b) 
+    std::sort(pts.begin() + 1, pts.end(), [this] (const Zaki::Physics::Coord3D& a, const Zaki::Physics::Coord3D& b) 
       { return comp_Orient(a, b); }) ;
   }
 }
@@ -241,7 +436,6 @@ void Cont2D::Clear()
 // default Constructor
 ContourFinder::ContourFinder() 
 {
-  logger.SetUnit("ContourFinder") ; 
   graph = new TMultiGraph()  ; 
   legend = new TLegend(0.7, 0.9, 0.7, 0.9) ;
 } 
@@ -283,7 +477,7 @@ ContourFinder::ContourFinder(const ContourFinder &zc2) :
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetGrid(const CONFIND::Grid2D& g) 
+void ContourFinder::SetGrid(const Zaki::Math::Grid2D& g) 
 {
   SetN_X(g.xAxis.res) ;
   set_n_x_flag = true ;
@@ -381,7 +575,7 @@ size_t ContourFinder::GetN_X() const
 {
   if(! set_n_x_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return 0 ;
   }
 
@@ -393,7 +587,7 @@ size_t ContourFinder::GetN_Y() const
 {
   if(! set_n_y_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return 0 ;
   }
 
@@ -405,7 +599,7 @@ double ContourFinder::GetX_Min() const
 {
   if(! set_x_min_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return 0 ;
   }
 
@@ -417,7 +611,7 @@ double ContourFinder::GetX_Max() const
 {  
   if(! set_x_max_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return 0 ;
   }
 
@@ -429,7 +623,7 @@ double ContourFinder::GetY_Min() const
 {
   if(! set_y_min_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return 0 ;
   }
 
@@ -441,7 +635,7 @@ double ContourFinder::GetY_Max() const
 {
   if(! set_y_max_flag)
   {
-    LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("variable not set!") ;
     return 0 ;
   }
 
@@ -467,11 +661,11 @@ void ContourFinder::SetGridVals(Mode in_mode)
 {
   if(!set_func_flag && !set_mem_func_flag)
   {
-    LOG_ERROR("Function not set!");
+    Z_LOG_ERROR("Function not set!");
     return ;
   }
 
-  LOG_INFO("==> Setting grid values ...");
+  Z_LOG_INFO("==> Setting grid values ...");
 
   if (in_mode == Optimal)
   {
@@ -546,7 +740,7 @@ std::pair<double, double> ContourFinder::GetDeltas() const
   if (! set_n_x_flag || ! set_n_y_flag || ! set_x_max_flag || 
       !set_x_min_flag || !set_y_max_flag || !set_y_min_flag)
     {
-      LOG_ERROR("Lengths are not set!") ;
+      Z_LOG_ERROR("Lengths are not set!") ;
       return {-1, -1};
     }
   return {delta_x, delta_y} ;
@@ -557,7 +751,7 @@ void ContourFinder::SetScanMode(const char in_scan_mode)
 {
   if(in_scan_mode != 'X' || in_scan_mode != 'Y')
   {
-    LOG_ERROR("Valid scan modes are 'X' & 'Y' only!\
+    Z_LOG_ERROR("Valid scan modes are 'X' & 'Y' only!\
     Ignoring the input scan mode, 'X' is assumed.") ;
     return;
   }
@@ -566,7 +760,7 @@ void ContourFinder::SetScanMode(const char in_scan_mode)
   set_scan_mode_flage = true ;
   char tmp[100] ;
   sprintf(tmp, "Scan mode is set to '%c'.", in_scan_mode) ;
-  LOG_INFO(tmp) ;
+  Z_LOG_INFO(tmp) ;
 }
 
 //--------------------------------------------------------------
@@ -583,7 +777,7 @@ void ContourFinder::FindContour(Cont2D& cont)
   char tmp[150] ;
   sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
           cont.color.name().c_str()) ;
-  LOG_INFO(tmp) ;
+  Z_LOG_INFO(tmp) ;
 
   SetDeltas() ;
 
@@ -627,7 +821,7 @@ void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
   char tmp[150] ;
   sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
           cont.color.name().c_str()) ;
-  LOG_INFO(tmp) ;
+  Z_LOG_INFO(tmp) ;
 
   SetDeltas() ;
 
@@ -723,7 +917,7 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
     char tmp[150] ;
     sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont_set[k].val, 
             cont_set[k].color.name().c_str()) ;
-    LOG_INFO(tmp) ;
+    Z_LOG_INFO(tmp) ;
 
     SetDeltas() ;
 
@@ -763,12 +957,12 @@ void ContourFinder::FindContourParallel(Cont2D& cont)
   char tmp[150] ;
   sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
           cont.color.name().c_str()) ;
-  LOG_INFO(tmp);
+  Z_LOG_INFO(tmp);
 
   SetDeltas() ;
  
   omp_set_num_threads(4) ;
-  LOG_INFO("Threads requested: 4");
+  Z_LOG_INFO("Threads requested: 4");
   // ContourFinder a[4] = {*this, *this, *this, *this} ;
 
   // ............... PARALLEL REGION BEGINS.....................
@@ -780,7 +974,7 @@ void ContourFinder::FindContourParallel(Cont2D& cont)
     {
       char tmp[50] ;
       sprintf(tmp, "Threads provided:  %d.", omp_get_num_threads()) ;
-      LOG_INFO(tmp);
+      Z_LOG_INFO(tmp);
     }
   #pragma omp critical
   std::cout << "\n Pointer to a["<< omp_get_thread_num() <<"]: " << a.genFuncPtr << "\n";
@@ -810,7 +1004,7 @@ void ContourFinder::Print() const
 {
   if (! set_grid_vals_flag )
     {
-      LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
+      Z_LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
       return ;
     }
   
@@ -818,7 +1012,7 @@ void ContourFinder::Print() const
   {
     char tmp[100] ;
     sprintf(tmp, "==> Printing Contour = %f ...", cont_set[i].val) ;
-    LOG_INFO(tmp);
+    Z_LOG_INFO(tmp);
 
     std::cout << cont_set[i] ;
   }
@@ -839,7 +1033,7 @@ void ContourFinder::SetFunc(double (*f)(double, double) )
 
 //--------------------------------------------------------------
 // Non-static mem-funcs
-void ContourFinder::SetMemFunc(Func2D* gen_Fun) 
+void ContourFinder::SetMemFunc(Zaki::Math::Func2D* gen_Fun) 
 {
   genFuncPtr = gen_Fun ;
   set_mem_func_flag = true ;
@@ -865,7 +1059,7 @@ void ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
 // {
 //   if (!set_cont_val_flag)
 //   {
-//     LOG_ERROR("Contour values are not set!");
+//     Z_LOG_ERROR("Contour values are not set!");
 //     return {-1} ;
 //   }
 //   return cont_val_set ;
@@ -876,7 +1070,7 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
 {
   if (! set_grid_vals_flag )
   {
-    LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
+    Z_LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
     return ;
   }
 
@@ -886,7 +1080,7 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
     {
       char tmp[150] ;
       sprintf(tmp, "Contour '%.2e' hasn't been found yet, skipping to the next one.", cont_set[i].val) ;
-      LOG_WARNING(tmp) ;
+      Z_LOG_WARNING(tmp) ;
       continue ;
     }  
     cont_set[i].Export(wrk_dir_str + "/" + f_name, mode) ;
@@ -894,7 +1088,7 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
 
   char tmp_char[150] ;
   sprintf(tmp_char, "Contours exported to %s_[CONT].dat.", f_name.c_str() ) ;
-  LOG_INFO(tmp_char) ;
+  Z_LOG_INFO(tmp_char) ;
 }
 //--------------------------------------------------------------
 // Plot options
@@ -947,7 +1141,7 @@ TLegend* ContourFinder::GetLegend()
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetLegendLabels(std::vector<std::string> in_labels) 
+void ContourFinder::SetLegendLabels(const std::vector<std::string>& in_labels) 
 {
   legend_label_set = in_labels ;
   set_leg_lab_flag = true ;
@@ -963,7 +1157,7 @@ void ContourFinder::Plot(const std::string& f_name,
 
   if (! set_grid_vals_flag )
   {
-    LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
+    Z_LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
     return ;
   }
 
@@ -1015,7 +1209,7 @@ void ContourFinder::Plot(const std::string& f_name,
     {
       char tmp[150] ;
       sprintf(tmp, "Contour '%.2e' hasn't been found yet, skipping to the next one.", cont_set[i].val) ;
-      LOG_WARNING(tmp) ;
+      Z_LOG_WARNING(tmp) ;
       continue ;
     }
 
@@ -1023,11 +1217,14 @@ void ContourFinder::Plot(const std::string& f_name,
     {
       char tmp[150] ;
       sprintf(tmp, "Contour '%.2e' has no points within the specified range.", cont_set[i].val) ;
-      LOG_ERROR(tmp) ;
+      Z_LOG_ERROR(tmp) ;
       continue ;
     }  
 
-    cont_set[i].Sort();
+    // cont_set[i].Sort();
+    if(connected_plot)
+      cont_set[i].SortNew(GetDeltas());
+
 
     x_vals.reserve(cont_set[i].size()) ;
     y_vals.reserve(cont_set[i].size()) ;

@@ -1,25 +1,9 @@
 #ifndef Base_H
 #define Base_H
 
-#include "Common.h"
-// #include "SaveVectorToFile.h"
-#include "Instrumentor.h"
+#include <zaki/Util/Instrumentor.h>
 
-//==============================================================
-//                    Profiling
-#define PROFILING 0
-#if PROFILING
-  #define PROFILE_SCOPE(name) InstrumentationTimer timer##__LINE__(name)
-  #define PROFILE_FUNCTION() PROFILE_SCOPE(__FUNCTION__)
-#else
-  #define PROFILE_SCOPE(name)
-  #define PROFILE_FUNCTION()
-#endif
-//                     Logging
-#define LOG_INFO(message)  logger.Info(message, __func__)
-#define LOG_ERROR(message)  logger.Error(message, __func__)
-#define LOG_WARNING(message)  logger.Warn(message, __func__)
-//==============================================================
+#include "Common.h"
 
 // namespace CONFIND
 // {
@@ -28,7 +12,10 @@ class Base {
 
   //--------------------------------------------------------------
   protected:
-    Logger logger;
+    void ShowBanner();
+
+    static size_t counter;
+
     std::string wrk_dir_str        = ""    ;
     std::string name               = ""    ;
 
