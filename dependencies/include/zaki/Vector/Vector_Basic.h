@@ -15,7 +15,7 @@ namespace Vector
 //==============================================================
 // Checks if an element exists in the list.
 template <class T> 
-bool Exists(T Element, std::vector<T>& Vec) 
+bool Exists(T Element, const std::vector<T>& Vec) 
 {
     if (std::find(Vec.begin(), Vec.end(), Element) != Vec.end())
         return true ;

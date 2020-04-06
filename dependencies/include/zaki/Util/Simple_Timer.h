@@ -124,7 +124,7 @@ std::ostream& operator << (std::ostream &output, Operation o) ;
 //--------------------------------------------------------------
 #define TIMING 1
 #if TIMING
-  #define Z_TIMER_SCOPE(name) Zaki::Util::Timer timer##__LINE__(name)
+  #define Z_TIMER_SCOPE(name) Zaki::Util::Timer sim_timer##__LINE__(name)
   #define Z_TIMER() Z_TIMER_SCOPE(Z_PRETTY_FUNCTION)
 #else
   #define Z_TIMER_SCOPE(name)

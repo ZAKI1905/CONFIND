@@ -4,6 +4,7 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 //--------------------------------------------------------------
 namespace Zaki
@@ -217,6 +218,22 @@ extern const Date VERNAL_2020;
 
 //==============================================================
 
+//==============================================================
+// Chemical Elements
+struct Element
+{
+    std::string sym ;
+    double Z  ; // Atomic number
+    double A  ; // Mass number, Standard atomic weight 
+    double I  ; // DM capture rate in the Sun
+    double v2 ; // Typical escape velocity squared in the Sun
+
+    Element(const std::string& in_sym, double in_Z, double in_A, double in_I, double in_v2)
+        : sym(in_sym), Z(in_Z), A(in_A), I(in_I), v2(in_v2) {}
+
+    double mu() { return A*AMU_2_GEV ;} // Molar mass in GeV
+};
+//==============================================================
 //--------------------------------------------------------------
 } // End of namespace Physics
 //--------------------------------------------------------------

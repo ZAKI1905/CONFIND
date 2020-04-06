@@ -129,7 +129,7 @@ class InstrumentationTimer
 //--------------------------------------------------------------
 #define PROFILING 1
 #if PROFILING
-  #define PROFILE_SCOPE(name) Zaki::Util::InstrumentationTimer timer##__LINE__(name)
+  #define PROFILE_SCOPE(name) Zaki::Util::InstrumentationTimer inst_timer##__LINE__(name)
   #define PROFILE_FUNCTION() PROFILE_SCOPE(Z_PRETTY_FUNCTION)
 #else
   #define PROFILE_SCOPE(name)
