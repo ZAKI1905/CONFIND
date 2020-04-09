@@ -12,11 +12,17 @@ OBJ_EXT		 := o
 # LINK_TARGET	:= memfunctionOptimized
 # EXAMPLE 	:= 2_MemFunctionOptimized
 
-LINK_TARGET	:= modify_object
-EXAMPLE 	:= 3_Modify_Object
+# LINK_TARGET	:= modify_object
+# EXAMPLE 	:= 3_Modify_Object
+
+# LINK_TARGET	:= parallel
+# EXAMPLE 	:= 4_Parallel
 
 # LINK_TARGET	:= test
 # EXAMPLE 	:= test
+
+LINK_TARGET	:= omp_prototype
+EXAMPLE 	:= omp_prototype
 # ----------------------------------
 # Directories
 SRC_DIR		:= src
