@@ -55,6 +55,7 @@ void Base::ShowBanner()
   banner.GetTextBox()->SetAlignment(TextBox::center) ;
   banner.GetTextBox()->SetPadding(5) ;
 
+  banner.GetTextBox()->EnableClearScreen() ;
   banner.Show() ;
 
 }
