@@ -5,13 +5,16 @@
 
 #include <zaki/Physics/Coordinate.h>
 
-// #include "Common.h"
 #include "Base.h"
 
-//==============================================================
+//--------------------------------------------------------------
+
+namespace CONFIND
+{
+//--------------------------------------------------------------
 // Forward declaration
-class ContourFinder ;
-//==============================================================
+class Bundle ;
+//--------------------------------------------------------------
 
 //==============================================================
 struct vertex
@@ -110,8 +113,8 @@ class Cell : public Base
     // Takes: X_idx, delta_X, Y_idx, delta_Y
     Cell(size_t i_x, double lx, size_t i_y, double ly);
 
-    // Takes: X_idx, delta_X, Y_idx, delta_Y, Pointer to ContourFinder, contour value
-    Cell(size_t i_x, double lx, size_t i_y, double ly, ContourFinder*, double c) ;
+    // Takes: X_idx, delta_X, Y_idx, delta_Y, Pointer to Bundle, contour value
+    Cell(size_t i_x, double lx, size_t i_y, double ly, Bundle*, double c) ;
 
     // Copy constructor 
     Cell(const Cell &c2) = delete ;
@@ -128,7 +131,7 @@ class Cell : public Base
     void SetVertex(const size_t, const Zaki::Physics::Coord3D&)    ;
     void SetVertexZ(const size_t, const double)   ;
     void SetTriangles()               ;
-    void SetGridPtr(ContourFinder* contPtrIn)  ;
+    void SetBundlePtr(Bundle* contPtrIn)  ;
     void SetContourValue(const double)      ;
     //............................................
 
@@ -177,13 +180,13 @@ class Cell : public Base
     std::vector<triangle> triangle_set ;
     std::vector<Zaki::Physics::Coord3D> contour_coords;
 
-    ContourFinder* ContFindptr = NULL ;
+    Bundle* BundlePtr = NULL ;
 
     // flags
     bool set_idx_flag             = false ;
-    std::array<bool,5> set_vertex_flag       = {{false, false, false, false, false}} ;
-    std::array<bool,4> set_vertexZ_flag       = {{false, false, false, false}} ;
-    bool set_grid_ptr_flag        = false ;
+    std::array<bool,5> set_vertex_flag  = {{false, false, false, false, false}} ;
+    std::array<bool,4> set_vertexZ_flag = {{false, false, false, false}} ;
+    bool set_bundle_ptr_flag      = false ;
     bool set_size_flag            = false ;
     bool found_verts_flag         = false ;
     bool set_contour_val_flag     = false ;
@@ -206,5 +209,7 @@ class Cell : public Base
 };
 
 //==============================================================
-// }
+} // CONFIND namespace
+//--------------------------------------------------------------
+
 #endif /*Contour_H*/

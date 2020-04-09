@@ -39,7 +39,7 @@ int main()
     Zaki::Math::Grid2D grid_in = {{{1, 15}, 200, "Log"},
                                 {{1, 15}, 200, "Log"}};
 
-    ContourFinder con    ;
+    CONFIND::ContourFinder con ;
     con.SetGrid(grid_in) ;
 
     // Setting the work directory
@@ -60,7 +60,7 @@ int main()
     // ...........................
     // Generating results
     // ...........................
-    con.SetGridVals(ContourFinder::Mode::Optimal) ;
+    con.SetGridVals(CONFIND::ContourFinder::Mode::Optimal) ;
     // con.Print() ;
     // con.ExportContour("independent_threshold_cont",  "w") ; 
 

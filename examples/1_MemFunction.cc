@@ -39,7 +39,7 @@ int main()
     Zaki::Math::Grid2D grid_in = {{{1, 15}, 200, "Log"},
                                 {{1, 15}, 200, "Log"}};
 
-    ContourFinder con    ;
+    CONFIND::ContourFinder con    ;
     con.SetGrid(grid_in) ;
 
     // Setting the work directory
@@ -60,6 +60,9 @@ int main()
     // ...........................
     // Generating results
     // ...........................
+    // No input mode will set the mode to Optimal
+    //  & in that case ContourFinder will find the
+    //  best mode depending on the average function call time.
     con.SetGridVals() ;
     // con.Print() ;
     // con.ExportContour("independent_threshold_cont",  "w") ; 

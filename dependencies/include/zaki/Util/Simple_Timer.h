@@ -93,7 +93,6 @@ class Timer
     {
         startTimePt = std::chrono::high_resolution_clock::now() ;
     }
-
     //--------------------------------------------------------------
     ~Timer()
     {
@@ -124,11 +123,11 @@ std::ostream& operator << (std::ostream &output, Operation o) ;
 //--------------------------------------------------------------
 #define TIMING 1
 #if TIMING
-  #define Z_TIMER_SCOPE(name) Zaki::Util::Timer sim_timer##__LINE__(name)
-  #define Z_TIMER() Z_TIMER_SCOPE(Z_PRETTY_FUNCTION)
+    #define Z_TIMER_SCOPE(name) Zaki::Util::Timer sim_timer##__LINE__(name)
+    #define Z_TIMER() Z_TIMER_SCOPE(Z_PRETTY_FUNCTION)
 #else
-  #define Z_TIMER_SCOPE(name)
-  #define Z_TIMER()
+    #define Z_TIMER_SCOPE(name)
+    #define Z_TIMER()
 #endif
 
 //==============================================================

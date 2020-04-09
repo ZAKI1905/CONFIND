@@ -28,10 +28,10 @@ int main()
     // Setting up the grid
     // ...........................
     // { {X_min, X_max}, X_Res, X_scale}, {Y_min, Y_max}, Y_Res, Y_scale} }
-    Zaki::Math::Grid2D grid_in = {{{2, 10}, 100, "Linear"},
-                                {{0, 10}, 100, "Linear"}};
+    Zaki::Math::Grid2D grid_in = {{{2, 10}, 30, "Linear"},
+                                {{0, 10}, 30, "Linear"}};
 
-    ContourFinder con    ;
+    CONFIND::ContourFinder con    ;
     con.SetGrid(grid_in) ;
 
     // Setting the work directory
@@ -43,8 +43,8 @@ int main()
     con.SetFunc(test_f) ;
 
     // Setting the contour level values
-    // con.SetContVal({5, 10, 25}) ;
-    con.SetContVal({5}) ;
+    con.SetContVal({5, 6, 7}) ;
+    // con.SetContVal({5}) ;
 
     // You can keep adding contours 
     // con.SetContVal({7.5}) ;
@@ -53,7 +53,8 @@ int main()
     // ...........................
     // Generating results
     // ...........................
-    con.SetGridVals(ContourFinder::Mode::Optimal) ;
+    con.SetThreads(2) ;
+    con.SetGridVals(CONFIND::ContourFinder::Mode::Normal) ;
     // con.Print() ;
     con.ExportContour("0_Function_Contour_Pts",  "w") ; 
 

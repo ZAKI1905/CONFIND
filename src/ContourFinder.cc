@@ -1,4 +1,3 @@
-#include <omp.h>
 #include <unordered_set>
 
 // Root
@@ -10,6 +9,8 @@
 #include <TLegend.h>
 
 #include <zaki/Util/Logger.h>
+#include <zaki/Util/Profile_Timer.h>
+
 #include <zaki/File/SaveVec.h>
 #include <zaki/Vector/Vector_Basic.h>
 
@@ -22,15 +23,15 @@
 // Cont2D struct begins
 //--------------------------------------------------------------
 // Constructors
-Cont2D::Cont2D(double in_val) : val(in_val) { } 
+CONFIND::Cont2D::Cont2D(double in_val) : val(in_val) { } 
 //--------------------------------------------------------------
-size_t Cont2D::size() const 
+size_t CONFIND::Cont2D::size() const 
 {
   return pts.size() ;
 }
 
 //--------------------------------------------------------------
-void Cont2D::SetColor(const CONFIND::Color in_color)
+void CONFIND::Cont2D::SetColor(const CONFIND::Color in_color)
 {
   color = in_color ;
 
@@ -40,7 +41,7 @@ void Cont2D::SetColor(const CONFIND::Color in_color)
 }
 
 //--------------------------------------------------------------
-void Cont2D::SetColor(const size_t in_idx)
+void CONFIND::Cont2D::SetColor(const size_t in_idx)
 {
   color.idx = in_idx ;
 
@@ -50,25 +51,25 @@ void Cont2D::SetColor(const size_t in_idx)
 }
 
 //--------------------------------------------------------------    
-CONFIND::Color Cont2D::GetColor() const 
+CONFIND::Color CONFIND::Cont2D::GetColor() const 
 {
   return color;
 }
 
 //--------------------------------------------------------------
-bool Cont2D::GetFound() const 
+bool CONFIND::Cont2D::GetFound() const 
 {
   return is_found_flag ;
 }
 
 //--------------------------------------------------------------
-void Cont2D::SetFound(const bool in_flag) 
+void CONFIND::Cont2D::SetFound(const bool in_flag) 
 {
   is_found_flag = in_flag;
 }
 
 //--------------------------------------------------------------
-std::ostream& operator << ( std::ostream &output, const Cont2D& c)
+std::ostream& CONFIND::operator << ( std::ostream &output, const CONFIND::Cont2D& c)
 { 
   output << "\n*        c = " << c.val << "        *\n" ;
 
@@ -81,13 +82,42 @@ std::ostream& operator << ( std::ostream &output, const Cont2D& c)
 }
 
 //--------------------------------------------------------------
-Zaki::Physics::Coord3D Cont2D::operator[](size_t idx_in) const
+Zaki::Physics::Coord3D CONFIND::Cont2D::operator[](size_t idx_in) const
 { 
   return pts[idx_in] ;
 }
 
 //--------------------------------------------------------------
-void Cont2D::AddPts(const std::vector<Zaki::Physics::Coord3D>& in_pts) 
+//  Addition operator
+CONFIND::Cont2D CONFIND::Cont2D::operator+(const Cont2D& in_c) const 
+{
+  if(in_c.val != val)
+    Z_LOG_ERROR("Contours with different values cannot be added!") ;
+  
+  Cont2D out_c(val) ;
+  out_c.pts.reserve(size() + in_c.size()) ;
+
+  out_c.pts.insert(out_c.pts.end(), pts.begin(), pts.end())  ;
+
+  out_c.pts.insert(out_c.pts.end(), in_c.pts.begin(), in_c.pts.end())  ;
+
+  return out_c ;
+}
+
+//--------------------------------------------------------------
+//  += operator overloading
+void CONFIND::Cont2D::operator+=(const Cont2D& in_c) 
+{
+  if(in_c.val != val)
+    Z_LOG_ERROR("Contours with different values cannot be added!") ;
+  
+  pts.reserve(size() + in_c.size()) ;
+
+  pts.insert(pts.end(), in_c.pts.begin(), in_c.pts.end())  ;
+
+}
+//--------------------------------------------------------------
+void CONFIND::Cont2D::AddPts(const std::vector<Zaki::Physics::Coord3D>& in_pts) 
 {
   for (size_t i = 0; i < in_pts.size(); i++)
   {
@@ -96,7 +126,7 @@ void Cont2D::AddPts(const std::vector<Zaki::Physics::Coord3D>& in_pts)
 }
 
 //--------------------------------------------------------------
-void Cont2D::Export(const std::string& f_name, const char* mode)
+void CONFIND::Cont2D::Export(const std::string& f_name, const char* mode)
 {
   if (pts.size() == 0)
   {
@@ -121,7 +151,7 @@ void Cont2D::Export(const std::string& f_name, const char* mode)
 // 0 --> p, q and r are colinear 
 // 1 --> Clockwise 
 // 2 --> Counterclockwise 
-int Cont2D::Orientation(const Zaki::Physics::Coord3D& p, const Zaki::Physics::Coord3D& q, const Zaki::Physics::Coord3D& r) const
+int CONFIND::Cont2D::Orientation(const Zaki::Physics::Coord3D& p, const Zaki::Physics::Coord3D& q, const Zaki::Physics::Coord3D& r) const
 { 
   double val = (q.y - p.y) * (r.x - q.x) - (q.x - p.x) * (r.y - q.y); 
 
@@ -134,14 +164,8 @@ int Cont2D::Orientation(const Zaki::Physics::Coord3D& p, const Zaki::Physics::Co
 } 
 
 //--------------------------------------------------------------
-bool Cont2D::comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::Physics::Coord3D &b) const
+bool CONFIND::Cont2D::comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::Physics::Coord3D &b) const
 {
-  // if ( a == bottom_left )
-  //   return true;
-  // else if ( b == bottom_left)
-  //   return false;
-
-  // std::cout << " --> comp_CW " << "\n"<< std::flush ;
   // Find orientation 
   int o = Orientation(bottom_left, a, b); 
   // std::cout << " --> Orientation: " << o << ", a: " << a << ", b: " << b<< "\n"<< std::flush ;
@@ -171,74 +195,20 @@ bool Cont2D::comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::Physics::C
   else
   // CCW
     return (o == 2) ? true: false; 
-
-  // return ( pow(a.x - pts[0].x, 2) + pow(a.y - pts[0].y, 2) < pow(b.x - pts[0].x, 2) + pow(b.y - pts[0].y, 2)) ;
 }
-//--------------------------------------------------------------
-// // A utility function to swap two points 
-// void Cont2D::swap(Zaki::Physics::Coord3D &p1, Zaki::Physics::Coord3D &p2) 
-// { 
-//   Zaki::Physics::Coord3D temp = p1; 
-//   p1 = p2; 
-//   p2 = temp; 
-// } 
-//--------------------------------------------------------------
-// 
-// struct Point
-// {
-//   // Main point
-//   Zaki::Physics::Coord3D p ;
-//   // Neighbour
-//   std::vector<Zaki::Physics::Coord3D> n ;
-// };
-//--------------------------------------------------------------
 
-void Cont2D::RMDuplicates()
+//--------------------------------------------------------------
+void CONFIND::Cont2D::RMDuplicates()
 {
   std::set<Zaki::Physics::Coord3D> tmp_set(pts.begin(), pts.end());
 
   pts.clear() ;
   pts.insert(pts.end(), tmp_set.begin(), tmp_set.end());
-
-  // std::vector<int> x = {1, 2, 3, 4, 5, 1, 2,3} ;
-  // std::unordered_set<int> s;
-  // for (int i : x)
-  //     s.insert(i);
-
-  // std::cout << "\nOriginal Set x with size =  "<< x.size() << "\n" ; 
-  // for (size_t i = 0; i < x.size(); i++)
-  // {
-  //   std::cout << x[i] ; 
-  //   if ( i == x.size() - 1)
-  //     std::cout << "\n" ;
-  //   else 
-  //     std::cout << ", " ; 
-  // }
-
-  // x.clear() ;    
-  // // pts.assign( s.begin(), s.end() );
-  // x.reserve(s.size());
-  // // std::copy(s.begin(), s.end(), x.begin());
-  // x.insert(x.end(), s.begin(), s.end());
-// for (auto it = s.begin(); it != s.end(); ) {
-//     x.push_back(std::move(s.extract(it++).value()));
-// }
-
-  // std::cout << "\nFinal Set x with size =  "<< x.size() << "\n"; 
-  // for (size_t i = 0; i < x.size(); i++)
-  // {
-  //   std::cout << x[i] ; 
-  //   if ( i == x.size() - 1)
-  //     std::cout << "\n" ;
-  //   else 
-  //     std::cout << ", " ; 
-  // }
-
 }
 
 //--------------------------------------------------------------
 
-void Cont2D::SortNew(const std::pair<double, double> del) 
+void CONFIND::Cont2D::SortNew(const std::pair<double, double> del) 
 {
   PROFILE_FUNCTION() ;
 
@@ -251,13 +221,10 @@ void Cont2D::SortNew(const std::pair<double, double> del)
     return ; 
   }
 
+  Z_LOG_ERROR("==> Sorting the points...") ;
+
   RMDuplicates() ;
 
-  // double eps = -0.9 ;
-
-  // int first_idx = -1 ;
-  // std::vector<std::vector<size_t>> neighbors_set;
-  // neighbors_set.reserve(pts.size()) ;
   std::vector<Zaki::Physics::Coord3D> out ;
   out.reserve(pts.size());
 
@@ -284,7 +251,6 @@ void Cont2D::SortNew(const std::pair<double, double> del)
 
   while(out.size() < pts.size())
   {
-    // myvector.erase (myvector.begin()+5);
     double d_min = INFINITY ;
     size_t idx = 0 ;
     for(size_t i = 0 ; i< pts.size() ; i++)
@@ -298,63 +264,13 @@ void Cont2D::SortNew(const std::pair<double, double> del)
     j = idx ;
   }
 
-
-
-    // neighbors_set.push_back({}) ;
-    // for(size_t j = 0 ; j< pts.size() ; j++)
-    // {
-    //   if (j == i) continue ;
-
-    //   if(fabs(pts[i].x - pts[j].x) < (1+eps)*del.first 
-    //       && fabs(pts[i].y - pts[j].y) < (1+eps)*del.second)
-    //     {
-    //       std::cout << "  -"<< j <<"  del_x: " <<fabs(pts[i].x - pts[j].x) 
-    //         << ", del_y: "<< fabs(pts[i].y - pts[j].y)<< "\n" ;
-    //       neighbors_set[i].push_back(j) ;
-    //     }
-    // }
-
-  //   std::cout << i+1 << ") in the loop: size: " <<neighbors_set[i].size()<< "\n" ;
-
-  //   if (neighbors_set[i].size() == 1 && first_idx == -1)
-  //   {
-  //     first_idx = i ;
-  //   }
-  // }
-
-  // std::vector<Zaki::Physics::Coord3D> out ;
-  // out.reserve(pts.size()) ;
-
-  // size_t next_idx = first_idx ;
-  // while (out.size() < pts.size())
-  // {
-  //   // std::cout << "Next idx: " << next_idx << ", neighbors_set[next_idx].size(): " 
-  //   // << neighbors_set[next_idx].size() ;
-
-  //   out.push_back(pts[next_idx]) ;
-  //   for (size_t i = 0; i < neighbors_set[next_idx].size(); i++)
-  //   {
-
-  //     if(neighbors_set[next_idx][i] != next_idx)
-  //     {
-  //       next_idx = neighbors_set[next_idx][0] ;
-  //     }
-  //   }
-  // }
-  
-  // char tmp[100] ;
-  // sprintf(tmp, "pts.size(): %lu, out.size(): %lu", pts.size(), out.size()) ;
-  // Z_LOG_INFO(tmp);
-
   already_sorted = true ;
-  Zaki::File::SaveVec(pts, "test_pts_not_sorted", "w") ;
   pts = out ;
-  Zaki::File::SaveVec(pts, "test_pts_sorted", "w") ;
 
 }
 
 //--------------------------------------------------------------
-void Cont2D::Sort()
+void CONFIND::Cont2D::Sort()
 {
   PROFILE_FUNCTION() ;
 
@@ -366,30 +282,10 @@ void Cont2D::Sort()
     Z_LOG_ERROR("Contour values hasn't been found yet!") ;
     return ; 
   }
-  // std::vector<Zaki::Physics::Coord3D>::iterator BotLef_it ;
 
-  // // Finding the bottom left point as a reference
-  // BotLef_it = std::min_element(pts.begin(), pts.end(), [] (const Zaki::Physics::Coord3D& a, const Zaki::Physics::Coord3D& b) 
-  // {
-  //   if ( a.y == b.y )
-  //     return a.x < b.x;
+  Z_LOG_INFO("==> Sorting the points...");
 
-  //   return a.y < b.y ;
-  // } ) ;
-
-  // bottom_left = *BotLef_it ;
-
-
-  //.......xXXXXXXXXX
-    // Find the bottom_left point 
-  //  double ymin = pts[0].y ; size_t min = 0; 
-  //  for (size_t i = 1; i < pts.size() ; i++) 
-  //  { 
-  //   // Pick the bottom-most. In case of tie, chose the 
-  //   // left most point 
-  //   if ( (pts[i].y < ymin) || (ymin == pts[i].y && pts[i].x < pts[min].x)) 
-  //     ymin = pts[i].y, min = i; 
-  //  } 
+  
   RMDuplicates() ;
 
   // Find the upper_left point 
@@ -407,7 +303,6 @@ void Cont2D::Sort()
   //.......xXXXXXXXXX
 
   bottom_left =  pts[0];
-  // std::cout << " bottom_left: " <<bottom_left << ", min_idx: " << min << "\n" ;
 
   std::sort(pts.begin() + 1, pts.end(), [this] (const Zaki::Physics::Coord3D& a, const Zaki::Physics::Coord3D& b) {
     return comp_Orient(a, b); }) ;
@@ -422,7 +317,7 @@ void Cont2D::Sort()
 }
 
 //--------------------------------------------------------------
-void Cont2D::Clear()
+void CONFIND::Cont2D::Clear()
 {
   pts.clear() ;
   already_sorted = false ;
@@ -434,7 +329,7 @@ void Cont2D::Clear()
 //  ContourFinder Class begins
 //--------------------------------------------------------------
 // default Constructor
-ContourFinder::ContourFinder() 
+CONFIND::ContourFinder::ContourFinder() 
 {
   graph = new TMultiGraph()  ; 
   legend = new TLegend(0.7, 0.9, 0.7, 0.9) ;
@@ -442,7 +337,7 @@ ContourFinder::ContourFinder()
 
 //--------------------------------------------------------------
 // default Destructor
-ContourFinder::~ContourFinder() 
+CONFIND::ContourFinder::~ContourFinder() 
 { 
   delete graph ;
   delete legend ;
@@ -451,205 +346,122 @@ ContourFinder::~ContourFinder()
 //--------------------------------------------------------------
 // Copy constructor
 // It will set the graph & legend pointers to NULL
-ContourFinder::ContourFinder(const ContourFinder &zc2) :
-  set_n_x_flag(zc2.set_n_x_flag),
-  set_n_y_flag(zc2.set_n_y_flag),
-  set_x_min_flag(zc2.set_x_min_flag),
-  set_x_scale_flag(zc2.set_x_scale_flag),
-  set_y_scale_flag(zc2.set_y_scale_flag),
-  set_x_max_flag(zc2.set_x_max_flag),
-  set_y_min_flag(zc2.set_y_min_flag),
-  set_y_max_flag(zc2.set_y_max_flag),
+CONFIND::ContourFinder::ContourFinder(const ContourFinder &zc2) :
+  set_grid_flag(zc2.set_grid_flag),
   set_grid_vals_flag(zc2.set_grid_vals_flag),
   set_func_flag(zc2.set_func_flag),
   set_cont_val_flag(zc2.set_cont_val_flag),
   set_mem_func_flag(zc2.set_mem_func_flag), func(zc2.func),
-  n_x(zc2.n_x), n_y(zc2.n_y), x_min(zc2.x_min), 
-  x_max(zc2.x_max), y_min(zc2.y_min), y_max(zc2.y_max),
-  delta_x(zc2.delta_x), delta_y(zc2.delta_y), x_scale(zc2.x_scale),
-  y_scale(zc2.y_scale), cont_set(zc2.cont_set)
+  delta_x(zc2.delta_x), delta_y(zc2.delta_y), 
+  cont_set(zc2.cont_set)
 {
-  // std::cout << "ContourFinder copy constructor from " << &zc2 << " -> " << this << " \n" ;
   genFuncPtr = zc2.genFuncPtr->Clone() ;
   graph = NULL;
   legend = NULL ;
-  // cpy_cons_called = true ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetGrid(const Zaki::Math::Grid2D& g) 
+void CONFIND::ContourFinder::SetGrid(const Zaki::Math::Grid2D& g) 
 {
-  SetN_X(g.xAxis.res) ;
-  set_n_x_flag = true ;
-  SetN_Y(g.yAxis.res) ;
-  set_n_y_flag = true ;
-
-  SetX_Max(g.xAxis.Max()) ;
-  set_x_max_flag = true ;
-  SetX_Min(g.xAxis.Min()) ; 
-  set_x_min_flag = true ;
-
-  SetY_Max(g.yAxis.Max()) ;
-  set_y_min_flag = true ;
-  SetY_Min(g.yAxis.Min()) ; 
-  set_y_max_flag = true ;
-
-  SetXScale(g.xAxis.scale) ;
-  set_x_scale_flag = true ;
-  SetYScale(g.yAxis.scale) ;
-  set_y_scale_flag = true ;
+  grid = g ;
+  set_grid_flag = true ; 
+  SetDeltas() ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetN_X(const size_t nx_in)  
-{
-  n_x = nx_in ;
-  set_n_x_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetN_Y(const size_t ny_in)  
-{
-  n_y = ny_in ;
-  set_n_y_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetWidth(const size_t width_in)  
+void CONFIND::ContourFinder::SetWidth(const size_t width_in)  
 {
   width = width_in ;
   set_width_flag = true ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetHeight(const size_t height_in)  
+void CONFIND::ContourFinder::SetHeight(const size_t height_in)  
 {
   height = height_in ;
   set_height_flag = true ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetXScale(const std::string& xsc_in)  
+size_t CONFIND::ContourFinder::GetN_X() const
 {
-  x_scale = xsc_in ;
-  set_x_scale_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetYScale(const std::string& ysc_in)  
-{
-  y_scale = ysc_in ;
-  set_y_scale_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetX_Min(double x_min_in)
-{
-  x_min = x_min_in ;
-  set_x_min_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetX_Max(double x_max_in)
-{
-  x_max = x_max_in ;
-  set_x_max_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetY_Min(double y_min_in)
-{
-  y_min = y_min_in ;
-  set_y_min_flag = true ;
-}
-
-//--------------------------------------------------------------
-void ContourFinder::SetY_Max(double y_max_in)
-{
-  y_max = y_max_in ;
-  set_y_max_flag = true ;
-}
-
-//--------------------------------------------------------------
-size_t ContourFinder::GetN_X() const
-{
-  if(! set_n_x_flag)
+  if(! set_grid_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("Grid not set!") ;
     return 0 ;
   }
 
-  return n_x;
+  return grid.xAxis.res;
 }
 
 //--------------------------------------------------------------
-size_t ContourFinder::GetN_Y() const 
+size_t CONFIND::ContourFinder::GetN_Y() const 
 {
-  if(! set_n_y_flag)
+  if(! set_grid_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("Grid not set!") ;
     return 0 ;
   }
 
-  return n_y;
+  return grid.yAxis.res;
 }
 
 //--------------------------------------------------------------
-double ContourFinder::GetX_Min() const
+double CONFIND::ContourFinder::GetX_Min() const
 {
-  if(! set_x_min_flag)
+  if(! set_grid_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("Grid not set!") ;
     return 0 ;
   }
 
-  return x_min;
+  return grid.xAxis.Min();
 }
 
 //--------------------------------------------------------------
-double ContourFinder::GetX_Max() const
+double CONFIND::ContourFinder::GetX_Max() const
 {  
-  if(! set_x_max_flag)
+  if(! set_grid_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("Grid not set!") ;
     return 0 ;
   }
 
-  return x_max;
+  return grid.xAxis.Max();
 }
 
 //--------------------------------------------------------------
-double ContourFinder::GetY_Min() const
+double CONFIND::ContourFinder::GetY_Min() const
 {
-  if(! set_y_min_flag)
+  if(! set_grid_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("Grid not set!") ;
     return 0 ;
   }
 
-  return y_min;
+  return grid.yAxis.Min();
 }
 
 //--------------------------------------------------------------
-double ContourFinder::GetY_Max() const
+double CONFIND::ContourFinder::GetY_Max() const
 {
-  if(! set_y_max_flag)
+  if(! set_grid_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    Z_LOG_ERROR("Grid not set!") ;
     return 0 ;
   }
 
-  return y_max;
+  return grid.yAxis.Max();
 }
 
 //--------------------------------------------------------------
-std::pair<double, double> ContourFinder::ij_2_xy(size_t i, size_t j) const
+std::pair<double, double> CONFIND::ContourFinder::ij_2_xy(size_t i, size_t j) const
 {
   // double delta_x = (x_max - x_min) / n_x ;
   // double delta_y = (y_max - y_min) / n_y ;
 
-  double x = x_min + i*delta_x ;
-  double y = y_min + j*delta_y ;
+  double x = grid.xAxis.Min() + i*delta_x ;
+  double y = grid.yAxis.Min() + j*delta_y ;
 
   std::pair<double, double> coordinate = {x, y} ;
 
@@ -657,7 +469,7 @@ std::pair<double, double> ContourFinder::ij_2_xy(size_t i, size_t j) const
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetGridVals(Mode in_mode)
+void CONFIND::ContourFinder::SetGridVals(const Mode& in_mode)
 {
   if(!set_func_flag && !set_mem_func_flag)
   {
@@ -667,7 +479,13 @@ void ContourFinder::SetGridVals(Mode in_mode)
 
   Z_LOG_INFO("==> Setting grid values ...");
 
-  if (in_mode == Optimal)
+  algorithm = in_mode ;
+
+  if (algorithm == Optimal)
+    FindOptimalMode() ; // will replace algorithm with the best mode
+
+  // Fast Mode
+  if (algorithm == Fast)
   {
     double* m_GridValArr = NULL;
     //..........................................
@@ -675,20 +493,26 @@ void ContourFinder::SetGridVals(Mode in_mode)
     if (unfound_contours > 1)
     {
       // # of total corners: (n_x+1)*(n_y+1)
-      m_GridValArr = new double[(n_x+1)*(n_y+1)] ;
+      m_GridValArr = new double[(grid.xAxis.res+1)*(grid.yAxis.res+1)] ;
     }
     //..........................................
     // Finding the first 'unfound' contour
-    FindContourOptimal(cont_set[cont_set.size()-unfound_contours], m_GridValArr) ;
+    FindContourFast(cont_set[cont_set.size()-unfound_contours], m_GridValArr) ;
 
-    // if (cont_set.size() > 1)
     if (unfound_contours > 0)
       // Now the function values are all set inside  'm_GridValArr'
       FindNextContours(m_GridValArr) ;
 
-    set_grid_vals_flag = true ;
-
     if(m_GridValArr) delete m_GridValArr;
+    set_grid_vals_flag = true ;
+    return ;
+  }
+  //..........................................
+  //  Ludicrous Mode
+  else if(algorithm == Ludicrous)
+  {
+    FindContourLudicrous() ;
+    set_grid_vals_flag = true ;
     return ;
   }
 
@@ -703,9 +527,9 @@ void ContourFinder::SetGridVals(Mode in_mode)
       continue ;
     }
     
-    if (in_mode == Normal)
+    if (algorithm == Normal)
       FindContour(cont_set[i]) ;
-    else if (in_mode == Parallel)
+    else if (algorithm == Parallel)
       FindContourParallel(cont_set[i]) ;
   }
 
@@ -713,41 +537,40 @@ void ContourFinder::SetGridVals(Mode in_mode)
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetDeltas()
+void CONFIND::ContourFinder::SetDeltas()
 {
-  if (x_scale == "Linear")
+  if (grid.xAxis.scale == "Linear")
   {
-    delta_x = (x_max - x_min) / n_x ;
+    delta_x = (grid.xAxis.Max() - grid.xAxis.Min()) / grid.xAxis.res ;
   }
-  else if (x_scale == "Log")
+  else if (grid.xAxis.scale == "Log")
   {
-    delta_x = (log10(x_max) - log10(x_min)) / n_x ;
+    delta_x = (log10(grid.xAxis.Max()) - log10(grid.xAxis.Min())) / grid.xAxis.res ;
   }
 
-  if (y_scale == "Linear")
+  if (grid.yAxis.scale == "Linear")
   {
-    delta_y = (y_max - y_min) / n_y ;
+    delta_y = (grid.yAxis.Max() - grid.yAxis.Min()) / grid.yAxis.res ;
   }
-  else if (y_scale == "Log")
+  else if (grid.yAxis.scale == "Log")
   {
-    delta_y = (log10(y_max) - log10(y_min)) / n_y ;
+    delta_y = (log10(grid.yAxis.Max()) - log10(grid.yAxis.Min())) / grid.yAxis.res ;
   }
 }
 
 //--------------------------------------------------------------
-std::pair<double, double> ContourFinder::GetDeltas() const
+std::pair<double, double> CONFIND::ContourFinder::GetDeltas() const
 {
-  if (! set_n_x_flag || ! set_n_y_flag || ! set_x_max_flag || 
-      !set_x_min_flag || !set_y_max_flag || !set_y_min_flag)
+  if (!set_grid_flag)
     {
-      Z_LOG_ERROR("Lengths are not set!") ;
+      Z_LOG_ERROR("Grid is not set!") ;
       return {-1, -1};
     }
   return {delta_x, delta_y} ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetScanMode(const char in_scan_mode)
+void CONFIND::ContourFinder::SetScanMode(const char in_scan_mode)
 {
   if(in_scan_mode != 'X' || in_scan_mode != 'Y')
   {
@@ -764,13 +587,161 @@ void ContourFinder::SetScanMode(const char in_scan_mode)
 }
 
 //--------------------------------------------------------------
-char ContourFinder::GetScanMode() const
+char CONFIND::ContourFinder::GetScanMode() const
 {
   return scan_mode ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::FindContour(Cont2D& cont)
+// Finding the optimal mode:
+//  ContourFinder will find the best mode depending on the 
+//  average function call time. By default, '50' points are
+//  randomly chosen on the grid to ensure a more precise
+//  decision. 'SetOptimizationTrials' can be used to change 
+//  this number for cases where some areas of the grid
+//  might be unusually fast or slow.
+void CONFIND::ContourFinder::FindOptimalMode()
+{
+  Z_LOG_INFO("Finding the optimal mode...") ;
+  
+  //seed
+  auto seed = std::chrono::system_clock::now().time_since_epoch().count();
+  random_engine.seed(seed); // seeding the engine
+
+  double x_low_bound, x_up_bound, y_low_bound, y_up_bound;
+
+  // X axis
+  if(grid.xAxis.scale == "Linear")
+  {
+    x_low_bound = grid.xAxis.Min() ;
+    x_up_bound = grid.xAxis.Max() ;
+  }
+  else // Log scale
+  {
+    x_low_bound = log10(grid.xAxis.Min()) ;
+    x_up_bound = log10(grid.xAxis.Max()) ;
+  }
+  
+  // Y-axis
+  if(grid.yAxis.scale == "Linear")
+  {
+    y_low_bound = grid.yAxis.Min() ;
+    y_up_bound = grid.yAxis.Max() ;
+  }
+  else // Log scale
+  {
+    y_low_bound = log10(grid.yAxis.Min()) ;
+    y_up_bound = log10(grid.yAxis.Max()) ;
+  }
+  
+  // distribution for x values
+  std::uniform_real_distribution<double> x_di(x_low_bound,x_up_bound);
+
+  // distribution for y values
+  std::uniform_real_distribution<double> y_di(y_low_bound,y_up_bound);
+
+  algorithm = TimeFunc(x_di, y_di) ;
+  Z_LOG_INFO("Optimal algorithm is set.") ;
+
+}
+
+//--------------------------------------------------------------
+// Sets the optimization_trials value in 'TimeFunc'
+// Also see: 'FindOptimalMode'
+void CONFIND::ContourFinder::SetOptimizationTrials(int in_val)
+{
+  optimization_trials = in_val ;
+}
+
+//--------------------------------------------------------------
+// Timing the function or member-function
+CONFIND::ContourFinder::Mode CONFIND::ContourFinder::TimeFunc(
+  std::uniform_real_distribution<double>& in_x_dis,
+  std::uniform_real_distribution<double>& in_y_dis ) 
+{
+  
+  Zaki::Util::TimeProfileManager::BeginSpecialSession("FuncTiming") ;
+
+  double x=0, y = 0; 
+  for (size_t i = 0; i < optimization_trials; i++)
+  {
+    x = in_x_dis(random_engine) ;
+    y = in_y_dis(random_engine) ;
+
+    if (grid.xAxis.scale == "Log" && grid.yAxis.scale == "Log")
+     { x = pow(10, x) ; y = pow(10, y) ; }
+
+    else if(grid.xAxis.scale == "Linear" && grid.yAxis.scale == "Log")
+      y = pow(10, y) ;
+
+    else if(grid.xAxis.scale == "Log" && grid.yAxis.scale == "Linear")
+      x =pow(10, x) ;
+
+    if(func)
+    { 
+      // Timing scope
+      Z_TIME_PROFILE_SIMPLE("Func_"+std::to_string(i)) ;
+      func(x,y) ;
+    }
+    else if(genFuncPtr)
+    { 
+      // Timing scope
+      Z_TIME_PROFILE_SIMPLE("Mem_Func_"+std::to_string(i)) ;
+      genFuncPtr->Eval(x,y) ;
+    }
+    else
+    {
+    Z_LOG_WARNING(
+      "Optimal mode wasn't found because neither a function or a"
+      "member function is set. Use 'SetFunc' or 'SetMemFunc' first"
+      " and try again.") ;
+      break;
+    }
+  }
+
+  std::vector<double> timing_results =
+  Zaki::Util::TimeProfileManager::GetSpecialValues() ;
+
+  Zaki::Util::TimeProfileManager::EndSpecialSession() ;
+
+  // Analyzing the results
+  double mean = 0, min = timing_results[0], max = timing_results[0] ;
+  for (size_t i = 0; i < timing_results.size(); i++)
+  {
+    mean += timing_results[i] / timing_results.size() ;
+
+    if (timing_results[i] < min)
+      min = timing_results[i] ;
+
+    if (timing_results[i] > max)
+      max = timing_results[i] ;
+  }
+
+  // Change of beahviour happens around this time
+  double threshold_time = 2e-2 ; // in ms
+
+  // For now we only use the mean value
+  // If grid size is small the threshold time is a bit higher
+  if( grid.xAxis.res < 50 && grid.yAxis.res < 50 )
+    threshold_time = 4e-2;
+
+  if(mean > threshold_time)
+  {
+    // Ludicrous mode is the optimal mode
+    Z_LOG_INFO("Ludicrous mode is the optimal mode!") ;
+    return Mode::Ludicrous ;
+  }
+  else
+  {
+    // Fast mode is the optimal mode
+    Z_LOG_INFO("Fast mode is the optimal mode!") ;
+    return Mode::Fast ;
+  }
+    
+}
+
+//--------------------------------------------------------------
+void CONFIND::ContourFinder::FindContour(Cont2D& cont)
 {
   PROFILE_FUNCTION() ;
 
@@ -779,15 +750,17 @@ void ContourFinder::FindContour(Cont2D& cont)
           cont.color.name().c_str()) ;
   Z_LOG_INFO(tmp) ;
 
-  SetDeltas() ;
+  // SetDeltas() ;
+
+  Bundle b(grid, cont, genFuncPtr, func) ;
 
   if(scan_mode == 'X')
   {
-    for (size_t j = 0; j < n_y; j++)
+    for (size_t j = 0; j < grid.yAxis.res; j++)
     {
-      for (size_t i = 0; i < n_x; i++)
+      for (size_t i = 0; i < grid.xAxis.res; i++)
       {
-        Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+        Cell new_cell(i, delta_x, j, delta_y, &b, cont.val) ;
         new_cell.FindVerts() ;
         new_cell.GetStatus() ;
         cont.AddPts(new_cell.GetContourCoords()) ;
@@ -796,11 +769,11 @@ void ContourFinder::FindContour(Cont2D& cont)
   }
   else // if(scan_mode == 'Y')
   {
-    for (size_t i = 0; i < n_x; i++)
+    for (size_t i = 0; i < grid.xAxis.res; i++)
     {
-      for (size_t j = 0; j < n_y; j++)
+      for (size_t j = 0; j < grid.yAxis.res; j++)
       {
-        Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+        Cell new_cell(i, delta_x, j, delta_y, &b, cont.val) ;
         new_cell.FindVerts() ;
         new_cell.GetStatus() ;
         cont.AddPts(new_cell.GetContourCoords()) ;
@@ -814,7 +787,7 @@ void ContourFinder::FindContour(Cont2D& cont)
 }
 
 //--------------------------------------------------------------
-void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
+void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr)
 {
   PROFILE_FUNCTION() ;
 
@@ -823,12 +796,16 @@ void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
           cont.color.name().c_str()) ;
   Z_LOG_INFO(tmp) ;
 
-  SetDeltas() ;
+  // SetDeltas() ;
 
   std::vector<double> corners;
-  corners.reserve(n_x+1);
+  corners.reserve(grid.xAxis.res+1);
   double tmp_corner ;
 
+  Bundle b(grid, cont, genFuncPtr, func) ;
+
+  int n_x = grid.xAxis.res ;
+  int n_y = grid.yAxis.res ;
   //============LOOP STARTS============ 
   for (size_t j = 0; j < n_y; j++)
   {
@@ -836,7 +813,7 @@ void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
     for (size_t i = 0; i < n_x; i++)
     {
       // Instantiate a cell
-      Cell new_cell(i, delta_x, j, delta_y, this, cont.val) ;
+      Cell new_cell(i, delta_x, j, delta_y, &b, cont.val) ;
 
       // ............................................
       // Except the first column:
@@ -901,7 +878,7 @@ void ContourFinder::FindContourOptimal(Cont2D& cont, double* in_gridValArr)
 }
 
 //--------------------------------------------------------------
-void ContourFinder::FindNextContours(double* in_gridValArr)
+void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
 {
   PROFILE_FUNCTION() ;
 
@@ -919,8 +896,11 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
             cont_set[k].color.name().c_str()) ;
     Z_LOG_INFO(tmp) ;
 
-    SetDeltas() ;
+    // SetDeltas() ;
 
+    Bundle b(grid, cont_set[k], genFuncPtr, func) ;
+    int n_x = grid.xAxis.res ;
+    int n_y = grid.yAxis.res ;
     //============LOOP STARTS============ 
     for (size_t j = 0; j < n_y; j++)
     {
@@ -928,7 +908,7 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
       for (size_t i = 0; i < n_x; i++)
       {
         // Instantiate a cell
-        Cell new_cell(i, delta_x, j, delta_y, this, cont_set[k].val) ;
+        Cell new_cell(i, delta_x, j, delta_y, &b, cont_set[k].val) ;
 
         // ............................................
         new_cell.SetVertexZ(1, in_gridValArr[i    + (n_x+1) * j     ]) ;
@@ -951,56 +931,309 @@ void ContourFinder::FindNextContours(double* in_gridValArr)
 }
 
 //--------------------------------------------------------------
-//              !!! Under Construction !!!
-void ContourFinder::FindContourParallel(Cont2D& cont)
+//  Ludicrous mode: Combination of fast & parallel modes
+void CONFIND::ContourFinder::FindContourLudicrous() 
 {
-  char tmp[150] ;
-  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
-          cont.color.name().c_str()) ;
-  Z_LOG_INFO(tmp);
+  PROFILE_FUNCTION() ;
 
-  SetDeltas() ;
- 
-  omp_set_num_threads(4) ;
-  Z_LOG_INFO("Threads requested: 4");
-  // ContourFinder a[4] = {*this, *this, *this, *this} ;
+  // Including only the unfound contours
+  std::vector<Cont2D> 
+  curr_cont_set(cont_set.end() - unfound_contours, cont_set.end()) ; 
 
-  // ............... PARALLEL REGION BEGINS.....................
+  int n_t = 1 ;
+  omp_set_num_threads(req_threads) ;
+  Z_LOG_INFO( ("Threads requested: " + std::to_string(req_threads)).c_str()) ;
+
+  // ..............................
+  // Parallel Region
+  // ..............................
   #pragma omp parallel
   {
-    ContourFinder a = *this ;
-    // Asking one of the threads to save the available threads
+    //.......................................
+    // Figuring out the thread id & numbers
     #pragma omp single
     {
-      char tmp[50] ;
-      sprintf(tmp, "Threads provided:  %d.", omp_get_num_threads()) ;
-      Z_LOG_INFO(tmp);
+      n_t = omp_get_num_threads() ;
+      Z_LOG_INFO( ("Working Threads: " + std::to_string(n_t)).c_str()) ;
     }
-  #pragma omp critical
-  std::cout << "\n Pointer to a["<< omp_get_thread_num() <<"]: " << a.genFuncPtr << "\n";
 
-  #pragma omp parallel for
-    for (size_t j = 0; j < n_y; j++)
+    int t_n = omp_get_thread_num() ;
+    //.......................................
+    std::vector<Cont2D> loc_con_set ;
+    #pragma omp critical
+      loc_con_set = curr_cont_set;
+
+    //.......................................
+    // Defining local sub_grids:
+    double y_min = grid.yAxis.Min() + t_n * (grid.yAxis.Max() - grid.yAxis.Min())/(1.0*n_t) ;
+    double y_max = grid.yAxis.Min() + (t_n+1) * (grid.yAxis.Max() - grid.yAxis.Min())/(1.0*n_t) ;
+    int res      = grid.yAxis.res / n_t + 1  ; 
+
+    Zaki::Math::Grid2D loc_grid = {grid.xAxis, 
+                    {{y_min, y_max}, res, grid.yAxis.scale}};
+
+    CONFIND::Bundle b(loc_grid, genFuncPtr, func);
+
+    std::vector<double> loc_gridVal;
+    // If more than one contour
+    if (unfound_contours > 1)
     {
-      for (size_t i = 0; i < n_x; i++)
+      loc_gridVal.resize((loc_grid.xAxis.res+1)*(loc_grid.yAxis.res+1)) ;
+    }
+    //.......................................
+    // Contour set loop begins
+    //.......................................
+    for (size_t i = 0; i < loc_con_set.size(); i++)
+    {
+      size_t tmp_first = 0 ;
+      // Skip the contours that are already found
+      if (loc_con_set[i].GetFound())
+        { continue ; tmp_first++ ;}
+
+      char tmp[150] ;
+      sprintf(tmp, "(Thread: %d) ==> Finding contour for c = %.2e (%s)...",
+        t_n, loc_con_set[i].val,
+        loc_con_set[i].color.name().c_str()) ;
+      Z_LOG_INFO(tmp) ;
+      // .............................
+
+      b.AddCont(loc_con_set[i]) ;
+      // This should be intensive
+      if (i==tmp_first)
+      {  
+        ThreadTaskLudicrous(b, loc_gridVal) ;
+      }
+      else  // Not the first contour 
       {
-        Cell new_cell(i, delta_x, j, delta_y, &a, cont.val) ;
-        new_cell.FindVerts() ;
-        new_cell.GetStatus() ;
-        #pragma omp critical
-        {cont.AddPts(new_cell.GetContourCoords()) ;}
+        ThreadNextTaskLudicrous(b, loc_gridVal) ;
+      }
+      // .............................
+
+
+      loc_con_set[i] += b.GetCont() ;
+      loc_con_set[i].SetFound();
+    }
+    //.......................................
+    // Contour set loop ends
+    //.......................................
+
+
+    #pragma omp critical
+    {
+      // Need to make sure we add the points 
+      // only to the unfound contours
+      //  unfound contours = loc_con_set.size()
+      for (size_t i = 0; i < loc_con_set.size(); i++)
+      {
+        cont_set[ cont_set.size() - loc_con_set.size() + i] += loc_con_set[i] ;
+      }     
+    }
+  }
+  // ..............................
+  // Parallel Region Ends
+
+  for (size_t i = 0; i < cont_set.size(); i++)
+  {
+    // Marking the contour as found
+    cont_set[i].SetFound();
+    unfound_contours--;
+  }
+
+  return;
+}
+
+//--------------------------------------------------------------
+//  Ludicrous mode: Combination of fast & parallel modes
+void CONFIND::ContourFinder::ThreadNextTaskLudicrous(Bundle& in_b,
+ std::vector<double>& in_vec) 
+{
+  PROFILE_FUNCTION() ;
+
+
+  int n_x = in_b.Grid.xAxis.res ;
+  int n_y = in_b.Grid.yAxis.res ;
+  //============LOOP STARTS============ 
+  for (size_t j = 0; j < n_y; j++)
+  {
+    // corners.clear() ;
+    for (size_t i = 0; i < n_x; i++)
+    {
+      // Instantiate a cell
+      Cell new_cell(i, delta_x, j, delta_y, &in_b, in_b.Con.val) ;
+
+      // ............................................
+      new_cell.SetVertexZ(1, in_vec[i    + (n_x+1) * j     ]) ;
+      new_cell.SetVertexZ(2, in_vec[i+1  + (n_x+1) * j     ]) ;
+      new_cell.SetVertexZ(3, in_vec[i+1  + (n_x+1) * (j+1) ]) ;
+      new_cell.SetVertexZ(4, in_vec[i    + (n_x+1) * (j+1) ]) ;
+      //............................................
+
+      new_cell.FindVerts() ;
+      new_cell.GetStatus() ;
+      in_b.Con.AddPts(new_cell.GetContourCoords()) ;
+    }
+  }
+  //============END of LOOP============ 
+}
+
+//--------------------------------------------------------------
+// Task for each thread
+void CONFIND::ContourFinder::ThreadTaskLudicrous(Bundle& in_b, std::vector<double>& in_vec)
+{
+  std::vector<double> corners;
+  corners.reserve(grid.xAxis.res+1);
+  double tmp_corner ;
+
+  int n_x = in_b.Grid.xAxis.res ;
+  int n_y = in_b.Grid.yAxis.res ;
+  //============LOOP STARTS============ 
+  for (size_t j = 0; j < n_y; j++)
+  {
+    // corners.clear() ;
+    for (size_t i = 0; i < n_x; i++)
+    {
+      // Instantiate a cell
+      Cell new_cell(i, delta_x, j, delta_y, &in_b, in_b.Con.val) ;
+
+      // ............................................
+      // Except the first column:
+      if ( i > 0)
+        // Top_Left vertex: (idx = 4), i is the last element added to corners[]
+        new_cell.SetVertexZ(4, corners[i]) ;
+      //............................................
+      // First column (except the first cell):
+      if( j > 0 )
+        // Bottom_Right vertex: (idx = 2), i+1 is to the right of the cell
+        new_cell.SetVertexZ(2, corners[i+1]) ;
+      //............................................
+      // All cells except the first one at (0,0):
+      if( !(i == 0 && j ==0 ) )
+        // Bottom_Left vertex : (idx = 1)
+        new_cell.SetVertexZ(1, tmp_corner) ;
+      //............................................
+
+      new_cell.FindVerts() ;
+      new_cell.GetStatus() ;
+      in_b.Con.AddPts(new_cell.GetContourCoords()) ;
+
+      //............................................
+      // Before reaching the wall on the right
+      if ( i < n_x - 1)
+        tmp_corner = new_cell.GetFuncVals(2) ;
+      // If last column, set tmp_corner for the next row
+      else
+        tmp_corner = corners[0] ;
+      //............................................
+
+      if (i==0) // The first vertex in each row
+        corners[0] = new_cell.GetFuncVals(4) ;
+      // The rest of the row
+      corners[i+1] = new_cell.GetFuncVals(3) ;
+      //............................................
+      // double* in_gridValArr  = NULL ;
+      if (in_vec.size() != 0)
+      {
+        // saving the bottom_left vertex
+        in_vec[i + (n_x + 1)*j] = new_cell.GetFuncVals(1) ;
+
+        // For the last column, we need to save the bottom-right vertex too
+        if( i == n_x - 1)
+          in_vec[n_x + (n_x + 1)*j] = new_cell.GetFuncVals(2) ;
+
+        // For the last row, we need to save the top-left vertex too
+        if( j == n_y - 1)
+          in_vec[i + (n_x + 1)*n_y] = new_cell.GetFuncVals(4) ;
+
+        // For the last top-right corner cell top-right vertex (last element)
+        if ( j == n_y - 1 && i == n_x - 1 )
+          in_vec[(n_x+1)*(n_y+1) - 1] = new_cell.GetFuncVals(3) ;
       }
     }
   }
-  // ............... PARALLEL REGION ENDS......................
+  //============END of LOOP============ 
+
+}
+
+//--------------------------------------------------------------
+// Setting the number of threads
+void CONFIND::ContourFinder::SetThreads(int in_num) 
+{
+  req_threads = in_num ;
+}
+
+//--------------------------------------------------------------
+// Parallel evaluation of the contours
+void CONFIND::ContourFinder::FindContourParallel(Cont2D& cont)
+{
+  PROFILE_FUNCTION() ;
+
+  char tmp[150] ;
+  sprintf(tmp, "==> Finding contour for c = %.2e (%s)...", cont.val,
+          cont.color.name().c_str()) ;
+  Z_LOG_INFO(tmp) ;
+
+  int n_t = 1 ;
+  omp_set_num_threads(req_threads) ;
+  Z_LOG_INFO( ("Threads requested: " + std::to_string(req_threads)).c_str()) ;
+
+  // ..............................
+  // Parallel Region
+  // ..............................
+  #pragma omp parallel
+  {
+    #pragma omp single
+    {
+      n_t = omp_get_num_threads() ;
+      Z_LOG_INFO( ("Working Threads: " + std::to_string(n_t)).c_str()) ;
+    }
+
+    int t_n = omp_get_thread_num() ;
+
+    double y_min = grid.yAxis.Min() + t_n * (grid.yAxis.Max() - grid.yAxis.Min())/(1.0*n_t) ;
+    double y_max = grid.yAxis.Min() + (t_n+1) * (grid.yAxis.Max() - grid.yAxis.Min())/(1.0*n_t) ;
+    int res      = grid.yAxis.res / n_t + 1  ; 
+
+    Zaki::Math::Grid2D loc_grid = {grid.xAxis, 
+                    {{y_min, y_max}, res, grid.yAxis.scale}};
+
+    // takes the contour level (value)
+    Cont2D loc_cont(cont.val);
+    CONFIND::Bundle b(loc_grid, loc_cont, genFuncPtr, func);
+
+    // This should be intensive
+    ThreadTask(b) ;
+
+    #pragma omp critical
+    cont += b.GetCont() ;
+  }
+  // ..............................
 
   // Marking the contour as found
   cont.SetFound();
   unfound_contours--;
+
 }
 
 //--------------------------------------------------------------
-void ContourFinder::Print() const
+// Task for each thread
+void CONFIND::ContourFinder::ThreadTask(Bundle& in_b)
+{
+
+  for (size_t j = 0; j < in_b.Grid.yAxis.res; j++)
+  {
+    for (size_t i = 0; i < in_b.Grid.xAxis.res; i++)
+    {
+      Cell new_cell(i, delta_x, j, delta_y, &in_b, in_b.Con.val) ;
+      new_cell.FindVerts() ;
+      new_cell.GetStatus() ;
+      in_b.Con.AddPts(new_cell.GetContourCoords()) ;
+    }
+  }
+
+}
+
+//--------------------------------------------------------------
+void CONFIND::ContourFinder::Print() const
 {
   if (! set_grid_vals_flag )
     {
@@ -1019,28 +1252,51 @@ void ContourFinder::Print() const
 }
 
 //--------------------------------------------------------------
-// std::vector<std::vector<double> > ContourFinder::GetGridVals()
-// {
-//   return grid_vals ;
-// }
-
-//--------------------------------------------------------------
-void ContourFinder::SetFunc(double (*f)(double, double) ) 
+void CONFIND::ContourFinder::SetFunc(double (*f)(double, double) ) 
 {
   func = f;
-  set_func_flag = true ;
+
+  if(func) 
+  {
+    Z_LOG_INFO("Function is set.") ;
+    set_func_flag = true ;
+
+    // Reseting 'genFuncPtr'
+    if(genFuncPtr)
+    {
+      genFuncPtr = NULL ;
+      set_mem_func_flag = false ; 
+    }
+  }
+  else
+    Z_LOG_INFO("Function is not set, because the input is a NULL pointer.") ;
+
 }
 
 //--------------------------------------------------------------
 // Non-static mem-funcs
-void ContourFinder::SetMemFunc(Zaki::Math::Func2D* gen_Fun) 
+void CONFIND::ContourFinder::SetMemFunc(Zaki::Math::Func2D* gen_Fun) 
 {
   genFuncPtr = gen_Fun ;
-  set_mem_func_flag = true ;
+
+  if(genFuncPtr) 
+  {
+    Z_LOG_INFO("Member function is set.") ;
+    set_mem_func_flag = true ;
+
+    // Reseting 'func'
+    if(func)
+    {
+      func = NULL ;
+      set_func_flag = false ; 
+    }
+  }
+  else
+    Z_LOG_INFO("Member function is not set, because the input is a NULL pointer.") ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetContVal(const std::vector<double>& cont_val_in) 
+void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in) 
 {
   // cont_set.clear() ;
   for (size_t i = 0; i < cont_val_in.size(); i++)
@@ -1055,18 +1311,7 @@ void ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
 }
 
 //--------------------------------------------------------------
-// std::vector<double> ContourFinder::GetContVal() const
-// {
-//   if (!set_cont_val_flag)
-//   {
-//     Z_LOG_ERROR("Contour values are not set!");
-//     return {-1} ;
-//   }
-//   return cont_val_set ;
-// }
-
-//--------------------------------------------------------------
-void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
+void CONFIND::ContourFinder::ExportContour(const std::string& f_name, const char* mode)
 {
   if (! set_grid_vals_flag )
   {
@@ -1092,37 +1337,41 @@ void ContourFinder::ExportContour(const std::string& f_name, const char* mode)
 }
 //--------------------------------------------------------------
 // Plot options
-void ContourFinder::SetPlotXLabel(const char* const in_x_label)
+void CONFIND::ContourFinder::SetPlotXLabel(const char* const in_x_label)
 {
   x_label = in_x_label;
   set_plotX_label_flag = true ;
 }
+
 //--------------------------------------------------------------
-void ContourFinder::SetPlotYLabel(const char* const in_y_label)
+void CONFIND::ContourFinder::SetPlotYLabel(const char* const in_y_label)
 {
   y_label = in_y_label;
   set_plotY_label_flag = true ;
 }
+
 //--------------------------------------------------------------
-void ContourFinder::SetPlotLabel(const char* const in_label) 
+void CONFIND::ContourFinder::SetPlotLabel(const char* const in_label) 
 {
   plot_label = in_label ;
   set_plot_label_flag = true ;
 }
+
 //--------------------------------------------------------------
-void ContourFinder::SetPlotConnected(const bool in_connected)     
+void CONFIND::ContourFinder::SetPlotConnected(const bool in_connected)     
 {
   connected_plot = in_connected ;
   set_plot_connected_flag = true ;
 }
+
 //--------------------------------------------------------------
-TMultiGraph* ContourFinder::GetGraph() 
+TMultiGraph* CONFIND::ContourFinder::GetGraph() 
 {
   return graph ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::MakeLegend(const bool in_make_leg,
+void CONFIND::ContourFinder::MakeLegend(const bool in_make_leg,
                                const char* const in_head,
                                const char* const in_option) 
 {
@@ -1134,21 +1383,22 @@ void ContourFinder::MakeLegend(const bool in_make_leg,
   if(strcmp(in_option, "user") == 0)
     default_legend_opt = false ;
 }
+
 //--------------------------------------------------------------
-TLegend* ContourFinder::GetLegend() 
+TLegend* CONFIND::ContourFinder::GetLegend() 
 {
   return legend;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::SetLegendLabels(const std::vector<std::string>& in_labels) 
+void CONFIND::ContourFinder::SetLegendLabels(const std::vector<std::string>& in_labels) 
 {
   legend_label_set = in_labels ;
   set_leg_lab_flag = true ;
 }
 
 //--------------------------------------------------------------
-void ContourFinder::Plot(const std::string& f_name, 
+void CONFIND::ContourFinder::Plot(const std::string& f_name, 
                          const char* const in_main_title,
                          const char* const in_x_title,
                          const char* const in_y_title)
@@ -1160,6 +1410,8 @@ void ContourFinder::Plot(const std::string& f_name,
     Z_LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
     return ;
   }
+
+  Z_LOG_INFO("==> Plotting contours...");
 
   TCanvas c("c", "Contour Plot", width, height) ;
   c.SetGrid();
@@ -1299,13 +1551,13 @@ void ContourFinder::Plot(const std::string& f_name,
   // .....................................
   // Axis Scale  & Limits
   //.....................................
-  if (x_scale == "Log")
+  if (grid.xAxis.scale == "Log")
     c.SetLogx() ;
-  if (y_scale == "Log")
+  if (grid.yAxis.scale == "Log")
     c.SetLogy() ;
   //...............
-  graph->GetXaxis()->SetLimits(x_min, x_max);
-  graph->GetYaxis()->SetLimits(y_min, y_max);
+  graph->GetXaxis()->SetLimits(grid.xAxis.Min(), grid.xAxis.Max());
+  graph->GetYaxis()->SetLimits(grid.yAxis.Min(), grid.yAxis.Max());
   // .....................................
 
   if(connected_plot)
@@ -1329,36 +1581,23 @@ void ContourFinder::Plot(const std::string& f_name,
 }
 
 //--------------------------------------------------------------
-std::string ContourFinder::GetXScale()  const
+std::string CONFIND::ContourFinder::GetXScale()  const
 {
-  return x_scale;
+  return grid.xAxis.scale;
 }
 
 //--------------------------------------------------------------
-std::string ContourFinder::GetYScale()  const
+std::string CONFIND::ContourFinder::GetYScale()  const
 {
-  return y_scale;
+  return grid.yAxis.scale;
 }
-
-//--------------------------------------------------------------
-// double DistSq(coords x_1, coords x_2)
-// {
-//   return  pow(x_1.x - x_2.x, 2) + pow(x_1.y - x_2.y, 2) ;
-// }
 
 //--------------------------------------------------------------
 // Will clear everything!
-void ContourFinder::Clear()
+void CONFIND::ContourFinder::Clear()
 {
   cont_set.clear() ;
-  set_n_x_flag         = false ;
-  set_n_y_flag         = false ;
-  set_x_min_flag       = false ;
-  set_x_scale_flag     = false ;
-  set_y_scale_flag     = false ;
-  set_x_max_flag       = false ;
-  set_y_min_flag       = false ;
-  set_y_max_flag       = false ;
+  set_grid_flag         = false ;
   set_grid_vals_flag   = false ;
   set_func_flag        = false ;
   set_cont_val_flag    = false ;

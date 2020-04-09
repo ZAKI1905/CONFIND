@@ -1,6 +1,9 @@
 #ifndef ContourFinder_H
 #define ContourFinder_H
 
+#include <omp.h>
+#include <random>
+
 // Root
 #include <TMultiGraph.h>
 #include <TLegend.h>
@@ -14,8 +17,8 @@
 // Local headers
 #include "Cell.h"
 
-// namespace CONFIND
-// {
+namespace CONFIND
+{
 //==============================================================
 class Cont2D : public Base
 {
@@ -36,10 +39,10 @@ class Cont2D : public Base
     void AddPts(const std::vector<Zaki::Physics::Coord3D>&) ;
     void RMDuplicates() ;
     Zaki::Physics::Coord3D operator[](size_t) const ;
+    Cont2D operator+(const Cont2D& c) const ;
+    void operator+=(const Cont2D& c) ;
     size_t size() const ;
     void SortNew(const std::pair<double, double>) ;
-
-
 
   private:
     double val;
@@ -52,19 +55,11 @@ class Cont2D : public Base
     Zaki::Physics::Coord3D bottom_left ;
     int Orientation(const Zaki::Physics::Coord3D&, const Zaki::Physics::Coord3D&, const Zaki::Physics::Coord3D&) const;
 
-    // Zaki::Physics::Coord3D operator[](size_t) const ;
-    // size_t size() const ;
-
-    // void AddPts(const std::vector<Zaki::Physics::Coord3D>&) ;
 
     void Export(const std::string& f_name, const char* mode) ;
 
     void Sort() ;
-    // void SortNew(const std::pair<double, double>) ;
-    // void RMDuplicates() ;
 
-    // A utility function to swap two points 
-    // void swap(Zaki::Physics::Coord3D &p1, Zaki::Physics::Coord3D &p2) ;
     bool comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::Physics::Coord3D &b) const; 
     bool sort_cw = true ;
     bool already_sorted = false ;
@@ -88,30 +83,22 @@ class ContourFinder : public Base
 
     enum Mode
     {
-      Optimal = 0, Normal, Parallel    
+      Normal = 0, Fast, Parallel, Ludicrous, Optimal    
     } ;
 
     //............................................
     // Setters
     //............................................
-    // void SetWrkDir(const std::string&) ;
-    void SetN_X(const size_t)   ;
-    void SetN_Y(const size_t)   ;
-    void SetXScale(const std::string&) ;
-    void SetYScale(const std::string&) ;
-    void SetX_Min(double) ;
-    void SetX_Max(double) ;
-    void SetY_Min(double) ;
-    void SetY_Max(double) ;
     void SetGrid(const Zaki::Math::Grid2D&)  ;
     void SetWidth(const size_t) ;
     void SetHeight(const size_t) ;
     void SetDeltas()      ;
-    void SetGridVals(Mode = Normal)    ;
+    void SetGridVals(const Mode& = Optimal)    ;
     void SetFunc(double (*f) (double, double) ) ; // Normal funcs 
     void SetMemFunc(Zaki::Math::Func2D*) ;  // Non-static mem-funcs
     void SetContVal(const std::vector<double>&) ;
     void SetScanMode(const char) ;
+    void SetOptimizationTrials(int) ;
 
     // Plot options
     void SetPlotXLabel(const char*) ;
@@ -123,9 +110,16 @@ class ContourFinder : public Base
     //............................................
 
     void FindContour(Cont2D& cont) ;
-    void FindContourOptimal(Cont2D& cont, double*) ;
+    void FindContourFast(Cont2D& cont, double*) ;
     void FindNextContours(double*) ;
+    void FindContourLudicrous() ;
+    void ThreadNextTaskLudicrous(Bundle& in_b, std::vector<double>&) ;
+    void ThreadTaskLudicrous(Bundle& in_b, std::vector<double>&) ;
     void FindContourParallel(Cont2D& cont) ;
+    void SetThreads(int) ;
+    void ThreadTask(Bundle& in_b) ;
+    
+
 
     void Clear() ;
 
@@ -157,16 +151,9 @@ class ContourFinder : public Base
   private:
 
     // flags
-    bool set_n_x_flag         = false ;
-    bool set_n_y_flag         = false ;
     bool set_height_flag      = false ;
     bool set_width_flag       = false ;
-    bool set_x_min_flag       = false ;
-    bool set_x_scale_flag     = false ;
-    bool set_y_scale_flag     = false ;
-    bool set_x_max_flag       = false ;
-    bool set_y_min_flag       = false ;
-    bool set_y_max_flag       = false ;
+    bool set_grid_flag        = false ;
     bool set_grid_vals_flag   = false ;
     bool set_func_flag        = false ;
     bool set_cont_val_flag    = false ;
@@ -181,8 +168,9 @@ class ContourFinder : public Base
     bool make_legend_flag     = false  ;
 
     char scan_mode = 'X' ; 
+    Mode algorithm ;
 
-    double (*func) (double, double)   ;
+    double (*func) (double, double)= NULL ;
     Zaki::Math::Func2D* genFuncPtr = NULL ;
     TMultiGraph *graph = NULL ;
     TLegend *legend    = NULL ;
@@ -190,17 +178,66 @@ class ContourFinder : public Base
     std::string legend_header = "Contours" ;
     bool default_legend_opt = true ; 
 
-    size_t n_x, n_y ;
+    void FindOptimalMode() ;
+    int optimization_trials = 50 ;
+    Mode TimeFunc(std::uniform_real_distribution<double>&, 
+                  std::uniform_real_distribution<double>&) ;
+
+    std::default_random_engine random_engine ;
+
+    Zaki::Math::Grid2D grid ;
     size_t width = 1000, height = 1000 ;
-    double x_min, x_max, y_min, y_max, delta_x, delta_y ;
-    std::string x_scale = "Linear" ; std::string y_scale = "Linear" ;
+    double delta_x, delta_y ;
     std::string x_label="X", y_label ="Y", plot_label="" ;
     bool connected_plot = false  ;
     std::vector<Cont2D> cont_set ;
 
+    int req_threads = 1 ;
     int unfound_contours = 0 ;
 };
 
-// }
+//==============================================================
+// Bundle Class is used for sending information to each thread
+//  in a multithreaded scenario to avoid racing.
+class Bundle : public Base
+{
+  friend class ContourFinder;
+  friend class Cell;
+
+  public:
+    // Constructor 1
+    Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
+    Zaki::Math::Func2D* in_mf) 
+        : Grid(in_g), Con(in_c), MemFunc(in_mf) {}
+
+    // Constructor 2
+    Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
+    double (*in_f)(double, double)) 
+        : Grid(in_g), Con(in_c), Func(in_f) {}
+
+    // Constructor 3
+    Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
+    Zaki::Math::Func2D* in_mf,
+    double (*in_f)(double, double)) 
+        : Grid(in_g), Con(in_c), MemFunc(in_mf), Func(in_f) {}
+    
+    // Constructor 4
+    Bundle(const Zaki::Math::Grid2D& in_g,
+    Zaki::Math::Func2D* in_mf,
+    double (*in_f)(double, double)) 
+        : Grid(in_g), Con(0), MemFunc(in_mf), Func(in_f) {}
+
+    void AddCont(const Cont2D& in_c) { Con = in_c; }
+    Cont2D GetCont() {return Con;}
+      
+  private:
+    Zaki::Math::Grid2D Grid;
+    Cont2D Con ;
+    Zaki::Math::Func2D* MemFunc = NULL;
+    double (*Func)(double, double) = NULL ;
+
+};
+//--------------------------------------------------------------
+} // CONFIND namespace
 //==============================================================
 #endif /*ContourFinder_H*/
