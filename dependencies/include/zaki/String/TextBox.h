@@ -38,6 +38,9 @@ class TextBox
     void SetPadLeft(size_t) ;
     void SetPadRight(size_t) ;
     void SetPadding(size_t, int = -1) ;
+    
+    // Clears the screen first & moves the cursor to (1,1)
+    void EnableClearScreen() ;
 
     void Print() ;
     void MakeFrame() ;
@@ -56,6 +59,8 @@ class TextBox
     Color text_color;
     Color pad_color;
 
+    // Clears the screen first & moves the cursor to (1,1)
+    bool clear_screen = false; 
 
     size_t height = 0, width = 0, l_pad = 1, r_pad = 1 ;
 
