@@ -1,7 +1,6 @@
 #include <set>
 
 #include <Zaki/Vector/Vector_Basic.hpp>
-#include <Zaki/Vector/DataSet.hpp>
 
 #include <Zaki/Util/ObjObserver.hpp>
 
@@ -98,26 +97,6 @@ Zaki::Math::Curve2D CONFIND::Cont2D::ConvertToCurve2D()
 }
 
 //--------------------------------------------------------------
-// Added on Sep 21, 2023
-Zaki::Vector::DataSet CONFIND::Cont2D::ConvertToDataSet() 
-{
-  SortNew() ;
-  
-  Zaki::Vector::DataSet tmp_ds ;
-  tmp_ds.Reserve(2, pts.size()) ;
-
-  tmp_ds[0].label = "X" ;
-  tmp_ds[1].label = "Y" ;
-
-  for (size_t i = 0; i < pts.size(); i++)
-  {
-    tmp_ds[0].vals.emplace_back(pts[i].x) ;
-    tmp_ds[1].vals.emplace_back(pts[i].y) ;
-  }
-  
-  return tmp_ds ;
-}
-
 //--------------------------------------------------------------
 std::ostream& CONFIND::operator << ( std::ostream &output, const CONFIND::Cont2D& c)
 { 

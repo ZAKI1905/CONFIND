@@ -60,8 +60,6 @@ class Cont2D : public Base
 
     Zaki::Math::Curve2D ConvertToCurve2D() ;
 
-    /// Converts the point to a DataSet
-    Zaki::Vector::DataSet ConvertToDataSet() ;
 
 
   private:
