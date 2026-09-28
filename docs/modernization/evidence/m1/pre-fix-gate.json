@@ -1,0 +1,58 @@
+[
+  {
+    "fixture": "small",
+    "build": "Debug",
+    "equal": true,
+    "different_lines": 0,
+    "raw_differences": 0,
+    "curve_point_differences": 0,
+    "first_difference": [],
+    "oracle_sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7",
+    "candidate_sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7"
+  },
+  {
+    "fixture": "small",
+    "build": "Release",
+    "equal": false,
+    "different_lines": 8,
+    "raw_differences": 2,
+    "curve_point_differences": 3,
+    "first_difference": [
+      [
+        7,
+        "RAW\t4\t0x1.00a7b7380b14p+0\t0x1.ffb7414a4d2b3p-1\t0x1.22fad6cb53501p-10\t3ff00a7b7380b140\t3feffb7414a4d2b3\t3f522fad6cb53501",
+        "RAW\t4\t0x1.00a7b7380b13fp+0\t0x1.ffb7414a4d2b3p-1\t0x1.22fad6cb53501p-10\t3ff00a7b7380b13f\t3feffb7414a4d2b3\t3f522fad6cb53501"
+      ]
+    ],
+    "oracle_sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7",
+    "candidate_sha256": "cd90f7164d3398b5d5ed01f0f3ca92bbe1f92b48966db98cf517996b80fe7f0d"
+  },
+  {
+    "fixture": "stellar",
+    "build": "Debug",
+    "equal": true,
+    "different_lines": 0,
+    "raw_differences": 0,
+    "curve_point_differences": 0,
+    "first_difference": [],
+    "oracle_sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0",
+    "candidate_sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0"
+  },
+  {
+    "fixture": "stellar",
+    "build": "Release",
+    "equal": false,
+    "different_lines": 442,
+    "raw_differences": 258,
+    "curve_point_differences": 184,
+    "first_difference": [
+      [
+        16,
+        "RAW\t13\t0x1.7835604b874e9p+50\t0x1.d7aeefc151fb1p+47\t0x1.6666666666666p-1\t4317835604b874e9\t42ed7aeefc151fb1\t3fe6666666666666",
+        "RAW\t13\t0x1.7835604b874eap+50\t0x1.d7aeefc151fb1p+47\t0x1.6666666666666p-1\t4317835604b874ea\t42ed7aeefc151fb1\t3fe6666666666666"
+      ]
+    ],
+    "oracle_sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0",
+    "candidate_sha256": "f2f7cff87475c40480bbcee4da9dd60abca28bfe3a550b11c1f7f39488c6fa93"
+  }
+]
