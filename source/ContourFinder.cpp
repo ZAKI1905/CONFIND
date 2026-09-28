@@ -5,9 +5,7 @@
 #include <stdexcept>
 #include "IndexedExecutor.hpp"
 
-
 #include <Zaki/Vector/Vector_Basic.hpp>
-
 
 // Local headers
 #include "Confind/ContourFinder.hpp"
@@ -17,105 +15,100 @@
 //  ContourFinder Class begins
 //--------------------------------------------------------------
 // Default Constructor
-CONFIND::ContourFinder::ContourFinder() 
+CONFIND::ContourFinder::ContourFinder()
   : Base("ContourFinder")
 {
-  (void)0 ;
 
-} 
+}
 
 //--------------------------------------------------------------
 // Destructor
-CONFIND::ContourFinder::~ContourFinder() 
-{ 
-  (void)0 ;
-  // if (cpy_cons_called)  delete genFuncPtr; 
-} 
-
-//--------------------------------------------------------------
-// Assignment operator
-CONFIND::ContourFinder&
-CONFIND::ContourFinder::operator=(const ContourFinder &other) 
+CONFIND::ContourFinder::~ContourFinder()
 {
-  (void)0 ;
-
-  if(this == &other) return *this ;
-  else
-  {
-  set_grid_flag = other.set_grid_flag ;
-  set_grid_vals_flag = other.set_grid_vals_flag ;
-  set_func_flag = other.set_func_flag ;
-  set_cont_val_flag = other.set_cont_val_flag ;
-  set_mem_func_flag = other.set_mem_func_flag ;
-  cpy_cons_called = other.cpy_cons_called ;
-  set_scan_mode_flage = other.set_scan_mode_flage ;
-  scan_mode = other.scan_mode ;
-  algorithm = other.algorithm ;
-  func = other.func ;
-  grid = other.grid ;
-  delta_x = other.delta_x ; delta_y = other.delta_y ;
-  cont_set = other.cont_set ;
-  unfound_contours = other.unfound_contours ;
-
-  // Pointer member variables
-  if(other.genFuncPtr)
-    genFuncPtr = other.genFuncPtr->Clone() ;
-
-
-
-  return *this ;
-  }
+  // if (cpy_cons_called)  delete genFuncPtr;
 }
 
 //--------------------------------------------------------------
-// Copy constructor
-// Copies everything!
-CONFIND::ContourFinder::ContourFinder(const ContourFinder &zc2) 
-  : Base("ContourFinder"),
-  set_grid_flag(zc2.set_grid_flag),
-  set_grid_vals_flag(zc2.set_grid_vals_flag),
-  set_func_flag(zc2.set_func_flag),
-  set_cont_val_flag(zc2.set_cont_val_flag),
-  set_mem_func_flag(zc2.set_mem_func_flag),
-  cpy_cons_called(zc2.cpy_cons_called),
-  set_scan_mode_flage(zc2.set_scan_mode_flage),
-  scan_mode(zc2.scan_mode),
-  algorithm(zc2.algorithm),
-  func(zc2.func),
-  grid(zc2.grid),
-  delta_x(zc2.delta_x), delta_y(zc2.delta_y),
-  cont_set(zc2.cont_set),
-  unfound_contours(zc2.unfound_contours)
-{
-  (void)0 ;
-    
-    
-  if(zc2.genFuncPtr)
-    genFuncPtr = zc2.genFuncPtr->Clone() ;
+// Copy every numerical/configuration field, clone owned evaluators before assignment.
+CONFIND::ContourFinder::ContourFinder(const ContourFinder& other) : Base(other),
+  set_grid_flag(other.set_grid_flag), set_grid_vals_flag(other.set_grid_vals_flag),
+  set_func_flag(other.set_func_flag), set_cont_val_flag(other.set_cont_val_flag),
+  set_mem_func_flag(other.set_mem_func_flag), cpy_cons_called(other.cpy_cons_called),
+  set_scan_mode_flage(other.set_scan_mode_flage), scan_mode(other.scan_mode),
+  algorithm(other.algorithm), func(other.func),
+  genFuncPtr(other.genFuncPtr ? other.genFuncPtr->Clone() : nullptr),
+  grid(other.grid), delta_x(other.delta_x), delta_y(other.delta_y),
+  cont_set(other.cont_set), unfound_contours(other.unfound_contours) {}
 
-
+void CONFIND::ContourFinder::Swap(ContourFinder& other) {
+  using std::swap;
+  swap(wrk_dir,other.wrk_dir);
+  swap(name,other.name);
+  swap(set_name_flag,other.set_name_flag);
+  swap(set_wrk_dir_flag,other.set_wrk_dir_flag);
+  swap(set_grid_flag,other.set_grid_flag);
+  swap(set_grid_vals_flag,other.set_grid_vals_flag);
+  swap(set_func_flag,other.set_func_flag);
+  swap(set_cont_val_flag,other.set_cont_val_flag);
+  swap(set_mem_func_flag,other.set_mem_func_flag);
+  swap(cpy_cons_called,other.cpy_cons_called);
+  swap(set_scan_mode_flage,other.set_scan_mode_flage);
+  swap(scan_mode,other.scan_mode);
+  swap(algorithm,other.algorithm);
+  swap(func,other.func);
+  swap(genFuncPtr,other.genFuncPtr);
+  swap(grid,other.grid);
+  swap(delta_x,other.delta_x);
+  swap(delta_y,other.delta_y);
+  swap(cont_set,other.cont_set);
+  swap(unfound_contours,other.unfound_contours);
+}
+CONFIND::ContourFinder& CONFIND::ContourFinder::operator=(const ContourFinder& other) {
+  if (this != &other) { ContourFinder copy(other); Swap(copy); }
+  return *this;
+}
+CONFIND::ContourFinder::ContourFinder(ContourFinder&& other) : ContourFinder() { Swap(other); }
+CONFIND::ContourFinder& CONFIND::ContourFinder::operator=(ContourFinder&& other) {
+  if (this != &other) { ContourFinder moved(std::move(other)); Swap(moved); }
+  return *this;
 }
 
-//--------------------------------------------------------------
-void CONFIND::ContourFinder::SetGrid(const Zaki::Math::Grid2D& g) 
+namespace {
+size_t SampleCount(const Zaki::Math::Grid2D& grid) {
+  const size_t nx=grid.xAxis.res, ny=grid.yAxis.res, limit=std::numeric_limits<size_t>::max();
+  if (!nx || !ny || nx==limit || ny==limit || nx+1>limit/(ny+1) ||
+      (nx+1)*(ny+1)>std::vector<double>().max_size())
+    throw std::invalid_argument("CONFIND: invalid grid dimensions");
+  for (const auto* axis : {&grid.xAxis, &grid.yAxis})
+    if (axis->scale!="Linear" && axis->scale!="Log")
+      throw std::invalid_argument("CONFIND: unsupported axis scale");
+  // No NaN or reversed-axis policy change: historical numerical semantics remain.
+  return (nx+1)*(ny+1);
+}
+}
+void CONFIND::ContourFinder::ValidateReady() const {
+  if (!set_grid_flag || !set_cont_val_flag || cont_set.empty())
+    throw std::invalid_argument("CONFIND: nonempty levels and a grid are required");
+  SampleCount(grid);
+}
+
+void CONFIND::ContourFinder::SetGrid(const Zaki::Math::Grid2D& g)
 {
+  SampleCount(g);
   grid = g ;
-  set_grid_flag = true ; 
+  set_grid_flag = true ;
   SetDeltas() ;
 }
 
 //--------------------------------------------------------------
 
-
 //--------------------------------------------------------------
-
 
 //--------------------------------------------------------------
 size_t CONFIND::ContourFinder::GetN_X() const
 {
   if(! set_grid_flag)
   {
-    (void)0 ;
     return 0 ;
   }
 
@@ -123,11 +116,10 @@ size_t CONFIND::ContourFinder::GetN_X() const
 }
 
 //--------------------------------------------------------------
-size_t CONFIND::ContourFinder::GetN_Y() const 
+size_t CONFIND::ContourFinder::GetN_Y() const
 {
   if(! set_grid_flag)
   {
-    (void)0 ;
     return 0 ;
   }
 
@@ -139,7 +131,6 @@ double CONFIND::ContourFinder::GetX_Min() const
 {
   if(! set_grid_flag)
   {
-    (void)0 ;
     return 0 ;
   }
 
@@ -148,10 +139,9 @@ double CONFIND::ContourFinder::GetX_Min() const
 
 //--------------------------------------------------------------
 double CONFIND::ContourFinder::GetX_Max() const
-{  
+{
   if(! set_grid_flag)
   {
-    (void)0 ;
     return 0 ;
   }
 
@@ -163,7 +153,6 @@ double CONFIND::ContourFinder::GetY_Min() const
 {
   if(! set_grid_flag)
   {
-    (void)0 ;
     return 0 ;
   }
 
@@ -175,7 +164,6 @@ double CONFIND::ContourFinder::GetY_Max() const
 {
   if(! set_grid_flag)
   {
-    (void)0 ;
     return 0 ;
   }
 
@@ -199,17 +187,18 @@ std::pair<double, double> CONFIND::ContourFinder::ij_2_xy(size_t i, size_t j) co
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::SetGridVals(const Mode& in_mode)
 {
+  ValidateReady();
   if (!set_func_flag && !set_mem_func_flag)
     throw std::invalid_argument("CONFIND: function not set");
+  if (unfound_contours == 0) return;
   algorithm = in_mode;
   if (algorithm == Fast)
   {
-    double* m_GridValArr = nullptr;
-    if (unfound_contours > 1)
-      m_GridValArr = new double[(grid.xAxis.res+1)*(grid.yAxis.res+1)];
+    std::vector<double> storage;
+    if (unfound_contours > 1) storage.resize(SampleCount(grid));
+    double* m_GridValArr = storage.empty() ? nullptr : storage.data();
     FindContourFast(cont_set[cont_set.size()-unfound_contours], m_GridValArr);
     if (unfound_contours > 0) FindNextContours(m_GridValArr);
-    if (m_GridValArr) delete m_GridValArr;
   }
   else if (algorithm == Normal)
   {
@@ -220,11 +209,13 @@ void CONFIND::ContourFinder::SetGridVals(const Mode& in_mode)
   set_grid_vals_flag = true;
 }
 
-
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::SetGridVals(Zaki::Math::GridVals_2D* in_grid_v_2d)
 {
-  (void)0;
+  ValidateReady();
+  if (!in_grid_v_2d || !in_grid_v_2d->m_GridValArr ||
+      in_grid_v_2d->n_x != grid.xAxis.res || in_grid_v_2d->n_y != grid.yAxis.res)
+    throw std::invalid_argument("CONFIND: null or mismatched sampled grid");
 
   FindNextContours(in_grid_v_2d->m_GridValArr) ;
 
@@ -234,6 +225,7 @@ void CONFIND::ContourFinder::SetGridVals(Zaki::Math::GridVals_2D* in_grid_v_2d)
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::SetDeltas()
 {
+  if (!set_grid_flag) throw std::invalid_argument("CONFIND: grid not set");
   if (grid.xAxis.scale == "Linear")
   {
     delta_x = (grid.xAxis.Max() - grid.xAxis.Min()) / grid.xAxis.res ;
@@ -258,7 +250,6 @@ std::pair<double, double> CONFIND::ContourFinder::GetDeltas() const
 {
   if (!set_grid_flag)
     {
-      (void)0 ;
       return {-1, -1};
     }
   return {delta_x, delta_y} ;
@@ -269,7 +260,6 @@ void CONFIND::ContourFinder::SetScanMode(const char in_scan_mode)
 {
   if(in_scan_mode != 'X' || in_scan_mode != 'Y')
   {
-    (void)0 ;
     return;
   }
 
@@ -277,7 +267,6 @@ void CONFIND::ContourFinder::SetScanMode(const char in_scan_mode)
   set_scan_mode_flage = true ;
   char tmp[100] ;
   snprintf(tmp, sizeof(tmp), "Scan mode is set to '%c'.", in_scan_mode) ;
-  (void)0 ;
 }
 
 //--------------------------------------------------------------
@@ -288,29 +277,23 @@ char CONFIND::ContourFinder::GetScanMode() const
 
 //--------------------------------------------------------------
 // Finding the optimal mode:
-//  ContourFinder will find the best mode depending on the 
+//  ContourFinder will find the best mode depending on the
 //  average function call time. By default, '50' points are
 //  randomly chosen on the grid to ensure a more precise
-//  decision. 'SetOptimizationTrials' can be used to change 
+//  decision. 'SetOptimizationTrials' can be used to change
 //  this number for cases where some areas of the grid
 //  might be unusually fast or slow.
-
 
 //--------------------------------------------------------------
 // Sets the optimization_trials value in 'TimeFunc'
 // Also see: 'FindOptimalMode'
 
-
 //--------------------------------------------------------------
 // Timing the function or member-function
-
 
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::FindContour(Cont2D& cont)
 {
-  (void)0 ;
-
-  (void)0 ;
 
   // SetDeltas() ;
 
@@ -351,11 +334,9 @@ void CONFIND::ContourFinder::FindContour(Cont2D& cont)
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr)
 {
-  (void)0 ;
 
   char tmp[150] ;
   snprintf(tmp, sizeof(tmp), "%.2e", cont.val) ;
-    
 
   // SetDeltas() ;
 
@@ -367,10 +348,10 @@ void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr
 
   size_t n_x = grid.xAxis.res ;
   size_t n_y = grid.yAxis.res ;
-    
+
   // Instantiate a cell
   Cell new_cell(0, delta_x, 0, delta_y, &b, cont.val) ;
-  //============LOOP STARTS============ 
+  //============LOOP STARTS============
   for (size_t j = 0; j < n_y; j++)
   {
     // corners.clear() ;
@@ -430,11 +411,11 @@ void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr
         // For the last top-right corner cell top-right vertex (last element)
         if ( j == n_y - 1 && i == n_x - 1 )
           in_gridValArr[(n_x+1)*(n_y+1) - 1] = new_cell.GetFuncVals(3) ;
-        
+
       }
     }
   }
-  //============END of LOOP============ 
+  //============END of LOOP============
 
   // Marking the contour as found
   cont.SetFound();
@@ -444,10 +425,9 @@ void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
 {
-  (void)0 ;
 
   // ......................
-  // May 17, 2022: 
+  // May 17, 2022:
   // I changed the initial k from '1' to '0'
   // so I can use FindNextContours for the first contour too.
   // if the first contour is found, it will be skipped anyways!
@@ -460,18 +440,16 @@ void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
     {
       continue ;
     }
-    
-    (void)0 ;
 
     // SetDeltas() ;
 
     Bundle b(grid, cont_set[k], genFuncPtr, func) ;
     size_t n_x = grid.xAxis.res ;
     size_t n_y = grid.yAxis.res ;
-      
+
     // Instantiate a cell
     Cell new_cell(0, delta_x, 0, delta_y, &b, cont_set[k].val) ;
-    //============LOOP STARTS============ 
+    //============LOOP STARTS============
     for (size_t j = 0; j < n_y; j++)
     {
       // corners.clear() ;
@@ -492,98 +470,59 @@ void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
         cont_set[k].AddPts(new_cell.GetContourCoords()) ;
       }
     }
-    //============END of LOOP============ 
+    //============END of LOOP============
     // Marking the contour as found
     cont_set[k].SetFound();
     unfound_contours--;
   }
-  //============END of Contour LOOP============ 
+  //============END of Contour LOOP============
 }
 
 //--------------------------------------------------------------
 
+//--------------------------------------------------------------
 
 //--------------------------------------------------------------
 
-
 //--------------------------------------------------------------
-
-
-//--------------------------------------------------------------
-
 
 //--------------------------------------------------------------
 // Parallel evaluation of the contours
 
-
 //--------------------------------------------------------------
 
-                 
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::Print() const
 {
   if (! set_grid_vals_flag )
     {
-      (void)0;
       return ;
     }
-  
+
   for (size_t i = 0; i < cont_set.size(); i++)
   {
     char tmp[100] ;
     snprintf(tmp, sizeof(tmp), "==> Printing Contour = %f ...", cont_set[i].val) ;
-    (void)0;
 
     std::cout << cont_set[i] ;
   }
 }
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetFunc(double (*f)(double, double) ) 
-{
-  func = f;
-
-  if(func) 
-  {
-    (void)0 ;
-    set_func_flag = true ;
-
-    // Reseting 'genFuncPtr'
-    if(genFuncPtr)
-    {
-      genFuncPtr.reset() ;
-      set_mem_func_flag = false ; 
-    }
-  }
-  else
-    (void)0 ;
-
+void CONFIND::ContourFinder::SetFunc(double (*f)(double,double)) {
+  if (!f) throw std::invalid_argument("CONFIND: null function");
+  genFuncPtr.reset(); set_mem_func_flag=false; func=f; set_func_flag=true;
 }
 
 //--------------------------------------------------------------
 // Non-static mem-funcs
-void CONFIND::ContourFinder::SetMemFunc(Zaki::Math::Func2D* gen_Fun) 
-{
-  genFuncPtr = std::unique_ptr<Zaki::Math::Func2D>(gen_Fun) ;
-
-  if(genFuncPtr) 
-  {
-    (void)0 ;
-    set_mem_func_flag = true ;
-
-    // Reseting 'func'
-    if(func)
-    {
-      func = nullptr ;
-      set_func_flag = false ; 
-    }
-  }
-  else
-    (void)0 ;
+void CONFIND::ContourFinder::SetMemFunc(std::unique_ptr<Zaki::Math::Func2D> evaluator) {
+  if (!evaluator) throw std::invalid_argument("CONFIND: null owned evaluator");
+  genFuncPtr=std::move(evaluator); set_mem_func_flag=true; func=nullptr; set_func_flag=false;
 }
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in) 
+void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
 {
   // cont_set.clear() ;
   for (size_t i = 0; i < cont_val_in.size(); i++)
@@ -598,8 +537,9 @@ void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
 
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in,
-                                        const std::vector<std::string>& in_label) 
+                                        const std::vector<std::string>& in_label)
 {
+  if (in_label.size()!=cont_val_in.size()) throw std::invalid_argument("CONFIND: label count mismatch");
   // cont_set.clear() ;
   for (size_t i = 0; i < cont_val_in.size(); i++)
   {
@@ -618,7 +558,6 @@ void CONFIND::ContourFinder::ExportContour(const Zaki::String::Directory& f_name
 {
   if (! set_grid_vals_flag )
   {
-    (void)0;
     return ;
   }
 
@@ -628,29 +567,22 @@ void CONFIND::ContourFinder::ExportContour(const Zaki::String::Directory& f_name
     {
       char tmp[150] ;
       snprintf(tmp, sizeof(tmp), "Contour '%.2e' hasn't been found yet, skipping to the next one.", cont_set[i].val) ;
-      (void)0 ;
       continue ;
-    }  
+    }
     cont_set[i].Export(wrk_dir + f_name, mode) ;
   }
-
-  (void)0 ;
 }
 //--------------------------------------------------------------
 
-
-//--------------------------------------------------------------
-
-
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
 
 //--------------------------------------------------------------
 
-
 //--------------------------------------------------------------
 
+//--------------------------------------------------------------
 
 //--------------------------------------------------------------
 // {
@@ -658,17 +590,14 @@ void CONFIND::ContourFinder::ExportContour(const Zaki::String::Directory& f_name
 
 //--------------------------------------------------------------
 
-
 //--------------------------------------------------------------
 // {
 // }
 
 //--------------------------------------------------------------
-
 
 //--------------------------------------------------------------
 // Commented on May 1, 2023:
-
 
 //--------------------------------------------------------------
 std::string CONFIND::ContourFinder::GetXScale()  const
@@ -687,6 +616,7 @@ std::string CONFIND::ContourFinder::GetYScale()  const
 void CONFIND::ContourFinder::Clear()
 {
   cont_set.clear() ;
+  unfound_contours = 0;
   set_grid_flag         = false ;
   set_grid_vals_flag   = false ;
   set_func_flag        = false ;
@@ -700,7 +630,7 @@ void CONFIND::ContourFinder::Clear()
 
 //--------------------------------------------------------------
 /// Returns 'cont_set'
-std::vector<CONFIND::Cont2D> CONFIND::ContourFinder::GetContourSet() const 
+std::vector<CONFIND::Cont2D> CONFIND::ContourFinder::GetContourSet() const
 {
   return cont_set ;
 }
@@ -710,7 +640,8 @@ std::vector<CONFIND::Cont2D> CONFIND::ContourFinder::GetContourSet() const
 // Samples are independent indexed tasks; contour assembly starts only after join.
 void CONFIND::ContourFinder::Evaluate(const EvaluatorFactory& factory, ThreadingOptions options)
 {
-  if (!factory || !set_grid_flag || !set_cont_val_flag)
+  ValidateReady();
+  if (!factory)
     throw std::invalid_argument("CONFIND: grid, levels and evaluator factory required");
   const size_t nx = grid.xAxis.res, ny = grid.yAxis.res;
   const size_t limit = std::numeric_limits<size_t>::max();
@@ -736,6 +667,9 @@ void CONFIND::ContourFinder::Evaluate(const EvaluatorFactory& factory, Threading
     const double x = x0 + i*delta_x, y = y0 + j*delta_y;
     values[k] = evaluators[worker](log_x ? pow(10,x) : x, log_y ? pow(10,y) : y);
   });
-  FindNextContours(values.data());
+  auto saved_evaluator = std::move(genFuncPtr);
+  try { FindNextContours(values.data()); }
+  catch (...) { genFuncPtr=std::move(saved_evaluator); throw; }
+  genFuncPtr=std::move(saved_evaluator);
   set_grid_vals_flag = true;
 }

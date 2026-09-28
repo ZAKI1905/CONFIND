@@ -45,7 +45,7 @@ struct triangle
   // vertex v[3] ;
   std::array<vertex, 3> v;
 
-  triangle(const vertex& v_1, const vertex& v_2, const vertex& v_3) 
+  triangle(const vertex& v_1, const vertex& v_2, const vertex& v_3)
     : v({v_1, v_2, v_3}) {} ;
 
   int status(const double& cont) const
@@ -60,7 +60,7 @@ struct triangle
       if( sum == -1) // --> (-1, -1, +1)
       // (c-3) Two vertices lie below and one above the contour level: (-1, -1, +1)
         return 3;
-      else // --> (+1, +1, +1): 
+      else // --> (+1, +1, +1):
       // (j-10) All the vertices lie above the contour level.
         return 10;
     }
@@ -71,11 +71,11 @@ struct triangle
       if( sum == 1) // --> (+1, +1, -1)
       // (f-6)  One vertex lies below and two above the contour level: (-1, +1, +1)
         return 6;
-      else // --> (-1, -1, -1): 
+      else // --> (-1, -1, -1):
       // (a-1) All the vertices lie below the contour level.
         return 1;
     }
-    
+
     else if ( sum == 2 ) // : (1, 1, 0)
     // i) One vertex lies on and two above the contour level.
       return 9;
@@ -96,7 +96,7 @@ struct triangle
 
     // g) Three vertices lie on the contour level.
     else
-      return 7 ; 
+      return 7 ;
 
   }
 } ;
@@ -108,7 +108,7 @@ class Cell : public Base
   //------------------------------------------------
 
   public:
-    
+
     // Constructor
     // Default
     Cell() ;
@@ -120,9 +120,9 @@ class Cell : public Base
     Cell(const size_t& i_x, const double& lx, const size_t& i_y, const double& ly,
           Bundle*, const double& c) ;
 
-    // Copy constructor 
+    // Copy constructor
     Cell(const Cell &c2) = delete ;
-    
+
     // Assignment operator
     Cell& operator=(const Cell &c2) = delete ;
 
@@ -146,7 +146,7 @@ class Cell : public Base
     void EvalCenter() ;
 
     // evaluates the function values
-    double EvalFunc(const double& x, const double& y) ; 
+    double EvalFunc(const double& x, const double& y) ;
 
     //............................................
     // Getters
@@ -162,20 +162,19 @@ class Cell : public Base
     // size_t GetXIdx()   const ;
     // size_t GetYIdx()   const ;
     double GetLX()     const ;
-    double GetLY()     const ;  
-    
+    double GetLY()     const ;
+
     double GetFuncVals(const size_t&) const ;
     double GetContourValue() const ;
     const std::vector<Zaki::Physics::Coord3D>& GetContourCoords() const ;
     int GetStatus() ;
     //............................................
 
-
   private:
 
     // Grid minimum x & y
     double G_x_min, G_y_min ;
-    
+
     // Cell minimum x & y
     double x_min, y_min ;
 
@@ -195,7 +194,7 @@ class Cell : public Base
                                       {{0, 0, 0}},
                                       {{0, 0, 0}},
                                       {{0, 0, 0}} }};
-    
+
     std::vector<triangle> triangle_set ;
     std::vector<Zaki::Physics::Coord3D> contour_coords;
 
@@ -218,7 +217,7 @@ class Cell : public Base
 
     // Case 4: d) One vertex lies below and two on the contour level. (-1, 0, 0)
     // Case 8: h) Two vertices lie on and one above the contour level. (+1, 0, 0)
-    void case48(const triangle&)     ; 
+    void case48(const triangle&)     ;
 
     // Case 3: c) Two vertices lie below and one above the contour level.
     // Case 6: f) One vertex lies below and two above the contour level.

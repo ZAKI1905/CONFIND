@@ -1,10 +1,7 @@
 #ifndef CONFIND_Cont2D_H
 #define CONFIND_Cont2D_H
 
-
 // #include <random>
-
-
 
 #include <Zaki/Physics/Coordinate.hpp>
 // #include <Zaki/Math/MemFuncWrapper.hpp>
@@ -24,7 +21,7 @@ class Cont2D : public Base
   friend std::ostream  & operator<<(std::ostream &os, const Cont2D& p);
   //--------------------------------------------------------------
   public:
-    
+
     // Constructor
     Cont2D(double) ;
 
@@ -48,8 +45,6 @@ class Cont2D : public Base
 
     Zaki::Math::Curve2D ConvertToCurve2D() ;
 
-
-
   private:
     double val;
     std::vector<Zaki::Physics::Coord3D> pts;
@@ -58,20 +53,18 @@ class Cont2D : public Base
     bool set_label_flag = false ;
     bool is_found_flag = false ;
 
-
     // The most bottom_left point (used for sorting)
-    Zaki::Physics::Coord3D bottom_left ;
+    Zaki::Physics::Coord3D bottom_left{} ;
     int Orientation(const Zaki::Physics::Coord3D&, const Zaki::Physics::Coord3D&, const Zaki::Physics::Coord3D&) const;
-
 
     void Export(const Zaki::String::Directory& f_name, const Zaki::File::FileMode& mode) ;
 
     void Sort() ;
 
-    bool comp_Orient(const Zaki::Physics::Coord3D &, const Zaki::Physics::Coord3D &) const; 
+    bool comp_Orient(const Zaki::Physics::Coord3D &, const Zaki::Physics::Coord3D &) const;
     bool sort_cw = true ;
     bool already_sorted = false ;
-    void Clear() ; 
+    void Clear() ;
 };
 
 std::ostream& operator << ( std::ostream &output, const Cont2D& c ) ;

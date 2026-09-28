@@ -4,15 +4,10 @@
 #include <functional>
 #include "Confind/ThreadingOptions.hpp"
 
-
-
-
-
 #include <Zaki/Math/Func2D.hpp>
 #include <Zaki/Math/MemFuncWrapper.hpp>
 #include <Zaki/Math/Math_Core.hpp>
 #include <Zaki/Vector/DataSet.hpp>
-
 
 // Local headers
 #include "Confind/Cell.hpp"
@@ -27,16 +22,18 @@ namespace CONFIND
 class ContourFinder : public Base
 {
 
-  friend class Cell ; 
+  friend class Cell ;
  //--------------------------------------------------------------
   public:
 
     //............................................
     /// Constructor
     ContourFinder() ;
-    
+
     /// Destructor
     ~ContourFinder() ;
+    ContourFinder(ContourFinder&&);
+    ContourFinder& operator=(ContourFinder&&);
 
     /// Copy constructor
     ContourFinder(const ContourFinder &zc2) ;
@@ -45,10 +42,9 @@ class ContourFinder : public Base
     ContourFinder& operator=(const ContourFinder &zc2) ;
     //............................................
 
-
     enum Mode
     {
-      Normal = 0, Fast    
+      Normal = 0, Fast
     } ;
 
     //............................................
@@ -65,13 +61,11 @@ class ContourFinder : public Base
     void Evaluate(const EvaluatorFactory&, ThreadingOptions = {});
     void SetGridVals(Zaki::Math::GridVals_2D*)    ;
 
-    void SetFunc(double (*f) (const double, const double) ) ; // Normal funcs 
-    void SetMemFunc(Zaki::Math::Func2D*) ;  // Non-static mem-funcs
+    void SetFunc(double (*f) (const double, const double) ) ; // Normal funcs
+    void SetMemFunc(std::unique_ptr<Zaki::Math::Func2D>) ;  // Non-static mem-funcs
     void SetContVal(const std::vector<double>&) ;
     void SetContVal(const std::vector<double>&, const std::vector<std::string>& label) ;
     void SetScanMode(const char) ;
-
-    
 
     //............................................
 
@@ -90,29 +84,23 @@ class ContourFinder : public Base
     double GetY_Min() const ;
     double GetY_Max() const ;
     char GetScanMode() const;
-    
+
     /// Returns 'cont_set'
     std::vector<Cont2D> GetContourSet() const ;
 
     std::pair<double, double> ij_2_xy(const size_t i, const size_t j) const ;
-    
+
     void Print() const override;
     void ExportContour(const Zaki::String::Directory& f_name, const Zaki::File::FileMode& mode) ;
-
-
 
  //--------------------------------------------------------------
   private:
 
+    void Swap(ContourFinder&);
+    void ValidateReady() const;
     void FindContour(Cont2D& cont) ;
     void FindContourFast(Cont2D& cont, double*) ;
     void FindNextContours(double*) ;
-
-
-
-
-
-
 
     // flags
     bool set_grid_flag        = false ;
@@ -123,7 +111,7 @@ class ContourFinder : public Base
     bool cpy_cons_called      = false ;
     bool set_scan_mode_flage  = false ;
 
-    char scan_mode = 'X' ; 
+    char scan_mode = 'X' ;
     Mode algorithm = Fast ;
 
     //............................................
@@ -133,18 +121,11 @@ class ContourFinder : public Base
     std::unique_ptr<Zaki::Math::Func2D> genFuncPtr = nullptr ;
     //............................................
 
-
-
-
-
-
-
     Zaki::Math::Grid2D grid{} ;
     double delta_x = 0, delta_y = 0 ;
     std::vector<Cont2D> cont_set ;
 
-
-    unsigned int unfound_contours = 0 ;
+    size_t unfound_contours = 0 ;
 };
 
 //==============================================================
@@ -160,8 +141,7 @@ class MemFuncContWrapper : public Base
     MemFuncContWrapper(const FuncObj& obj, const MemFuncPtr& memFn)
       : Base("MemFuncContWrapper")
     {
-      (void)0 ;
-      cont_finder.SetMemFunc(new Zaki::Math::MemFuncWrapper<FuncObj, double (FuncObj::*)(double, double)>(obj, memFn)) ;
+      cont_finder.SetMemFunc(std::make_unique<Zaki::Math::MemFuncWrapper<FuncObj, double (FuncObj::*)(double, double)>>(obj, memFn)) ;
     }
     ~MemFuncContWrapper(){}
 
@@ -172,8 +152,7 @@ class MemFuncContWrapper : public Base
 
     void UpdateMemFunc(const FuncObj& obj, const MemFuncPtr& memFn)
     {
-      (void)0 ;
-      cont_finder.SetMemFunc(new Zaki::Math::MemFuncWrapper<FuncObj, double (FuncObj::*)(double, double)>(obj, memFn)) ;
+      cont_finder.SetMemFunc(std::make_unique<Zaki::Math::MemFuncWrapper<FuncObj, double (FuncObj::*)(double, double)>>(obj, memFn)) ;
     }
 
     ContourFinder* operator->() {

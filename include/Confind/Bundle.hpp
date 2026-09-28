@@ -1,15 +1,11 @@
 #ifndef CONFIND_Bundle_H
 #define CONFIND_Bundle_H
 
-
 // #include <random>
-
-
 
 #include <Zaki/Math/Func2D.hpp>
 #include <Zaki/Math/Math_Core.hpp>
 // #include <Zaki/File/VecSaver.hpp>
-
 
 // Local headers
 // #include "Confind/Cell.hpp"
@@ -29,45 +25,40 @@ class Bundle : public Base
     // Constructor 0
     Bundle() : Base("Bundle"), Con(0)
     {
-        (void)0 ;
     }
 
     // Constructor 1
     Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
-    const std::unique_ptr<Zaki::Math::Func2D>& in_mf) 
+    const std::unique_ptr<Zaki::Math::Func2D>& in_mf)
         : Base("Bundle"), Grid(in_g), Con(in_c)
     {
-        (void)0 ;
       if(in_mf)
         MemFunc = in_mf->Clone() ;
     }
 
     // Constructor 2
     Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
-    double (*in_f)(const double, const double)) 
+    double (*in_f)(const double, const double))
         : Base("Bundle"), Grid(in_g), Con(in_c), Func(in_f)
     {
-        (void)0 ;
     }
 
     // Constructor 3
     Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
     const std::unique_ptr<Zaki::Math::Func2D>& in_mf,
-    double (*in_f)(const double, const double)) 
+    double (*in_f)(const double, const double))
         : Base("Bundle"), Grid(in_g), Con(in_c), Func(in_f)
     {
-        (void)0 ;
       if(in_mf)
         MemFunc = in_mf->Clone() ;
     }
-    
+
     // Constructor 4
     Bundle(const Zaki::Math::Grid2D& in_g,
     const std::unique_ptr<Zaki::Math::Func2D>& in_mf,
-    double (*in_f)(const double, const double)) 
+    double (*in_f)(const double, const double))
         : Base("Bundle"), Grid(in_g), Con(0), Func(in_f)
     {
-        (void)0 ;
       if(in_mf)
         MemFunc = in_mf->Clone() ;
     }
@@ -76,8 +67,6 @@ class Bundle : public Base
     Bundle(const Bundle& other)
       : Base("Bundle"), Grid(other.Grid), Con(other.Con), Func(other.Func)
     {
-      (void)0 ;
-
 
         if(other.MemFunc)
         MemFunc = other.MemFunc->Clone() ;
@@ -86,30 +75,25 @@ class Bundle : public Base
 
     ~Bundle()
     {
-        (void)0 ;
     }
-    
+
     void AddCont(const Cont2D& in_c) { Con = in_c; }
     void AddGrid(const Zaki::Math::Grid2D& in_g) { Grid = in_g; }
 
-    void AddMemFunc(const std::unique_ptr<Zaki::Math::Func2D>& in_mf) 
-    { 
+    void AddMemFunc(const std::unique_ptr<Zaki::Math::Func2D>& in_mf)
+    {
       if(in_mf)
-        MemFunc  = in_mf->Clone(); 
-      else
-        (void)0 ;
+        MemFunc  = in_mf->Clone();
     }
-    
-    void AddFunc(double (*in_f)(const double, const double)) 
-    { 
+
+    void AddFunc(double (*in_f)(const double, const double))
+    {
       if(in_f)
         Func = in_f;
-      else
-        (void)0 ;
     }
 
     Cont2D GetCont() {return Con;}
-      
+
   private:
     Zaki::Math::Grid2D Grid;
     Cont2D Con ;
