@@ -1,0 +1,23 @@
+Test project /private/tmp/confind20-20260928/modern-release
+    Start 1: historical_serial
+1/9 Test #1: historical_serial ................   Passed    0.26 sec
+    Start 2: historical_export
+2/9 Test #2: historical_export ................   Passed    0.23 sec
+    Start 3: historical_samples_workers_1
+3/9 Test #3: historical_samples_workers_1 .....   Passed    0.03 sec
+    Start 4: historical_samples_workers_2
+4/9 Test #4: historical_samples_workers_2 .....   Passed    0.03 sec
+    Start 5: historical_samples_workers_4
+5/9 Test #5: historical_samples_workers_4 .....   Passed    0.03 sec
+    Start 6: historical_samples_workers_8
+6/9 Test #6: historical_samples_workers_8 .....   Passed    0.04 sec
+    Start 7: ownership_inputs_exceptions
+7/9 Test #7: ownership_inputs_exceptions ......   Passed    0.23 sec
+    Start 8: scheduler_stress_80_runs
+8/9 Test #8: scheduler_stress_80_runs .........   Passed    1.80 sec
+    Start 9: installed_package_consumer
+9/9 Test #9: installed_package_consumer .......   Passed    1.60 sec
+
+100% tests passed, 0 tests failed out of 9
+
+Total Test time (real) =   4.26 sec
