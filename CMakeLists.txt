@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.22)
 project(CONFIND VERSION 2.0.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 find_package(Zaki 2.0 CONFIG REQUIRED)
