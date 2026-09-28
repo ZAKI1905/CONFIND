@@ -1,6 +1,0 @@
-/*          Automatically generated             */
-// The configured options and settings for CONFIND
-#define CONFIND_VERSION_MAJOR ${CONFIND_VERSION_MAJOR}
-#define CONFIND_VERSION_MINOR ${CONFIND_VERSION_MINOR}
-#define CONFIND_VERSION_STR "${CONFIND_VERSION_MAJOR}.${CONFIND_VERSION_MINOR}"
-#define CONFIND_RELEASE_DATE "${CONFIND_RELEASE_DATE}"
