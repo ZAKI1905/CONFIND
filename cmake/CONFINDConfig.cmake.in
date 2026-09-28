@@ -1,0 +1,6 @@
+@PACKAGE_INIT@
+include(CMakeFindDependencyMacro)
+find_dependency(Zaki 2.0 CONFIG)
+find_dependency(Threads)
+include("${CMAKE_CURRENT_LIST_DIR}/CONFINDTargets.cmake")
+check_required_components(CONFIND)

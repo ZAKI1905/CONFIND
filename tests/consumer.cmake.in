@@ -1,0 +1,14 @@
+set(prefix "@CMAKE_CURRENT_BINARY_DIR@/consumer-install")
+set(consumer_build "@CMAKE_CURRENT_BINARY_DIR@/consumer-build")
+function(checked)
+  execute_process(COMMAND ${ARGV} RESULT_VARIABLE result OUTPUT_VARIABLE log ERROR_VARIABLE error)
+  if(NOT result EQUAL 0)
+    message(FATAL_ERROR "Installed consumer command failed (${result}): ${error} ${log}")
+  endif()
+endfunction()
+checked("@CMAKE_COMMAND@" --install "@PROJECT_BINARY_DIR@" --prefix "${prefix}")
+checked("@CMAKE_COMMAND@" -S "@CMAKE_CURRENT_SOURCE_DIR@/consumer" -B "${consumer_build}"
+  "-DCMAKE_CXX_COMPILER=@CMAKE_CXX_COMPILER@" "-DCMAKE_CXX_FLAGS=@CMAKE_CXX_FLAGS@"
+  "-DCONFIND_DIR=${prefix}/@CMAKE_INSTALL_LIBDIR@/cmake/CONFIND" "-DZaki_DIR=@Zaki_DIR@")
+checked("@CMAKE_COMMAND@" --build "${consumer_build}" --parallel 2)
+checked("@CMAKE_CTEST_COMMAND@" --test-dir "${consumer_build}" --output-on-failure)
