@@ -1,0 +1,74 @@
+[
+{
+  "directory": "/private/tmp/confind-m1/final-Debug",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -fPIC -ffp-contract=off -o CMakeFiles/CONFIND.dir/source/Base.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Base.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Base.cpp",
+  "output": "CMakeFiles/CONFIND.dir/source/Base.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -fPIC -ffp-contract=off -o CMakeFiles/CONFIND.dir/source/Cell.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Cell.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Cell.cpp",
+  "output": "CMakeFiles/CONFIND.dir/source/Cell.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -fPIC -ffp-contract=off -o CMakeFiles/CONFIND.dir/source/Cont2D.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Cont2D.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Cont2D.cpp",
+  "output": "CMakeFiles/CONFIND.dir/source/Cont2D.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -fPIC -ffp-contract=off -o CMakeFiles/CONFIND.dir/source/ContourFinder.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/ContourFinder.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/ContourFinder.cpp",
+  "output": "CMakeFiles/CONFIND.dir/source/ContourFinder.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -fPIC -ffp-contract=off -fno-builtin -fno-lto -o CMakeFiles/CONFIND.dir/source/Internal/HistoricalMath.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Internal/HistoricalMath.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Internal/HistoricalMath.cpp",
+  "output": "CMakeFiles/CONFIND.dir/source/Internal/HistoricalMath.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -ffp-contract=off -o CMakeFiles/confind_characterize.dir/characterize.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/characterize.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/characterize.cpp",
+  "output": "tests/CMakeFiles/confind_characterize.dir/characterize.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -ffp-contract=off -o CMakeFiles/confind_export.dir/export.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/export.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/export.cpp",
+  "output": "tests/CMakeFiles/confind_export.dir/export.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -ffp-contract=off -o CMakeFiles/confind_safety.dir/safety.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/safety.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/safety.cpp",
+  "output": "tests/CMakeFiles/confind_safety.dir/safety.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -ffp-contract=off -o CMakeFiles/confind_benchmark.dir/benchmark.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/benchmark.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/benchmark.cpp",
+  "output": "tests/CMakeFiles/confind_benchmark.dir/benchmark.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++ -DCONFIND_MODERN -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -O0 -ffp-contract=off -o CMakeFiles/confind_m1_characterize.dir/m1_characterize.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/m1_characterize.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/m1_characterize.cpp",
+  "output": "tests/CMakeFiles/confind_m1_characterize.dir/m1_characterize.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -O0 -ffp-contract=off -o CMakeFiles/confind_m1_differential.dir/m1_differential.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/m1_differential.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/m1_differential.cpp",
+  "output": "tests/CMakeFiles/confind_m1_differential.dir/m1_differential.cpp.o"
+},
+{
+  "directory": "/private/tmp/confind-m1/final-Debug/tests",
+  "command": "/usr/bin/clang++  -I/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/include -isystem /private/tmp/confind-m1/zaki-prefix/include -isystem /opt/local/include -g -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -o CMakeFiles/confind_thread_discrimination.dir/thread_discrimination.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/thread_discrimination.cpp",
+  "file": "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/thread_discrimination.cpp",
+  "output": "tests/CMakeFiles/confind_thread_discrimination.dir/thread_discrimination.cpp.o"
+}
+]

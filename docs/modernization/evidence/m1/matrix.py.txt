@@ -1,0 +1,18 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+import concurrent.futures
+
+def qualify(name,typ,flags):
+ prefix=t/'zaki-prefix'
+ if flags:
+  prefix=t/('zaki-'+name+'-prefix');zb=t/('zaki-'+name)
+  run(['cmake','-S','/Users/keeper/Documents/CompactStar/external/Zaki','-B',zb,'-DCMAKE_BUILD_TYPE='+typ,'-DCMAKE_CXX_COMPILER=/usr/bin/clang++','-DCMAKE_C_COMPILER=/usr/bin/clang','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_CXX_FLAGS='+flags,'-DCMAKE_C_FLAGS='+flags,'-DZAKI_BUILD_TESTS=OFF','-DZAKI_BUILD_EXAMPLES=OFF','-DCMAKE_INSTALL_PREFIX='+str(prefix)],name+'-zaki-config.log')
+  run(['cmake','--build',zb,'-j','4'],name+'-zaki-build.log');run(['cmake','--install',zb],name+'-zaki-install.log')
+ b=t/('final-'+name)
+ run(['cmake','-S',r,'-B',b,'-DCMAKE_BUILD_TYPE='+typ,'-DCMAKE_CXX_COMPILER=/usr/bin/clang++','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_PREFIX_PATH='+str(prefix),'-DCMAKE_CXX_FLAGS='+flags,'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON','-DCONFIND_BUILD_BENCHMARK=ON'],name+'-final-config.log')
+ run(['cmake','--build',b,'-j','4','--verbose'],name+'-final-build.log')
+ run(['ctest','--test-dir',b,'--output-on-failure','-j','3'],name+'-final-tests.log')
+ print(name,'FINAL ALL TESTS PASS',flush=True)
+os.environ['ASAN_OPTIONS']='detect_leaks=0:halt_on_error=1';os.environ['UBSAN_OPTIONS']='halt_on_error=1:print_stacktrace=1';os.environ['TSAN_OPTIONS']='halt_on_error=1'
+with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+ fs=[pool.submit(qualify,*x) for x in [('Debug','Debug',''),('Release','Release',''),('ASan-UBSan','Debug','-fsanitize=address,undefined -fno-omit-frame-pointer'),('TSan','Debug','-fsanitize=thread -fno-omit-frame-pointer')]]
+ for f in fs:f.result()

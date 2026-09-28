@@ -1,0 +1,7 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+for typ in ['Debug','Release']:
+ b=t/('fix-'+typ)
+ run(['cmake','-S',r,'-B',b,'-DCMAKE_BUILD_TYPE='+typ,'-DCMAKE_CXX_COMPILER=/usr/bin/clang++','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_PREFIX_PATH='+str(t/'zaki-prefix'),'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'],f'fix-{typ}-configure.log')
+ run(['cmake','--build',b,'-j','6','--verbose'],f'fix-{typ}-build.log')
+ run(['ctest','--test-dir',b,'--output-on-failure','-j','4'],f'fix-{typ}-tests.log')
+ print(typ,'all tests PASS',flush=True)

@@ -1,0 +1,16 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+import re
+rows=[]
+for typ in ['Debug','Release']:
+ b=t/('final-'+typ);lib=b/'libCONFIND.a'
+ symbols=sp.check_output(['nm','-u',str(lib)],text=True)
+ asm=sp.check_output(['xcrun','llvm-objdump','--disassemble','--reloc',str(lib)],text=True)
+ helper=b/'CMakeFiles/CONFIND.dir/source/Internal/HistoricalMath.cpp.o'
+ helperasm=sp.check_output(['xcrun','llvm-objdump','--disassemble','--reloc',str(helper)],text=True)
+ (t/f'final-{typ}-symbols.txt').write_text(symbols);(t/f'final-{typ}-helper-disassembly.txt').write_text(helperasm)
+ fmas=re.findall(r'\b(?:fmadd|fmsub|fnmadd|fnmsub|fmla|fmls)\b',asm)
+ assert not fmas and '__exp10' not in symbols and '_pow' in symbols and '_pow' in helperasm
+ commands=json.loads((b/'compile_commands.json').read_text());flagged=[x['file'] for x in commands if '-fno-builtin' in x['command']];assert len(flagged)==1 and flagged[0].endswith('HistoricalMath.cpp')
+ rows.append(dict(build=typ,archive_sha256=hashlib.sha256(lib.read_bytes()).hexdigest(),libm_pow=True,exp10=False,FMA=0,no_builtin_sources=flagged,disassembly_sha256=hashlib.sha256(asm.encode()).hexdigest()))
+(t/'final-codegen.json').write_text(json.dumps(rows,indent=2)+'\n')
+print(json.dumps(rows,indent=2))

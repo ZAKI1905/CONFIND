@@ -1,0 +1,11 @@
+{
+  "relocated": true,
+  "consumer_tests": "PASS",
+  "consumer_flags_clean": true,
+  "export_paths_clean": true,
+  "OpenMP": false,
+  "ROOT": false,
+  "Python": false,
+  "plotting": false,
+  "vendored_Zaki": false
+}

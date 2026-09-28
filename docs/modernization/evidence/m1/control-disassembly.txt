@@ -1,0 +1,8 @@
+
+/private/tmp/confind-m1/codegen-control.o:	file format mach-o arm64
+
+Disassembly of section __TEXT,__text:
+
+0000000000000000 <ltmp0>:
+       0: 14000000     	b	0x0 <ltmp0>
+		0000000000000000:  ARM64_RELOC_BRANCH26	___exp10

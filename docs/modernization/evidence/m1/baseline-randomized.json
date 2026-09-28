@@ -1,0 +1,30 @@
+[
+  {
+    "build": "Debug",
+    "mode": "log",
+    "records": 3621,
+    "different_records": 0,
+    "different_fixtures": 0
+  },
+  {
+    "build": "Debug",
+    "mode": "linear",
+    "records": 3621,
+    "different_records": 0,
+    "different_fixtures": 0
+  },
+  {
+    "build": "Release",
+    "mode": "log",
+    "records": 3621,
+    "different_records": 840,
+    "different_fixtures": 243
+  },
+  {
+    "build": "Release",
+    "mode": "linear",
+    "records": 3621,
+    "different_records": 0,
+    "different_fixtures": 0
+  }
+]

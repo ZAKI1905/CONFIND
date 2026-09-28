@@ -1,0 +1,10 @@
+
+/private/tmp/confind-m1/final-Release/CMakeFiles/CONFIND.dir/source/Internal/HistoricalMath.cpp.o:	file format mach-o arm64
+
+Disassembly of section __TEXT,__text:
+
+0000000000000000 <ltmp0>:
+       0: 4ea01c01     	mov.16b	v1, v0
+       4: 1e649000     	fmov	d0, #10.00000000
+       8: 14000000     	b	0x8 <ltmp0+0x8>
+		0000000000000008:  ARM64_RELOC_BRANCH26	_pow

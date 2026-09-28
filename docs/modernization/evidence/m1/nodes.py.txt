@@ -1,0 +1,5 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+run(base+['-I'+str(cs/'include'),'-I/opt/local/include','-I/opt/homebrew/opt/libomp/include','-c',r/'tests/m1_nodes_oracle.cpp','-o',t/'nodes-oracle.o'],'nodes-compile.log')
+run(['/usr/bin/clang++','-isysroot',sdk,t/'nodes-oracle.o',cs/'lib/Confind/Darwin/arm64/libConfind.a',cs/'lib/Zaki/Darwin/arm64/libZaki.a','-L/opt/local/lib','-lgsl','-lgslcblas','-lz','-L/opt/homebrew/opt/libomp/lib','-lomp','-L/Users/keeper/miniforge3/lib','-lpython3.12','-Wl,-rpath,/opt/homebrew/opt/libomp/lib','-Wl,-rpath,/Users/keeper/miniforge3/lib','-Wl,-rpath,/opt/local/lib','-o',t/'nodes-oracle'],'nodes-link.log')
+for i in [1,2]:run([t/'nodes-oracle',t/f'nodes-{i}.tsv'],f'nodes-{i}.log')
+assert (t/'nodes-1.tsv').read_bytes()==(t/'nodes-2.tsv').read_bytes()

@@ -1,0 +1,11 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+ref=(r/'tests/reference/m1-stellar.tsv').read_bytes();h=hashlib.sha256(ref).hexdigest()
+with (t/'stellar-stress-hashes.tsv').open('w') as f:
+ f.write('workers\trun\tsha256\n')
+ for workers in [2,3,4,6,8]:
+  for i in range(1,21):
+   out=t/'stellar-stress-current.tsv'
+   run([t/'final-Release/tests/confind_m1_characterize',out,'stellar',workers,1],'stellar-stress-current.log')
+   assert out.read_bytes()==ref,'STOP threaded stellar mismatch'
+   f.write(f'{workers}\t{i}\t{h}\n');f.flush()
+  print('stellar perturb',workers,'20/20 PASS',flush=True)

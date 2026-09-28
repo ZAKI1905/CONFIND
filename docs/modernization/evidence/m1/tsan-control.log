@@ -1,0 +1,30 @@
+==7694==WARNING: external symbolizer didn't start up correctly!
+==7694==WARNING: Can't read from symbolizer at fd 3
+==7694==WARNING: atos failed to symbolize address "0x1048b3b18"
+==7694==WARNING: Can't read from symbolizer at fd 3
+==7694==WARNING: atos failed to symbolize address "0x1043c8afc"
+==7694==WARNING: Can't read from symbolizer at fd 3
+==7694==WARNING: atos failed to symbolize address "0x1048b3b18"
+==7694==WARNING: Can't read from symbolizer at fd 3
+==7694==WARNING: atos failed to symbolize address "0x1043c8970"
+==7694==WARNING: Can't read from symbolizer at fd 3
+==================
+WARNING: ThreadSanitizer: data race (pid=7694)
+  Write of size 4 at 0x0001043d0000 by thread T2:
+    #0 void* std::__1::__thread_proxy[abi:nqe220106]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1>>(void*) <null> (tsan-control:arm64+0x100000afc)
+
+  Previous write of size 4 at 0x0001043d0000 by thread T1:
+    #0 void* std::__1::__thread_proxy[abi:nqe220106]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_0>>(void*) <null> (tsan-control:arm64+0x100000970)
+
+  Location is global 'value' at 0x0001043d0000 (tsan-control+0x100008000)
+
+  Thread T2 (tid=29312555, running) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 main <null> (tsan-control:arm64+0x1000007f0)
+
+  Thread T1 (tid=29312554, finished) created by main thread at:
+    #0 pthread_create <null> (libclang_rt.tsan_osx_dynamic.dylib:arm64e+0x33bac)
+    #1 main <null> (tsan-control:arm64+0x100000770)
+
+SUMMARY: ThreadSanitizer: data race (/private/tmp/confind-m1/tsan-control:arm64+0x100000afc) in void* std::__1::__thread_proxy[abi:nqe220106]<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct>>, main::$_1>>(void*)+0x68
+==================

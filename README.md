@@ -31,8 +31,11 @@ target_link_libraries(my_program PRIVATE CONFIND::CONFIND)
 ```
 
 The package resolves `Zaki::Zaki` and `Threads::Threads` transitively. CONFIND
-applies `-ffp-contract=off` privately to its numerical translation units on
-AppleClang, Clang and GNU. It does not change consumer floating-point flags.
+requires CMake 3.22 or newer and applies `-ffp-contract=off` privately to its
+numerical translation units on AppleClang, Clang and GNU. A tiny private historical
+pow translation unit alone uses `-fno-builtin;-fno-lto` and noinline so optimized
+log conversions retain libm `pow(10.0,x)` rather than non-identical `exp10`.
+No private floating-point or builtin-control flags are imposed on consumers.
 Reference equality assumes identical evaluator/sample values and the qualified
 arithmetic environment; arbitrary evaluator compilation or nondeterministic
 external solvers are outside that guarantee.
@@ -100,3 +103,27 @@ work and throughput, without a required speedup.
 This is an untagged 2.0.0 candidate awaiting independent review and owner acceptance.
 CompactStar migration is separately authorized; see the
 [migration record](docs/modernization/COMPACTSTAR_MIGRATION.md).
+
+## Compatibility changes and deferred integration constraints
+
+Copies and assignments now carry the working directory and name. `SetWrkDir`
+recursively creates missing parents and can throw. Empty contour-level sets throw
+on the GridVals evaluation path, replacing the historical no-op. A label list
+longer than its value list is rejected, as are zero grid resolutions and unknown
+scale names. Export preserves complete long paths instead of silently truncating
+at the historical 149-character payload. These are existing 2.0 changes; M-1 does
+not change them.
+
+**Deferred N-1:** Debug consumers can interpose weak Zaki Coord3D comparator or
+XYDist2 definitions compiled under different FP contraction policy and thereby
+change de-duplication. Actual CompactStar consumer/link qualification must address
+this constraint separately. Coord3D, RMDuplicates and SortNew remain frozen here.
+
+`Evaluate` still re-samples when levels are already found, does not cache samples,
+is all-or-nothing on exceptions, cannot interrupt in-flight expensive tasks, and
+has no explicit sane worker upper limit beyond the sample count. Choose worker
+counts deliberately for stellar campaigns; these N-4 limits are deferred.
+
+See the [M-1 correction record](docs/modernization/CONFIND_2_0_M1_CORRECTION.md)
+for the discriminating historical log fixtures, exact Debug/Release qualification,
+threading mutation tests, C++17 policy evidence and remaining N-6/N-7 limitations.

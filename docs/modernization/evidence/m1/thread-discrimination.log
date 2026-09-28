@@ -1,0 +1,12 @@
+concurrency requested=2 observed=2
+cancellation workers=2 already_claimed=2 new_after_visible=0
+concurrency requested=3 observed=3
+cancellation workers=3 already_claimed=3 new_after_visible=0
+concurrency requested=4 observed=4
+cancellation workers=4 already_claimed=4 new_after_visible=0
+concurrency requested=6 observed=6
+cancellation workers=6 already_claimed=6 new_after_visible=0
+concurrency requested=8 observed=8
+cancellation workers=8 already_claimed=8 new_after_visible=0
+coordinates linear nodes=56 exact
+coordinates log nodes=56 exact

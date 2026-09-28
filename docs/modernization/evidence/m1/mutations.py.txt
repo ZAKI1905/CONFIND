@@ -1,0 +1,16 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+import shutil
+mutations={
+ 'M13':('source/IndexedExecutor.hpp','while (!cancelled.load(std::memory_order_relaxed))','while (true)'),
+ 'M14':('source/IndexedExecutor.hpp','if (count <= 1)','if (count >= 1)'),
+ 'M15':('source/ContourFinder.cpp','const double x = x0 + i*delta_x, y = y0 + j*delta_y;','const double x = x0 + (i*((log_x?log10(grid.xAxis.Max()):grid.xAxis.Max())-x0))/nx, y = y0 + (j*((log_y?log10(grid.yAxis.Max()):grid.yAxis.Max())-y0))/ny;')}
+for name,(file,old,new) in mutations.items():
+ src=t/('mutation-'+name);shutil.copytree(r,src,ignore=shutil.ignore_patterns('.git'))
+ f=src/file;s=f.read_text();assert s.count(old)==1;f.write_text(s.replace(old,new))
+ b=t/('mutation-build-'+name)
+ run(['cmake','-S',src,'-B',b,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_CXX_COMPILER=/usr/bin/clang++','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_PREFIX_PATH='+str(t/'zaki-prefix')],name+'-configure.log')
+ run(['cmake','--build',b,'--target','confind_thread_discrimination','-j','6'],name+'-build.log')
+ result=sp.run([str(b/'tests/confind_thread_discrimination'),str(r/'tests/reference/m1-nodes.tsv')],stdout=sp.PIPE,stderr=sp.STDOUT,text=True,timeout=60)
+ (t/(name+'-result.log')).write_text(result.stdout+'\nexit='+str(result.returncode)+'\n')
+ assert result.returncode!=0, 'mutation survived: '+name
+ print(name,'DETECTED',result.stdout[-250:],flush=True)

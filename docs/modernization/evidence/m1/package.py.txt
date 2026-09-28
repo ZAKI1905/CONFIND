@@ -1,0 +1,20 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+import shutil,re
+original=t/'package-original';moved=t/'package-relocated'
+run(['cmake','--install',t/'zaki-debug','--prefix',original],'package-zaki-install.log')
+run(['cmake','--install',t/'final-Release','--prefix',original],'package-confind-install.log')
+shutil.move(original,moved)
+b=t/'package-consumer'
+run(['cmake','-S',r/'tests/consumer','-B',b,'-DCMAKE_PREFIX_PATH='+str(moved),'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_CXX_COMPILER=/usr/bin/clang++','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'],'package-consumer-config.log')
+run(['cmake','--build',b,'--verbose'],'package-consumer-build.log')
+run(['ctest','--test-dir',b,'--output-on-failure'],'package-consumer-test.log')
+commands=(b/'compile_commands.json').read_text()
+assert '-fno-builtin' not in commands and '-ffp-contract' not in commands and '-fno-lto' not in commands
+exports='\n'.join(f.read_text() for f in (moved/'lib/cmake/CONFIND').glob('*'))
+assert '-fno-builtin' not in exports and '-ffp-contract' not in exports and str(r) not in exports and str(original) not in exports
+symbols=sp.check_output(['nm','-u',str(t/'final-Release/libCONFIND.a')],text=True)
+links=sp.check_output(['otool','-L',str(b/'consumer')],text=True)
+assert not re.search(r'__kmpc|GOMP|libomp|Python|libpython|libROOT',symbols+'\n'+links)
+(t/'package-linkage.txt').write_text(links)
+(t/'package-result.json').write_text(json.dumps({'relocated':True,'consumer_tests':'PASS','consumer_flags_clean':True,'export_paths_clean':True,'OpenMP':False,'ROOT':False,'Python':False,'plotting':False,'vendored_Zaki':False},indent=2)+'\n')
+print('Relocated package and clean consumer flags PASS',flush=True)

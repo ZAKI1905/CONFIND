@@ -1,0 +1,2 @@
+#include <cmath>
+__attribute__((noinline)) double control(double x){return std::pow(10,x);}

@@ -1,0 +1,9 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+rows=[]
+for typ in ['Debug','Release']:
+ for mode,mask in [('log',1),('linear',2)]:
+  out=t/f'start-{typ}-{mode}.tsv';run([t/f'start-{typ}/tests/confind_m1_differential',out,600,mask],f'start-{typ}-{mode}.log')
+  a=(r/f'tests/reference/m1-{mode}.tsv').read_text().splitlines();b=out.read_text().splitlines();assert len(a)==len(b)==3621
+  diffs=[x for x,y in zip(a,b) if x!=y]
+  row=dict(build=typ,mode=mode,records=3621,different_records=len(diffs),different_fixtures=len({x.split('\t')[0] for x in diffs}));rows.append(row);print(row,flush=True)
+(t/'baseline-randomized.json').write_text(json.dumps(rows,indent=2)+'\n')

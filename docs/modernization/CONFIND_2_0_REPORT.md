@@ -1,3 +1,37 @@
+# CONFIND 2.0 M-1 correction qualification
+
+**CONFIND 2.0 M-1 CORRECTION PASS — DEBUG AND OPTIMIZED NUMERICS MATCH HISTORICAL AUTHORITY — DETERMINISTIC THREADING PRESERVED — READY FOR INDEPENDENT RE-REVIEW**
+
+Disposition **A**, local Mac arm64, 2026-09-28. The original optimized-log claim
+below was insufficient and is superseded by the completed
+[73-item correction report](CONFIND_2_0_M1_CORRECTION.md#completed-correction-and-qualification--2026-09-28).
+The historical pre-M-1 report follows as a chronological record.
+
+M-1 is corrected by a private, noinline `pow(10.0,x)` helper compiled alone with
+`-fno-builtin;-fno-lto`; only 22 inverse-log calls are routed through it. Optimized
+builds are retained as required for expensive stellar evaluators. Debug and Release
+now match both discriminating oracle fixtures, all 52 old variants, and 600 linear
+plus 600 log differential fixtures exactly. No exp10 or FMA remains in the checked
+numerical archives; libm pow is present. The 99×150, 52-level fixture has zero raw
+and curve differences. Worker counts 1/2/3/4/6/8 and perturbed schedules match.
+
+Fresh Debug, Release, ASan+UBSan and TSan each pass 29/29; Release LTO also passes.
+Concurrency, node-coordinate and cancellation tests now kill M14/M15/M13.
+CMP0128 NEW (CMake minimum 3.22) produces strict C++17 on AppleClang, Clang and GCC;
+each compiler passes all 29 tests. A fresh relocated install and external consumer
+pass with no private flag leakage or restored dependencies. The unchanged CPU
+benchmark records 1 workers: 0.846176375 s, 2 workers: 0.426504667 s, 4 workers: 0.217563875 s, 8 workers: 0.1143265 s.
+
+N-3 behavior changes are documented in README and the correction report. N-1 weak
+Coord3D interposition remains prominent and deferred to integration qualification;
+N-4 Evaluate limits, N-6 incomplete earlier source-audit tooling and N-7 historical
+intermediate-commit failures remain deferred. Canonical CONFIND, CompactStar and
+Zaki are unchanged. No push, merge, tag, cluster or owner acceptance occurred.
+The exact next action is independent re-review of M-1, discrimination, Release,
+threading tests and C++17 policy. STOP before owner acceptance or integration.
+
+---
+
 # CONFIND 2.0 qualification report
 
 **CONFIND 2.0 MODERNIZATION PASS — HISTORICAL SERIAL NUMERICS PRESERVED —

@@ -1,0 +1,24 @@
+[
+  {
+    "build": "Debug",
+    "archive_sha256": "aa9cbe41f8c427a38c6930445a36f4f2a88751a5da7a6632e4c443c246416e2a",
+    "libm_pow": true,
+    "exp10": false,
+    "FMA": 0,
+    "no_builtin_sources": [
+      "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Internal/HistoricalMath.cpp"
+    ],
+    "disassembly_sha256": "e0000cdf20b2d7987f8828cecc5df1268d88791c591e3ec36e5101567a051428"
+  },
+  {
+    "build": "Release",
+    "archive_sha256": "2c193350c6d9600f27e90413680cf2e78f931d7e4a2bd026ecccd89302019ef7",
+    "libm_pow": true,
+    "exp10": false,
+    "FMA": 0,
+    "no_builtin_sources": [
+      "/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/source/Internal/HistoricalMath.cpp"
+    ],
+    "disassembly_sha256": "1fc2baf90a73c2592b9f64c5197b1597daf8709e45ae3faa5af77a53681e4591"
+  }
+]

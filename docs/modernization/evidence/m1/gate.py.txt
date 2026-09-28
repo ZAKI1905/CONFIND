@@ -1,0 +1,21 @@
+import subprocess as sp, pathlib as p, hashlib, json, os
+r=p.Path('/Users/keeper/.codex/worktrees/confind-2-0/CONFIND'); t=p.Path('/private/tmp/confind-m1'); cs=p.Path('/Users/keeper/Documents/CompactStar/repo/CompactStar/dependencies'); sdk=sp.check_output(['xcrun','--show-sdk-path'],text=True).strip()
+def run(cmd,log):
+ with (t/log).open('w') as f:sp.run(list(map(str,cmd)),stdout=f,stderr=sp.STDOUT,check=True)
+base=['/usr/bin/clang++','-std=c++17','-O0','-ffp-contract=off','-isysroot',sdk,'-arch','arm64']
+for name,src in [('m1','m1_characterize.cpp'),('differential','m1_differential.cpp')]:
+ run(base+['-I'+str(cs/'include'),'-I/opt/local/include','-I/opt/homebrew/opt/libomp/include','-c',r/'tests'/src,'-o',t/(name+'-oracle.o')],name+'-oracle-compile.log')
+ run(['/usr/bin/clang++','-isysroot',sdk,t/(name+'-oracle.o'),cs/'lib/Confind/Darwin/arm64/libConfind.a',cs/'lib/Zaki/Darwin/arm64/libZaki.a','-L/opt/local/lib','-lgsl','-lgslcblas','-lz','-L/opt/homebrew/opt/libomp/lib','-lomp','-L/Users/keeper/miniforge3/lib','-lpython3.12','-Wl,-rpath,/opt/homebrew/opt/libomp/lib','-Wl,-rpath,/Users/keeper/miniforge3/lib','-Wl,-rpath,/opt/local/lib','-o',t/(name+'-oracle')],name+'-oracle-link.log')
+for mode in ['small','stellar']:
+ for repeat in [1,2]:run([t/'m1-oracle',t/f'oracle-{mode}-{repeat}.tsv',mode,0,0],f'oracle-{mode}-{repeat}.log')
+ assert (t/f'oracle-{mode}-1.tsv').read_bytes()==(t/f'oracle-{mode}-2.tsv').read_bytes()
+for typ in ['Debug','Release']:
+ b=t/('start-'+typ)
+ run(['cmake','-S',r,'-B',b,'-DCMAKE_BUILD_TYPE='+typ,'-DCMAKE_CXX_COMPILER=/usr/bin/clang++','-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_PREFIX_PATH='+str(t/'zaki-prefix'),'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'],f'start-{typ}-configure.log')
+ run(['cmake','--build',b,'-j','6'],f'start-{typ}-build.log')
+ for mode in ['small','stellar']:
+  run([b/'tests/confind_m1_characterize',t/f'start-{typ}-{mode}.tsv',mode,0,0],f'start-{typ}-{mode}.log')
+  ref=(t/f'oracle-{mode}-1.tsv').read_bytes();got=(t/f'start-{typ}-{mode}.tsv').read_bytes()
+  print(typ,mode,'equal',ref==got,flush=True)
+  assert (ref==got)==(typ=='Debug'), 'STOP: gate failed'
+print('PRE-FIX GATE PASS',flush=True)

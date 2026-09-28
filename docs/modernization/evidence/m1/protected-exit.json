@@ -1,0 +1,17 @@
+{
+  "CONFIND": {
+    "HEAD": "89c5d9b731534e4289d9f686549d9f0ac178e567",
+    "master": "89c5d9b731534e4289d9f686549d9f0ac178e567",
+    "tracked_status": ""
+  },
+  "Zaki": {
+    "HEAD": "c8c68131b04e9d216673725075bef38df81e6041",
+    "master": "c8c68131b04e9d216673725075bef38df81e6041",
+    "tracked_status": ""
+  },
+  "CompactStar": {
+    "HEAD": "812463ac9ed374f64ac9cadd500066ab723d3a6c",
+    "master": "812463ac9ed374f64ac9cadd500066ab723d3a6c",
+    "tracked_status": ""
+  }
+}

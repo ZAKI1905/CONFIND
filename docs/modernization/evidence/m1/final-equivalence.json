@@ -1,0 +1,114 @@
+[
+  {
+    "build": "Debug",
+    "fixture": "small",
+    "exact": true,
+    "sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7",
+    "line_count": 13
+  },
+  {
+    "build": "Debug",
+    "fixture": "stellar",
+    "exact": true,
+    "sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0",
+    "line_count": 81457
+  },
+  {
+    "build": "Debug",
+    "fixture": "log",
+    "exact": true,
+    "sha256": "95390bfb199cdb5474dfe74f2adfeb5564304fbaeaa4e59703c823a8432c316f",
+    "line_count": 3621
+  },
+  {
+    "build": "Debug",
+    "fixture": "linear",
+    "exact": true,
+    "sha256": "e8d1f50b8d36a39eafd4bda11cea8bc6b796eea5226bfb213afe64f288da5cd0",
+    "line_count": 3621
+  },
+  {
+    "build": "Release",
+    "fixture": "small",
+    "exact": true,
+    "sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7",
+    "line_count": 13
+  },
+  {
+    "build": "Release",
+    "fixture": "stellar",
+    "exact": true,
+    "sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0",
+    "line_count": 81457
+  },
+  {
+    "build": "Release",
+    "fixture": "log",
+    "exact": true,
+    "sha256": "95390bfb199cdb5474dfe74f2adfeb5564304fbaeaa4e59703c823a8432c316f",
+    "line_count": 3621
+  },
+  {
+    "build": "Release",
+    "fixture": "linear",
+    "exact": true,
+    "sha256": "e8d1f50b8d36a39eafd4bda11cea8bc6b796eea5226bfb213afe64f288da5cd0",
+    "line_count": 3621
+  },
+  {
+    "build": "ASan-UBSan",
+    "fixture": "small",
+    "exact": true,
+    "sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7",
+    "line_count": 13
+  },
+  {
+    "build": "ASan-UBSan",
+    "fixture": "stellar",
+    "exact": true,
+    "sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0",
+    "line_count": 81457
+  },
+  {
+    "build": "ASan-UBSan",
+    "fixture": "log",
+    "exact": true,
+    "sha256": "95390bfb199cdb5474dfe74f2adfeb5564304fbaeaa4e59703c823a8432c316f",
+    "line_count": 3621
+  },
+  {
+    "build": "ASan-UBSan",
+    "fixture": "linear",
+    "exact": true,
+    "sha256": "e8d1f50b8d36a39eafd4bda11cea8bc6b796eea5226bfb213afe64f288da5cd0",
+    "line_count": 3621
+  },
+  {
+    "build": "TSan",
+    "fixture": "small",
+    "exact": true,
+    "sha256": "1fe565f1d7ac944ec2e41df8953494850c8526b276016bd119c890de1e691af7",
+    "line_count": 13
+  },
+  {
+    "build": "TSan",
+    "fixture": "stellar",
+    "exact": true,
+    "sha256": "927acf72b7a5bf8bd50488484dc58176d3cb252cc39460bfc06692f7849e2ee0",
+    "line_count": 81457
+  },
+  {
+    "build": "TSan",
+    "fixture": "log",
+    "exact": true,
+    "sha256": "95390bfb199cdb5474dfe74f2adfeb5564304fbaeaa4e59703c823a8432c316f",
+    "line_count": 3621
+  },
+  {
+    "build": "TSan",
+    "fixture": "linear",
+    "exact": true,
+    "sha256": "e8d1f50b8d36a39eafd4bda11cea8bc6b796eea5226bfb213afe64f288da5cd0",
+    "line_count": 3621
+  }
+]

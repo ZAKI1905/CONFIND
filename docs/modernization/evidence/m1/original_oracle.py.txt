@@ -1,0 +1,11 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+for name,src in [('serial',r/'docs/provenance/characterize_reconstruction.cpp.txt'),('export',r/'tests/export.cpp')]:
+ run(base+['-x','c++','-I'+str(cs/'include'),'-I/opt/local/include','-I/opt/homebrew/opt/libomp/include','-c',src,'-o',t/(name+'-historical.o')],name+'-historical-compile.log')
+ run(['/usr/bin/clang++','-isysroot',sdk,t/(name+'-historical.o'),cs/'lib/Confind/Darwin/arm64/libConfind.a',cs/'lib/Zaki/Darwin/arm64/libZaki.a','-L/opt/local/lib','-lgsl','-lgslcblas','-lz','-L/opt/homebrew/opt/libomp/lib','-lomp','-L/Users/keeper/miniforge3/lib','-lpython3.12','-Wl,-rpath,/opt/homebrew/opt/libomp/lib','-Wl,-rpath,/Users/keeper/miniforge3/lib','-Wl,-rpath,/opt/local/lib','-o',t/(name+'-historical')],name+'-historical-link.log')
+for i in [1,2]:
+ run([t/'serial-historical',t/f'historical-serial-{i}.tsv'],f'historical-serial-{i}.log')
+ assert (t/f'historical-serial-{i}.tsv').read_bytes()==(r/'tests/reference/serial.tsv').read_bytes()
+(t/'oracle-export').mkdir(exist_ok=True)
+run([t/'export-historical',t/'oracle-export'],'historical-export.log')
+for name in ['contour_first.tsv','contour_second.tsv']:assert (t/'oracle-export'/name).read_bytes()==(r/'tests/reference'/name).read_bytes()
+print('Existing historical serial 52 variants and export references reproduced exactly',flush=True)

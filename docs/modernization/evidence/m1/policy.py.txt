@@ -1,0 +1,14 @@
+exec(open('/private/tmp/confind-m1/gate.py').read().split("for name,src")[0])
+for name,compiler in [('apple','/usr/bin/clang++'),('clang','/opt/homebrew/opt/llvm/bin/clang++'),('gcc','/opt/homebrew/bin/g++-15')]:
+ prefix=t/'zaki-prefix'
+ if name=='gcc':
+  prefix=t/'zaki-gcc-prefix'
+  run(['cmake','-S','/Users/keeper/Documents/CompactStar/external/Zaki','-B',t/'zaki-gcc','-DCMAKE_BUILD_TYPE=Release','-DCMAKE_CXX_COMPILER='+compiler,'-DCMAKE_C_COMPILER=/opt/homebrew/bin/gcc-15','-DCMAKE_OSX_SYSROOT='+sdk,'-DZAKI_BUILD_TESTS=OFF','-DZAKI_BUILD_EXAMPLES=OFF','-DCMAKE_INSTALL_PREFIX='+str(prefix)],'zaki-gcc-config.log')
+  run(['cmake','--build',t/'zaki-gcc','-j','6'],'zaki-gcc-build.log');run(['cmake','--install',t/'zaki-gcc'],'zaki-gcc-install.log')
+ b=t/('policy-'+name)
+ run(['cmake','-S',r,'-B',b,'-DCMAKE_BUILD_TYPE=Release','-DCMAKE_CXX_COMPILER='+compiler,'-DCMAKE_OSX_SYSROOT='+sdk,'-DCMAKE_PREFIX_PATH='+str(prefix),'-DCMAKE_EXPORT_COMPILE_COMMANDS=ON'],name+'-policy-config.log')
+ run(['cmake','--build',b,'-j','6','--verbose'],name+'-policy-build.log')
+ commands=json.loads((b/'compile_commands.json').read_text());assert all('-std=c++17' in x['command'] and '-std=gnu++17' not in x['command'] for x in commands)
+ print(name,'standards mode c++17 verified',flush=True)
+ run(['ctest','--test-dir',b,'--output-on-failure','-j','4'],name+'-policy-tests.log')
+ print(name,'characterization neutral, all tests pass',flush=True)

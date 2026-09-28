@@ -1,0 +1,22 @@
+Change Dir: '/private/tmp/confind-m1/package-consumer'
+
+Run Build Command(s): /opt/homebrew/bin/cmake -E env VERBOSE=1 /opt/local/bin/gmake -f Makefile
+/opt/homebrew/bin/cmake -S/Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/consumer -B/private/tmp/confind-m1/package-consumer --check-build-system CMakeFiles/Makefile.cmake 0
+/opt/homebrew/bin/cmake -E cmake_progress_start /private/tmp/confind-m1/package-consumer/CMakeFiles /private/tmp/confind-m1/package-consumer//CMakeFiles/progress.marks
+/opt/local/bin/gmake  -f CMakeFiles/Makefile2 all
+gmake[1]: Entering directory '/private/tmp/confind-m1/package-consumer'
+/opt/local/bin/gmake  -f CMakeFiles/consumer.dir/build.make CMakeFiles/consumer.dir/depend
+gmake[2]: Entering directory '/private/tmp/confind-m1/package-consumer'
+cd /private/tmp/confind-m1/package-consumer && /opt/homebrew/bin/cmake -E cmake_depends "Unix Makefiles" /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/consumer /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/consumer /private/tmp/confind-m1/package-consumer /private/tmp/confind-m1/package-consumer /private/tmp/confind-m1/package-consumer/CMakeFiles/consumer.dir/DependInfo.cmake "--color=" consumer
+gmake[2]: Leaving directory '/private/tmp/confind-m1/package-consumer'
+/opt/local/bin/gmake  -f CMakeFiles/consumer.dir/build.make CMakeFiles/consumer.dir/build
+gmake[2]: Entering directory '/private/tmp/confind-m1/package-consumer'
+[ 50%] Building CXX object CMakeFiles/consumer.dir/main.cpp.o
+/usr/bin/clang++  -isystem /private/tmp/confind-m1/package-relocated/include -isystem /opt/local/include -O3 -DNDEBUG -std=c++17 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -MD -MT CMakeFiles/consumer.dir/main.cpp.o -MF CMakeFiles/consumer.dir/main.cpp.o.d -o CMakeFiles/consumer.dir/main.cpp.o -c /Users/keeper/.codex/worktrees/confind-2-0/CONFIND/tests/consumer/main.cpp
+[100%] Linking CXX executable consumer
+/opt/homebrew/bin/cmake -E cmake_link_script CMakeFiles/consumer.dir/link.txt --verbose=1
+/usr/bin/clang++ -O3 -DNDEBUG -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/consumer.dir/main.cpp.o -o consumer  /private/tmp/confind-m1/package-relocated/lib/libCONFIND.a /private/tmp/confind-m1/package-relocated/lib/libZaki.a /opt/local/lib/libgsl.dylib /opt/local/lib/libgslcblas.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/lib/libz.tbd
+gmake[2]: Leaving directory '/private/tmp/confind-m1/package-consumer'
+[100%] Built target consumer
+gmake[1]: Leaving directory '/private/tmp/confind-m1/package-consumer'
+/opt/homebrew/bin/cmake -E cmake_progress_start /private/tmp/confind-m1/package-consumer/CMakeFiles 0
