@@ -1,12 +1,6 @@
 #ifndef CONFIND_Cont2D_H
 #define CONFIND_Cont2D_H
 
-// #if __has_include(<omp.h>)
-//   #include <omp.h>
-//   #define Z_OMP 1
-// #else
-//   #define Z_OMP 0
-// #endif
 
 // #include <random>
 

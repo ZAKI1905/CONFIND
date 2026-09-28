@@ -13,3 +13,10 @@ add_test(NAME historical_serial COMMAND ${CMAKE_COMMAND}
 add_test(NAME historical_export COMMAND ${CMAKE_COMMAND}
   -DPROGRAM=$<TARGET_FILE:confind_export> -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/export
   -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference -P ${CMAKE_CURRENT_SOURCE_DIR}/export.cmake)
+
+foreach(workers 1 2 4 8)
+  add_test(NAME historical_samples_workers_${workers} COMMAND ${CMAKE_COMMAND}
+    -DPROGRAM=$<TARGET_FILE:confind_characterize> -DWORKERS=${workers}
+    -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/samples-${workers}.tsv
+    -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference/serial.tsv -P ${CMAKE_CURRENT_SOURCE_DIR}/compare.cmake)
+endforeach()

@@ -19,9 +19,13 @@
 #include <utility>
 #include <vector>
 #include <array>
+#include <thread>
+#include <chrono>
 #include <stdexcept>
 
 static FILE* OUT = nullptr;
+static size_t worker_count = 0;
+static bool perturb = false;
 
 static uint64_t bits(double d) { uint64_t u; std::memcpy(&u, &d, 8); return u; }
 
@@ -127,7 +131,23 @@ static std::vector<CONFIND::Cont2D> run_sampled(const Zaki::Math::Grid2D& g, con
   CONFIND::ContourFinder con;
   con.SetGrid(g);
   con.SetContVal(lv);
-  con.SetGridVals(&gv);
+  if (worker_count) {
+    con.Evaluate([=](size_t) -> CONFIND::ContourFinder::Evaluator {
+      return [=](double x,double y) {
+        if (perturb) {
+          std::this_thread::yield();
+          if ((bits(x)^bits(y))%7==0) std::this_thread::sleep_for(std::chrono::microseconds(1));
+        }
+        for (auto d:drop) {
+          double a=x0+d.first*dx,b=y0+d.second*dy;
+          if(g.xAxis.scale=="Log")a=std::pow(10,a);
+          if(g.yAxis.scale=="Log")b=std::pow(10,b);
+          if(x==a && y==b)return -1.0;
+        }
+        return f(x,y);
+      };
+    }, {worker_count});
+  } else con.SetGridVals(&gv);
   return con.GetContourSet();
 }
 
@@ -144,7 +164,7 @@ static std::vector<CONFIND::Cont2D> run_callable(const Zaki::Math::Grid2D& g, co
   con.SetContVal(lv);
   con.SetFunc(&callable_trampoline);
 #ifndef CONFIND_MODERN
-  con.SetThreads(threads);
+  (void)threads;
 #else
   (void)threads;
 #endif
@@ -156,6 +176,8 @@ int main(int argc, char** argv)
 {
   OUT = std::fopen(argc > 1 ? argv[1] : "oracle_out.txt", "w");
   if(!OUT) throw std::runtime_error("cannot open output");
+  if(argc>2) worker_count=std::stoul(argv[2]);
+  perturb=argc>3;
   Zaki::Util::LogManager::SetLogLevels(Zaki::Util::LogLevel::Error);
 
   // F01 constant field (ConvertToCurve2D deliberately skipped: SortNew reads pts[0] on empty -> UB)

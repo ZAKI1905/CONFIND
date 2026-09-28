@@ -1,14 +1,8 @@
 #ifndef ContourFinder_H
 #define ContourFinder_H
 
-#if __has_include(<omp.h>)
-  #include <omp.h>
-  #define Z_OMP 1
-#else
-  #define Z_OMP 0
-#endif
-
-#include <random>
+#include <functional>
+#include "Confind/ThreadingOptions.hpp"
 
 // Root
 // #include <TMultiGraph.h>
@@ -57,7 +51,7 @@ class ContourFinder : public Base
 
     enum Mode
     {
-      Normal = 0, Fast, Parallel, Ludicrous, Optimal    
+      Normal = 0, Fast    
     } ;
 
     //............................................
@@ -67,7 +61,13 @@ class ContourFinder : public Base
     void SetWidth(const size_t&) ;
     void SetHeight(const size_t&) ;
     void SetDeltas()      ;
+    // Historical callable modes remain serial (including their coordinate rounding).
     void SetGridVals(const Mode& = Fast)    ;
+    using Evaluator = std::function<double(double, double)>;
+    using EvaluatorFactory = std::function<Evaluator(size_t)>;
+    // Factory must provide independent state and worker-independent results.
+    // Factory calls and evaluator destruction are serialized on the caller.
+    void Evaluate(const EvaluatorFactory&, ThreadingOptions = {});
     void SetGridVals(Zaki::Math::GridVals_2D*)    ;
 
     void SetFunc(double (*f) (const double, const double) ) ; // Normal funcs 
@@ -75,8 +75,8 @@ class ContourFinder : public Base
     void SetContVal(const std::vector<double>&) ;
     void SetContVal(const std::vector<double>&, const std::vector<std::string>& label) ;
     void SetScanMode(const char) ;
-    void SetOptimizationTrials(const int&) ;
-    void SetThreads(const int&) ;    
+
+    
 
     // Plot options
     void SetPlotXLabel(const std::string&) ;
@@ -125,12 +125,12 @@ class ContourFinder : public Base
     void FindContour(Cont2D& cont) ;
     void FindContourFast(Cont2D& cont, double*) ;
     void FindNextContours(double*) ;
-    void FindContourLudicrous() ;
-    void ThreadNextTaskLudicrous(Bundle& in_b, const std::vector<double>&) ;
-    void ThreadTaskLudicrous(Bundle& in_b, std::vector<double>&) ;
-    void FindContourParallel(Cont2D& cont) ;
-    void FindOptimalMode() ;
-    void ThreadTask(Bundle& in_b) ;
+
+
+
+
+
+
 
     // flags
     bool set_height_flag      = false ;
@@ -169,11 +169,10 @@ class ContourFinder : public Base
     std::string legend_header = "Contours" ;
     bool default_legend_opt = true ; 
 
-    unsigned int optimization_trials = 50 ;
-    Mode TimeFunc(std::uniform_real_distribution<double>&, 
-                  std::uniform_real_distribution<double>&) ;
 
-    std::default_random_engine random_engine ;
+
+
+
 
     Zaki::Math::Grid2D grid ;
     unsigned int width = 1000, height = 1000 ;
@@ -183,7 +182,7 @@ class ContourFinder : public Base
     bool connected_plot = false  ;
     std::vector<Cont2D> cont_set ;
 
-    int req_threads = 1 ;
+
     unsigned int unfound_contours = 0 ;
 };
 

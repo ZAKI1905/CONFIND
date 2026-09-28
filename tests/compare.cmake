@@ -1,4 +1,4 @@
-execute_process(COMMAND "${PROGRAM}" "${OUTPUT}" RESULT_VARIABLE result OUTPUT_VARIABLE log ERROR_VARIABLE error)
+execute_process(COMMAND "${PROGRAM}" "${OUTPUT}" ${WORKERS} ${PERTURB} RESULT_VARIABLE result OUTPUT_VARIABLE log ERROR_VARIABLE error)
 if(NOT result EQUAL 0)
   message(FATAL_ERROR "Characterization exited ${result}: ${error} ${log}")
 endif()
