@@ -1,36 +1,59 @@
 #include <iterator>
 #include <algorithm>
 
-#include "../include/Cell.h"
-#include "../include/ContourFinder.h"
+#include "Confind/Cell.hpp"
+#include "Confind/ContourFinder.hpp"
+#include "Confind/Bundle.hpp"
 
 //==============================================================
-// default Constructor
-CONFIND::Cell::Cell() {} 
+// Default Constructor
+CONFIND::Cell::Cell() 
+  : Base("Cell", true)
+{
+  // Z_LOG_NOTE("Cell constructor called from " + PtrStr()) ;
+} 
 
 //--------------------------------------------------------------
-// default Destructor
-CONFIND::Cell::~Cell() {} 
+// Destructor
+CONFIND::Cell::~Cell() 
+{
+  // Z_LOG_NOTE("Cell destructor called from " + PtrStr()) ;
+} 
 
 //--------------------------------------------------------------
 // Constructor 2
-CONFIND::Cell::Cell(size_t i_in, double lx, size_t j_in, double ly) 
+CONFIND::Cell::Cell(const size_t& i_in, const double& lx, 
+                    const size_t& j_in, const double& ly) 
+  : Base("Cell", true)
 {
+  // Z_LOG_NOTE("Cell constructor called from " + PtrStr()) ;
+
   SetSize(lx, ly) ;
   SetIdx(i_in, j_in) ;
 }
 
 //--------------------------------------------------------------
 // Constructor 3
-CONFIND::Cell::Cell(size_t i_in, double lx, size_t j_in, double ly, Bundle* bun_in, double cont_val_in) :
+CONFIND::Cell::Cell(const size_t& i_in, const double& lx,
+                    const size_t& j_in, const double& ly, Bundle* bun_in,
+                    const double& cont_val_in) 
+  :  Base("Cell", true),
 l_x(lx), l_y(ly), idx(i_in, j_in), contour_val(cont_val_in), BundlePtr(bun_in),
-set_idx_flag(true), set_bundle_ptr_flag(true), set_size_flag(true), set_contour_val_flag(true)
+set_idx_flag(true), set_bundle_ptr_flag(true), set_size_flag(true),
+set_contour_val_flag(true), set_full_constructor(true)
 {
+  // Z_LOG_NOTE("Cell constructor called from " + PtrStr()) ;
+
   // FindVerts() ;
+  BundlePtr->Grid.xAxis.scale == "Log" ? G_x_min = log10(BundlePtr->Grid.xAxis.Min()) : G_x_min = BundlePtr->Grid.xAxis.Min() ;
+  BundlePtr->Grid.yAxis.scale == "Log" ? G_y_min = log10(BundlePtr->Grid.yAxis.Min()) : G_y_min = BundlePtr->Grid.yAxis.Min() ;
+
+  x_min = G_x_min + i_in*l_x ;
+  y_min = G_y_min + j_in*l_y ;
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cell::SetSize(const double lx_in, const double ly_in)  
+void CONFIND::Cell::SetSize(const double& lx_in, const double& ly_in)  
 {
   l_x = lx_in ;
   l_y = ly_in ;
@@ -39,17 +62,23 @@ void CONFIND::Cell::SetSize(const double lx_in, const double ly_in)
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cell::SetIdx(const size_t i_in, const size_t j_in)  
+void CONFIND::Cell::SetIdx(const size_t& i_in, const size_t& j_in)  
 {
-  // idx_x = i_in ;
-  // idx_y = j_in ;
   idx = {i_in, j_in} ;
 
   set_idx_flag = true ;
+
+  x_min = G_x_min + i_in*l_x ;
+  y_min = G_y_min + j_in*l_y ;
+
+  triangle_set.clear() ;
+  contour_coords.clear();
+  set_vertexZ_flag = {{false, false, false, false}} ;
+  found_verts_flag = false ;
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cell::SetVertexZ(const size_t idx_in, const double val_z)   
+void CONFIND::Cell::SetVertexZ(const size_t& idx_in, const double& val_z)   
 {
   if (idx_in > 4 || idx_in < 1)
   {
@@ -59,15 +88,15 @@ void CONFIND::Cell::SetVertexZ(const size_t idx_in, const double val_z)
   
   verts_set[idx_in].xyz.z = val_z ;
 
-  // There is an offset between the defenitions of verts_set & set_vertexZ_flag
-  // because we are nit including the center vertex anymore
+  // There is an offset between the definitions of verts_set & set_vertexZ_flag
+  // because we are not including the center vertex anymore
   set_vertexZ_flag[idx_in - 1] = true ;
 
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cell::SetVertex(const size_t idx_in, const double val_x, 
-                     const double val_y, const double val_z)
+void CONFIND::Cell::SetVertex(const size_t& idx_in, const double& val_x, 
+                     const double& val_y, const double& val_z)
 {
   if (idx_in > 4)
   {
@@ -82,7 +111,8 @@ void CONFIND::Cell::SetVertex(const size_t idx_in, const double val_x,
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cell::SetVertex(const size_t idx_in, const Zaki::Physics::Coord3D& val)
+void CONFIND::Cell::SetVertex(const size_t& idx_in, 
+                              const Zaki::Physics::Coord3D& val)
 {
   PROFILE_FUNCTION() ;
   if (idx_in > 4)
@@ -111,7 +141,7 @@ std::pair<size_t, size_t> CONFIND::Cell::GetIdx() const
 }
 
 //--------------------------------------------------------------
-CONFIND::vertex CONFIND::Cell::operator[](size_t idx_in) const
+CONFIND::vertex CONFIND::Cell::operator[](const size_t idx_in) const
 {
   if( set_vertex_flag[idx_in] )
   {
@@ -123,7 +153,7 @@ CONFIND::vertex CONFIND::Cell::operator[](size_t idx_in) const
 
 //--------------------------------------------------------------
 // Used for optimizing the process
-double CONFIND::Cell::GetFuncVals(const size_t i) const 
+double CONFIND::Cell::GetFuncVals(const size_t& i) const 
 {
   // Returning the function values at vertex i
   return verts_set[i].xyz.z ;
@@ -133,13 +163,13 @@ double CONFIND::Cell::GetFuncVals(const size_t i) const
 void CONFIND::Cell::EvalCenter()
 { 
   PROFILE_FUNCTION() ;
-  double cen_x  = (verts_set[1].xyz.x + verts_set[2].xyz.x) / 2 ;
-  double cen_y  = (verts_set[1].xyz.y + verts_set[4].xyz.y) / 2 ;
-  double cen_z  = (  verts_set[1].xyz.z + verts_set[2].xyz.z
-                   + verts_set[3].xyz.z + verts_set[4].xyz.z) / 4 ;
+  double cen_x  = (verts_set[B_Left].xyz.x + verts_set[B_Right].xyz.x) / 2 ;
+  double cen_y  = (verts_set[B_Left].xyz.y + verts_set[T_Left].xyz.y) / 2 ;
+  double cen_z  = (  verts_set[B_Left].xyz.z + verts_set[B_Right].xyz.z
+                   + verts_set[T_Right].xyz.z + verts_set[T_Left].xyz.z) / 4 ;
 
   // idx = 0 is for center
-  SetVertex(0, {cen_x, cen_y, cen_z}) ;
+  SetVertex(Center, {cen_x, cen_y, cen_z}) ;
 }
 
 //--------------------------------------------------------------
@@ -147,6 +177,8 @@ void CONFIND::Cell::SetBundlePtr(Bundle* bun_in)
 {
   BundlePtr = bun_in ;
   set_bundle_ptr_flag = true ;
+  BundlePtr->Grid.xAxis.scale == "Log" ? G_x_min = log10(BundlePtr->Grid.xAxis.Min()) : G_x_min = BundlePtr->Grid.xAxis.Min() ;
+  BundlePtr->Grid.yAxis.scale == "Log" ? G_y_min = log10(BundlePtr->Grid.yAxis.Min()) : G_y_min = BundlePtr->Grid.yAxis.Min() ;
 }
 
 //--------------------------------------------------------------
@@ -174,7 +206,7 @@ double CONFIND::Cell::GetLY()  const
 }
 
 //--------------------------------------------------------------
-double CONFIND::Cell::EvalFunc(const double x, const double y)
+double CONFIND::Cell::EvalFunc(const double& x, const double& y)
 {
   PROFILE_FUNCTION() ;
   if ( BundlePtr->Func )
@@ -184,7 +216,7 @@ double CONFIND::Cell::EvalFunc(const double x, const double y)
 }
 
 //--------------------------------------------------------------
-double CONFIND::Cell::EvalMemFunc(const double x, const double y)
+double CONFIND::Cell::EvalMemFunc(const double& x, const double& y)
 {
   if (BundlePtr->Grid.xAxis.scale == "Linear" && BundlePtr->Grid.yAxis.scale == "Linear")
     return BundlePtr->MemFunc->Eval(x, y) ;
@@ -206,7 +238,7 @@ double CONFIND::Cell::EvalMemFunc(const double x, const double y)
 }
 
 //--------------------------------------------------------------
-double CONFIND::Cell::EvalSimpleFunc(const double x, const double y)
+double CONFIND::Cell::EvalSimpleFunc(const double& x, const double& y)
 {
   if (BundlePtr->Grid.xAxis.scale == "Linear" && BundlePtr->Grid.yAxis.scale == "Linear")
     return BundlePtr->Func(x, y) ;
@@ -231,50 +263,54 @@ double CONFIND::Cell::EvalSimpleFunc(const double x, const double y)
 void CONFIND::Cell::FindVerts() 
 {
   PROFILE_FUNCTION() ;
-  if (!set_bundle_ptr_flag)
+  // If made from the full constructor no need to check
+  //  other conditions
+  if(!set_full_constructor)
   {
-    Z_LOG_ERROR("ContourFinder pointer not set!") ;
-    return ;
+    if (!set_bundle_ptr_flag)
+    {
+      Z_LOG_ERROR("ContourFinder pointer not set!") ;
+      return ;
+    }
+    if(!set_idx_flag)
+    {
+      Z_LOG_ERROR("Cell index is not set!") ;
+      return ;
+    }
+    if(!set_size_flag)
+    {
+      Z_LOG_ERROR("Cell size is not set!") ;
+      return ;
+    }
   }
-  if(!set_idx_flag)
-  {
-    Z_LOG_ERROR("Cell index is not set!") ;
-    return ;
-  }
-  if(!set_size_flag)
-  {
-    Z_LOG_ERROR("Cell size is not set!") ;
-    return ;
-  }
-
-  BundlePtr->Grid.xAxis.scale == "Log" ? x_min = log10(BundlePtr->Grid.xAxis.Min()) : x_min = BundlePtr->Grid.xAxis.Min() ;
-  BundlePtr->Grid.yAxis.scale == "Log" ? y_min = log10(BundlePtr->Grid.yAxis.Min()) : y_min = BundlePtr->Grid.yAxis.Min() ;
-
+  //.................................................
 
   //.......................................
-  if (set_vertexZ_flag[0])
-  SetVertex(1, {x_min + idx.first*l_x,  y_min + idx.second*l_y, verts_set[1].xyz.z}) ;
-  else
-  SetVertex(1, {x_min + idx.first*l_x,  y_min + idx.second*l_y,
-                   EvalFunc(x_min + idx.first*l_x, y_min + idx.second*l_y)}) ;
+  // There is an offset between 'set_vertexZ_flag' & 'verts_set' definitions
   //.......................................
-  if (set_vertexZ_flag[1])
-  SetVertex(2, {x_min + (idx.first+1)*l_x, y_min + idx.second*l_y, verts_set[2].xyz.z} ) ;
+  if (set_vertexZ_flag[B_Left-1])
+  SetVertex(B_Left, {x_min,  y_min, verts_set[B_Left].xyz.z}) ;
   else
-  SetVertex(2, {x_min + (idx.first+1)*l_x, y_min + idx.second*l_y, 
-                   EvalFunc(x_min + (idx.first+1)*l_x, y_min + idx.second*l_y)} ) ;
+  SetVertex(B_Left, {x_min,  y_min,
+                   EvalFunc(x_min, y_min)}) ;
   //.......................................
-  if (set_vertexZ_flag[2])
-  SetVertex(3, {x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y, verts_set[3].xyz.z} ) ;
+  if (set_vertexZ_flag[B_Right-1])
+  SetVertex(B_Right, {x_min + l_x, y_min, verts_set[B_Right].xyz.z} ) ;
   else
-  SetVertex(3, {x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y, 
-                   EvalFunc(x_min + (idx.first+1)*l_x, y_min + (idx.second+1)*l_y)} ) ;
+  SetVertex(B_Right, {x_min + l_x, y_min, 
+                   EvalFunc(x_min + l_x, y_min)} ) ;
   //.......................................
-  if (set_vertexZ_flag[3])
-  SetVertex(4, {x_min + idx.first*l_x, y_min + (idx.second+1)*l_y,  verts_set[4].xyz.z} ) ;
+  if (set_vertexZ_flag[T_Right-1])
+  SetVertex(T_Right, {x_min +l_x, y_min + l_y, verts_set[T_Right].xyz.z} ) ;
   else
-  SetVertex(4, {x_min + idx.first*l_x, y_min + (idx.second+1)*l_y, 
-                   EvalFunc(x_min + idx.first*l_x, y_min + (idx.second+1)*l_y)} ) ;
+  SetVertex(T_Right, {x_min + l_x, y_min + l_y, 
+                   EvalFunc(x_min + l_x, y_min + l_y)} ) ;
+  //.......................................
+  if (set_vertexZ_flag[T_Left-1])
+  SetVertex(T_Left, {x_min, y_min + l_y,  verts_set[T_Left].xyz.z} ) ;
+  else
+  SetVertex(T_Left, {x_min, y_min + l_y, 
+                   EvalFunc(x_min, y_min + l_y)} ) ;
   //.......................................
 
   EvalCenter()         ; // Center of the cell
@@ -291,20 +327,20 @@ void CONFIND::Cell::SetTriangles()
   triangle_set.reserve(4) ;
 
   // 0: Bottom triangle
-  triangle_set.emplace_back(verts_set[0], verts_set[1], verts_set[2]) ;
+  triangle_set.emplace_back(verts_set[Center], verts_set[B_Left], verts_set[B_Right]) ;
 
   // 1: Right triangle
-  triangle_set.emplace_back(verts_set[0], verts_set[2], verts_set[3]) ;
+  triangle_set.emplace_back(verts_set[Center], verts_set[B_Right], verts_set[T_Right]) ;
 
   // 2: Top triangle
-  triangle_set.emplace_back(verts_set[0], verts_set[3], verts_set[4]) ;
+  triangle_set.emplace_back(verts_set[Center], verts_set[T_Right], verts_set[T_Left]) ;
 
   // 3: Left triangle
-  triangle_set.emplace_back(verts_set[0], verts_set[4], verts_set[1]) ;
+  triangle_set.emplace_back(verts_set[Center], verts_set[T_Left], verts_set[B_Left]) ;
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cell::SetContourValue(double cont_in)
+void CONFIND::Cell::SetContourValue(const double& cont_in)
 {
   contour_val = cont_in ;
   set_contour_val_flag = true ;
@@ -389,7 +425,7 @@ int CONFIND::Cell::GetStatus()
 
 //--------------------------------------------------------------
 // (-1, -1, odd_sign--> +1) & ( odd_sign --> -1, +1, +1)
-void CONFIND::Cell::case36(const triangle& tri, const int odd_sign)
+void CONFIND::Cell::case36(const triangle& tri, const int& odd_sign)
 {
   // double c = GetContourValue() ;
   Zaki::Physics::Coord3D p_top, p_1, p_2 ;

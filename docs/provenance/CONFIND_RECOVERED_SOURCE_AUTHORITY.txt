@@ -1,0 +1,67 @@
+CONFIND RECOVERED SOURCE AUTHORITY CANDIDATE
+
+classification: EXACT NON-GIT SOURCE SNAPSHOT — CANDIDATE ONLY
+source recovery SHA: 0049b9ad828ac6e517a7314ae05b07e5361b6ea2
+snapshot manifest: ed76163c22e0a1f8ba3f71f62f5a56527528850650bbf7127da9c0c908d14083
+vendored CompactStar CONFIND archive SHA-256: 09ed1a7c43a83b42f64ee8e0bda3b879af970126ee75159a802179a4d0a49eb2
+current divergent CONFIND Git HEAD: 89c5d9b731534e4289d9f686549d9f0ac178e567
+historical identity confidence: MODERATE
+header contract: EXACT_HEADER_MATCH
+consumed symbol contract: COMPLETE_SYMBOL_CONTRACT_MATCH
+Git SHA: NONE / NOT DEFENSIBLY ASSIGNABLE
+
+status:
+- NOT ACCEPTED SOURCE AUTHORITY
+- NOT BUILD-QUALIFIED
+- NOT LINUX-QUALIFIED
+
+Original source locations
+=========================
+
+Implementation/build root:
+/Users/keeper/Library/CloudStorage/GoogleDrive-m.zakeri@eku.edu/My Drive/Research/Tools/Coding/Confind
+
+Exact consumed-header root:
+/Users/keeper/Library/CloudStorage/GoogleDrive-m.zakeri@eku.edu/My Drive/Research/Tools/Coding/CompactStar/dependencies/include/Confind
+
+README.md, build/*, legal/LICENSE, and source/* were copied byte-for-byte from
+the implementation/build root. include/Confind/* was copied byte-for-byte from
+the exact consumed-header root. No other source was used.
+
+Canonical source manifest
+=========================
+
+Each line is SHA-256, byte size, and logical path. The newline-terminated,
+logical-path-sorted text below is preserved separately as
+CONFIND_SOURCE_MANIFEST.sha256. Its own SHA-256 is
+ed76163c22e0a1f8ba3f71f62f5a56527528850650bbf7127da9c0c908d14083.
+
+fd5219e5010182cc74cd75c6564f3895119ba65c7848c0f0179bbdcf05951acb  880  README.md
+9e1b1e95422e175400e8c5e51df54100024533a5d030268072a6c16f55567c56  7001  build/CMakeLists.txt
+d6ac63e3a1f7e1060b2badd420514764cd71d6bded79965749400d18feee028f  346  build/ConfindConfig.h.in
+2862cc18f330c9f401c496fb9a56b0ce5bc0a01c5cc86b1cc5ed29e33d8c4e96  74  build/include-CMakeLists.txt
+963226b1c056908776469da7f8ec8fc769ef613a28384c58c3eaa9e19a3f69fd  138  build/src-CMakeLists.txt
+3e089b6d9429edd9dc859956fe1ce63e632dde1dfef1cacac273df4b3f9d2e7b  2633  include/Confind/Base.hpp
+8a85cdd53267da5882c158bc49d46d33b27f82915f8f21c9f4aa6dbd9cc0b13c  3856  include/Confind/Bundle.hpp
+b4b7c155fdf3439dfb4a835954cb3a9a7ca40a1628954776d4c26c73611ffea4  7153  include/Confind/Cell.hpp
+aaeb12aed6f620b10034b10d79faccd04313bda48cf77ba8247c2d47edf22bb8  692  include/Confind/Common.hpp
+da6209f01d0fc7c0b7dbf620696885fd0a19a156b2c9c85103692c6111e6f114  244  include/Confind/ConfindConfig.h
+b22cb1e6ebe62d3c91d3cd17b3de627e549f5142e290ec18b06553895cd15a7f  2475  include/Confind/Cont2D.hpp
+6b95b0a30c5e9f03aee022ed4e1994a3aed34b470f31472c90a550e6f20a09dd  7368  include/Confind/ContourFinder.hpp
+3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  35149  legal/LICENSE
+6e74812f8eab42063f1cac6fe4418c2a80c0328ae3115741e26f97b1f03f6ba1  5450  source/Base.cpp
+bc58cd5d51c8852d7d016424fade34841b015eeddbcad9fa52669f10f391f670  15456  source/Cell.cpp
+942a3b6d7b4f7aa62acde01f73b9788d938f2056ce30a69e8b0430ab338ec257  1762  source/Common.cpp
+fca14d98fa4fc9646883eebcf762f8b4b09c21d02808ec3e913f2d5f9ce9497e  10318  source/Cont2D.cpp
+8eaf44570eca16b1a7387e06416d3501fd8ddb674f4321e02c228847e31d8b6d  47834  source/ContourFinder.cpp
+
+Preservation convention
+=======================
+
+The source files are stored read-only (0444) and their directories are stored
+read-only/searchable (0555). These permissions are a reversible handling
+convention only. The canonical manifest and its SHA-256 are the scientific
+authority.
+
+No build, test, compilation, Git initialization, or source modification was
+performed while preserving this snapshot.

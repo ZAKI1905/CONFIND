@@ -1,0 +1,8 @@
+set(Confind_SRC_Files
+    src/Base.cpp
+    src/Cell.cpp
+    src/Cont2D.cpp
+    src/Common.cpp
+    src/ContourFinder.cpp
+    PARENT_SCOPE
+)

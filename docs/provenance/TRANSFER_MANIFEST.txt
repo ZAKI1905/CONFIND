@@ -1,0 +1,52 @@
+CONFIND RECOVERED SOURCE TRANSFER MANIFEST
+
+purpose: Preserve and manually transfer the authenticated recovered CONFIND composite source snapshot for a later, separately authorized Mac source-build equivalence experiment.
+classification: EXACT NON-GIT SOURCE SNAPSHOT — CANDIDATE ONLY
+source environment: local Mac recovered-source evidence store
+target environment: owner-selected verification or cluster bootstrap environment after authorization
+source recovery SHA: 0049b9ad828ac6e517a7314ae05b07e5361b6ea2
+source Git SHA: NONE / NOT DEFENSIBLY ASSIGNABLE
+source manifest SHA-256: ed76163c22e0a1f8ba3f71f62f5a56527528850650bbf7127da9c0c908d14083
+scope: The ZIP contains only the 18-file recovered CONFIND source snapshot and its preservation/transfer metadata. It does not accept the snapshot as source authority or authorize any build.
+
+Included files
+==============
+
+Each line is SHA-256, byte size, and ZIP-relative path.
+
+fd5219e5010182cc74cd75c6564f3895119ba65c7848c0f0179bbdcf05951acb  880  source/README.md
+9e1b1e95422e175400e8c5e51df54100024533a5d030268072a6c16f55567c56  7001  source/build/CMakeLists.txt
+d6ac63e3a1f7e1060b2badd420514764cd71d6bded79965749400d18feee028f  346  source/build/ConfindConfig.h.in
+2862cc18f330c9f401c496fb9a56b0ce5bc0a01c5cc86b1cc5ed29e33d8c4e96  74  source/build/include-CMakeLists.txt
+963226b1c056908776469da7f8ec8fc769ef613a28384c58c3eaa9e19a3f69fd  138  source/build/src-CMakeLists.txt
+3e089b6d9429edd9dc859956fe1ce63e632dde1dfef1cacac273df4b3f9d2e7b  2633  source/include/Confind/Base.hpp
+8a85cdd53267da5882c158bc49d46d33b27f82915f8f21c9f4aa6dbd9cc0b13c  3856  source/include/Confind/Bundle.hpp
+b4b7c155fdf3439dfb4a835954cb3a9a7ca40a1628954776d4c26c73611ffea4  7153  source/include/Confind/Cell.hpp
+aaeb12aed6f620b10034b10d79faccd04313bda48cf77ba8247c2d47edf22bb8  692  source/include/Confind/Common.hpp
+da6209f01d0fc7c0b7dbf620696885fd0a19a156b2c9c85103692c6111e6f114  244  source/include/Confind/ConfindConfig.h
+b22cb1e6ebe62d3c91d3cd17b3de627e549f5142e290ec18b06553895cd15a7f  2475  source/include/Confind/Cont2D.hpp
+6b95b0a30c5e9f03aee022ed4e1994a3aed34b470f31472c90a550e6f20a09dd  7368  source/include/Confind/ContourFinder.hpp
+3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986  35149  source/legal/LICENSE
+6e74812f8eab42063f1cac6fe4418c2a80c0328ae3115741e26f97b1f03f6ba1  5450  source/source/Base.cpp
+bc58cd5d51c8852d7d016424fade34841b015eeddbcad9fa52669f10f391f670  15456  source/source/Cell.cpp
+942a3b6d7b4f7aa62acde01f73b9788d938f2056ce30a69e8b0430ab338ec257  1762  source/source/Common.cpp
+fca14d98fa4fc9646883eebcf762f8b4b09c21d02808ec3e913f2d5f9ce9497e  10318  source/source/Cont2D.cpp
+8eaf44570eca16b1a7387e06416d3501fd8ddb674f4321e02c228847e31d8b6d  47834  source/source/ContourFinder.cpp
+ed76163c22e0a1f8ba3f71f62f5a56527528850650bbf7127da9c0c908d14083  1707  CONFIND_SOURCE_MANIFEST.sha256
+c45ddcae7f79e14b2d21ed559a07398f86a25fb8126a0379f6f635323ece9d8e  3690  CONFIND_RECOVERED_SOURCE_AUTHORITY.txt
+
+TRANSFER_MANIFEST.txt cannot contain its own final SHA-256 without circularity.
+Its SHA-256 and the ZIP SHA-256 are reported externally in the CompactStar
+preservation record. Receivers must verify those external values first, then
+verify every non-self member above after extracting to scratch.
+
+Credential exclusion statement
+==============================
+
+This archive contains source and provenance only.
+It contains no credentials, SSH keys, tokens, passwords, browser data,
+compiled libraries or build output.
+
+It also contains no .git directory, cloud-provider metadata, Finder metadata,
+.DS_Store file, or authenticated Darwin libConfind.a. The Darwin archive is
+referenced by SHA-256 in the authority metadata only.

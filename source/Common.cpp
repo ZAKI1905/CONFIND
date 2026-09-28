@@ -4,14 +4,15 @@
 */
 
 // #include <algorithm>
+#include <array>
 
-#include "../include/Common.h"
+#include "Confind/Common.hpp"
 
 //==============================================================
 std::string CONFIND::Color::name()
 {
-  int base  = idx % 13 ;
-  int shade = idx / 13 ;
+  unsigned int base  = idx % 13 ;
+  unsigned int shade = idx / 13 ;
   std::string out_name ;
 
   switch (base)
@@ -81,13 +82,13 @@ std::string CONFIND::Color::name()
 // ............................................
 // Root color mapping 
 // Ref: https://root.cern.ch/doc/master/classTColor.html
-std::array<EColor, 13> RColor = {kRed, kGreen, kBlue, kMagenta,
-                                 kTeal, kOrange, kCyan, kViolet,
-                                kGray, kPink, kAzure, kYellow, kSpring} ;
+// std::array<EColor, 13> RColor = {kRed, kGreen, kBlue, kMagenta,
+//                                  kTeal, kOrange, kCyan, kViolet,
+//                                 kGray, kPink, kAzure, kYellow, kSpring} ;
 
-EColor CONFIND::RColorMap(size_t i) 
-{ 
-  return static_cast<EColor>(RColor[i % 13] + 2*(i/13)) ;
-}
+// EColor CONFIND::RColorMap(const size_t& i) 
+// { 
+//   return static_cast<EColor>(RColor[i % 13] + 2*(i/13)) ;
+// }
 
 //==============================================================

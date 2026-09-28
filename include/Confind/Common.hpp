@@ -8,10 +8,10 @@
 // #include <cmath>
 
 // Root
-#include <TColor.h>
+// #include <TColor.h>
 
 // Dependencies
-#include <zaki/Util/Logger.h>
+#include <Zaki/Util/Logger.hpp>
 
 namespace CONFIND
 {
@@ -19,11 +19,11 @@ namespace CONFIND
 //==============================================================
 struct Color
 {
-    size_t idx ;
+    unsigned int idx ;
     std::string name() ;
 };
 // ........................................................
-EColor RColorMap(size_t) ;
+// EColor RColorMap(const size_t&) ;
 //==============================================================
 
 }
