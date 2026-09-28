@@ -3,7 +3,7 @@ project(CONFIND VERSION 2.0.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 find_package(Zaki 2.0 CONFIG REQUIRED)
 find_package(Threads REQUIRED)
-add_library(CONFIND STATIC source/Base.cpp source/Cell.cpp source/Cont2D.cpp source/ContourFinder.cpp)
+add_library(CONFIND STATIC source/Base.cpp source/Cell.cpp source/Cont2D.cpp source/ContourFinder.cpp source/Internal/HistoricalMath.cpp)
 add_library(CONFIND::CONFIND ALIAS CONFIND)
 target_compile_features(CONFIND PUBLIC cxx_std_17)
 set_target_properties(CONFIND PROPERTIES CXX_EXTENSIONS OFF)
@@ -11,6 +11,10 @@ target_include_directories(CONFIND PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOUR
 target_link_libraries(CONFIND PUBLIC Zaki::Zaki Threads::Threads)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^(AppleClang|Clang|GNU)$")
   target_compile_options(CONFIND PRIVATE -ffp-contract=off)
+  # Isolate the historical libm call. Do not broaden this to numerical TUs or
+  # consumers. Native object + noinline prevents LTO from undoing the boundary.
+  set_source_files_properties(source/Internal/HistoricalMath.cpp PROPERTIES
+    COMPILE_OPTIONS "-fno-builtin;-fno-lto")
 endif()
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
   set(CONFIND_TESTS_DEFAULT ON)

@@ -1,3 +1,4 @@
+#include "Internal/HistoricalMath.hpp"
 #include <unordered_set>
 #include <typeinfo>
 #include <algorithm>
@@ -665,7 +666,7 @@ void CONFIND::ContourFinder::Evaluate(const EvaluatorFactory& factory, Threading
   detail::RunIndexed(tasks, workers, [&](size_t worker, size_t k) {
     const size_t i = k % (nx+1), j = k / (nx+1);
     const double x = x0 + i*delta_x, y = y0 + j*delta_y;
-    values[k] = evaluators[worker](log_x ? pow(10,x) : x, log_y ? pow(10,y) : y);
+    values[k] = evaluators[worker](log_x ? detail::HistoricalPow10(x) : x, log_y ? detail::HistoricalPow10(y) : y);
   });
   auto saved_evaluator = std::move(genFuncPtr);
   try { FindNextContours(values.data()); }

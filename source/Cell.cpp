@@ -1,3 +1,4 @@
+#include "Internal/HistoricalMath.hpp"
 #include <stdexcept>
 #include <iterator>
 #include <algorithm>
@@ -206,13 +207,13 @@ double CONFIND::Cell::EvalMemFunc(const double& x, const double& y)
     return BundlePtr->MemFunc->Eval(x, y) ;
 
   else if (BundlePtr->Grid.xAxis.scale == "Log" && BundlePtr->Grid.yAxis.scale == "Log")
-    return BundlePtr->MemFunc->Eval(pow(10, x), pow(10, y)) ;
+    return BundlePtr->MemFunc->Eval(detail::HistoricalPow10(x), detail::HistoricalPow10(y)) ;
 
   else if(BundlePtr->Grid.xAxis.scale == "Linear" && BundlePtr->Grid.yAxis.scale == "Log")
-    return BundlePtr->MemFunc->Eval(x, pow(10, y)) ;
+    return BundlePtr->MemFunc->Eval(x, detail::HistoricalPow10(y)) ;
 
   else if(BundlePtr->Grid.xAxis.scale == "Log" && BundlePtr->Grid.yAxis.scale == "Linear")
-    return BundlePtr->MemFunc->Eval(pow(10, x), y) ;
+    return BundlePtr->MemFunc->Eval(detail::HistoricalPow10(x), y) ;
 
   else
   {
@@ -227,13 +228,13 @@ double CONFIND::Cell::EvalSimpleFunc(const double& x, const double& y)
     return BundlePtr->Func(x, y) ;
 
   else if (BundlePtr->Grid.xAxis.scale == "Log" && BundlePtr->Grid.yAxis.scale == "Log")
-    return BundlePtr->Func(pow(10, x), pow(10, y)) ;
+    return BundlePtr->Func(detail::HistoricalPow10(x), detail::HistoricalPow10(y)) ;
 
   else if(BundlePtr->Grid.xAxis.scale == "Linear" && BundlePtr->Grid.yAxis.scale == "Log")
-    return BundlePtr->Func(x, pow(10, y)) ;
+    return BundlePtr->Func(x, detail::HistoricalPow10(y)) ;
 
   else if(BundlePtr->Grid.xAxis.scale == "Log" && BundlePtr->Grid.yAxis.scale == "Linear")
-    return BundlePtr->Func(pow(10, x), y) ;
+    return BundlePtr->Func(detail::HistoricalPow10(x), y) ;
 
   else
   {
@@ -430,10 +431,10 @@ void CONFIND::Cell::case36(const triangle& tri, const int& odd_sign)
   } ;
 
   if (BundlePtr->Grid.xAxis.scale == "Log")
-    {o_1.x = pow(10, o_1.x) ; o_2.x = pow(10, o_2.x) ;}
+    {o_1.x = detail::HistoricalPow10(o_1.x) ; o_2.x = detail::HistoricalPow10(o_2.x) ;}
 
   if (BundlePtr->Grid.yAxis.scale == "Log")
-    {o_1.y = pow(10, o_1.y) ; o_2.y = pow(10, o_2.y) ;}
+    {o_1.y = detail::HistoricalPow10(o_1.y) ; o_2.y = detail::HistoricalPow10(o_2.y) ;}
 
   contour_coords.emplace_back(o_1.x, o_1.y, o_1.z) ;
   contour_coords.emplace_back(o_2.x, o_2.y, o_2.z) ;
@@ -465,10 +466,10 @@ void CONFIND::Cell::case5(const triangle& tri)
   } ;
 
   if (BundlePtr->Grid.xAxis.scale == "Log")
-    {o_on.x = pow(10, o_on.x) ; o_other.x = pow(10, o_other.x) ;}
+    {o_on.x = detail::HistoricalPow10(o_on.x) ; o_other.x = detail::HistoricalPow10(o_other.x) ;}
 
   if (BundlePtr->Grid.yAxis.scale == "Log")
-    {o_on.y = pow(10, o_on.y) ; o_other.y = pow(10, o_other.y) ;}
+    {o_on.y = detail::HistoricalPow10(o_on.y) ; o_other.y = detail::HistoricalPow10(o_other.y) ;}
 
   contour_coords.emplace_back(o_on.x, o_on.y, o_on.z) ;
   contour_coords.emplace_back(o_other.x, o_other.y, o_other.z) ;
@@ -490,10 +491,10 @@ void CONFIND::Cell::case48(const triangle& tri)
     { o_1 = tri.v[0].xyz ; o_2 = tri.v[1].xyz; }
 
   if (BundlePtr->Grid.xAxis.scale == "Log")
-    {o_1.x = pow(10, o_1.x) ; o_2.x = pow(10, o_2.x) ;}
+    {o_1.x = detail::HistoricalPow10(o_1.x) ; o_2.x = detail::HistoricalPow10(o_2.x) ;}
 
   if (BundlePtr->Grid.yAxis.scale == "Log")
-    {o_1.y = pow(10, o_1.y) ; o_2.y = pow(10, o_2.y) ;}
+    {o_1.y = detail::HistoricalPow10(o_1.y) ; o_2.y = detail::HistoricalPow10(o_2.y) ;}
 
   contour_coords.emplace_back(o_1.x, o_1.y, o_1.z) ;
   contour_coords.emplace_back(o_2.x, o_2.y, o_2.z) ;
