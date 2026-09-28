@@ -1,0 +1,8 @@
+execute_process(COMMAND "${PROGRAM}" "${OUTPUT}" RESULT_VARIABLE result OUTPUT_VARIABLE log ERROR_VARIABLE error)
+if(NOT result EQUAL 0)
+  message(FATAL_ERROR "Characterization exited ${result}: ${error} ${log}")
+endif()
+execute_process(COMMAND "${CMAKE_COMMAND}" -E compare_files "${OUTPUT}" "${REFERENCE}" RESULT_VARIABLE different)
+if(different)
+  message(FATAL_ERROR "Frozen historical reference differs: ${OUTPUT}")
+endif()

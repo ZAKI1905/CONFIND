@@ -1,0 +1,180 @@
+// Historical characterization adapted from the hash-verified reconnaissance probe
+// behavioural probe of the vendored CompactStar arm64 libConfind.a.
+// Not part of any repository. Uses only the authenticated vendored public headers.
+// Deliberately does NOT use Coord3D::operator< / operator== / XYDist2 so that this
+// translation unit emits no competing weak definitions of the comparator.
+#include <Confind/ContourFinder.hpp>
+#include <Zaki/Util/Logger.hpp>
+#include <Zaki/Vector/DataSet.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdio>
+#include <cstring>
+#include <functional>
+#include <limits>
+#include <set>
+#include <string>
+#include <utility>
+#include <vector>
+#include <array>
+#include <stdexcept>
+
+static FILE* OUT = nullptr;
+
+static uint64_t bits(double d) { uint64_t u; std::memcpy(&u, &d, 8); return u; }
+
+// FNV-1a over the exact bit patterns of a point sequence (order-sensitive)
+static uint64_t seqhash(const std::vector<std::pair<double, double>>& v)
+{
+  uint64_t h = 1469598103934665603ULL;
+  for (auto& p : v)
+    for (uint64_t w : {bits(p.first), bits(p.second)})
+      for (int k = 0; k < 8; ++k) { h ^= (w >> (8 * k)) & 0xff; h *= 1099511628211ULL; }
+  return h;
+}
+
+// r^2 exactly as the vendored (unfused, -O0) Coord3D::XYDist2({0,0,0}) computes it.
+// This TU is compiled with -ffp-contract=off so the expression is not fused.
+static double r2_unfused(double x, double y)
+{
+  volatile double xx = (x - 0.0) * (x - 0.0);
+  volatile double yy = (y - 0.0) * (y - 0.0);
+  return xx + yy;
+}
+
+struct Summary
+{
+  size_t raw = 0, exact_distinct = 0, r2_classes = 0, curve = 0;
+  uint64_t raw_hash = 0, curve_hash = 0;
+};
+
+static void dump_points(const char* tag, const std::vector<std::pair<double, double>>& v, size_t maxn)
+{
+  for (size_t i = 0; i < v.size() && i < maxn; ++i)
+    std::fprintf(OUT, "    %s[%zu] = (%.17g, %.17g)  [%a, %a]\n", tag, i, v[i].first, v[i].second,
+                 v[i].first, v[i].second);
+  if (v.size() > maxn) std::fprintf(OUT, "    %s ... (%zu more)\n", tag, v.size() - maxn);
+}
+
+// Complete deterministic records: raw order, z, bit identity and curve order.
+static Summary analyse(const char* name, std::vector<CONFIND::Cont2D> cs, size_t, bool curve_ok = true)
+{
+  Summary total;
+  std::fprintf(OUT, "FIXTURE\t%s\t%zu\n", name, cs.size());
+  for (size_t c = 0; c < cs.size(); ++c)
+  {
+    std::set<std::array<uint64_t,3>> ex;
+    std::set<uint64_t> radii;
+    size_t exact = 0;
+    for (size_t i=0; i<cs[c].size(); ++i) {
+      auto p=cs[c][i]; ex.insert({bits(p.x),bits(p.y),bits(p.z)});
+      radii.insert(bits(r2_unfused(p.x,p.y)));
+      bool prior=false;
+      for(size_t j=0;j<i;++j) { auto q=cs[c][j]; if(p.x==q.x && p.y==q.y && p.z==q.z) {prior=true;break;} }
+      if(!prior) ++exact;
+    }
+    std::fprintf(OUT,"CONTOUR\t%zu\t%a\t%016llx\t%d\t%zu\t%zu\t%zu\t%zu\n",c,cs[c].GetVal(),
+      (unsigned long long)bits(cs[c].GetVal()),int(cs[c].GetFound()),cs[c].size(),exact,ex.size(),radii.size());
+    for (size_t i=0; i<cs[c].size(); ++i) {
+      auto p=cs[c][i]; std::fprintf(OUT,"RAW\t%zu\t%a\t%a\t%a\t%016llx\t%016llx\t%016llx\n",i,p.x,p.y,p.z,
+        (unsigned long long)bits(p.x),(unsigned long long)bits(p.y),(unsigned long long)bits(p.z));
+    }
+    if(curve_ok && cs[c].size()) {
+      auto cv=cs[c].ConvertToCurve2D(); std::fprintf(OUT,"CURVE\t%zu\n",cv.pts.size());
+      for(size_t i=0;i<cv.pts.size();++i) {auto p=cv.pts[i];std::fprintf(OUT,"POINT\t%zu\t%a\t%a\t%016llx\t%016llx\n",i,p.x,p.y,
+        (unsigned long long)bits(p.x),(unsigned long long)bits(p.y));}
+    } else std::fprintf(OUT,"CURVE\tHISTORICAL_DEFECT_EMPTY_CONVERSION_NOT_INVOKED\n");
+  }
+  return total;
+}
+
+// ---------------------------------------------------------------------------
+using Field = std::function<double(double, double)>;
+
+static Zaki::Math::Grid2D grid(double x0, double x1, size_t nx, double y0, double y1, size_t ny)
+{
+  return {{{x0, x1}, nx, "Linear"}, {{y0, y1}, ny, "Linear"}};
+}
+
+// Sampled-grid path (the one CompactStar uses): SetGrid + SetContVal + SetGridVals(GridVals_2D*)
+static std::vector<CONFIND::Cont2D> run_sampled(const Zaki::Math::Grid2D& g, const Field& f,
+                                                const std::vector<double>& lv,
+                                                const std::vector<std::pair<size_t, size_t>>& drop = {})
+{
+  const size_t nx = g.xAxis.res, ny = g.yAxis.res;
+  const double x0 = g.xAxis.scale=="Log" ? std::log10(g.xAxis.Min()) : g.xAxis.Min();
+  const double x1 = g.xAxis.scale=="Log" ? std::log10(g.xAxis.Max()) : g.xAxis.Max();
+  const double y0 = g.yAxis.scale=="Log" ? std::log10(g.yAxis.Min()) : g.yAxis.Min();
+  const double y1 = g.yAxis.scale=="Log" ? std::log10(g.yAxis.Max()) : g.yAxis.Max();
+  const double dx = (x1 - x0) / nx;  // same expression as CONFIND::SetDeltas
+  const double dy = (y1 - y0) / ny;
+  std::vector<double> iv, jv, zv;
+  for (size_t j = 0; j <= ny; ++j)
+    for (size_t i = 0; i <= nx; ++i)
+    {
+      bool skip = false;
+      for (auto& d : drop) if (d.first == i && d.second == j) skip = true;
+      if (skip) continue;
+      iv.push_back(i); jv.push_back(j);
+      double x=x0+i*dx, y=y0+j*dy;
+      zv.push_back(f(g.xAxis.scale=="Log" ? std::pow(10,x) : x, g.yAxis.scale=="Log" ? std::pow(10,y) : y));
+    }
+  Zaki::Vector::DataSet ds(std::vector<Zaki::Vector::DataColumn>{
+      Zaki::Vector::DataColumn("i", iv), Zaki::Vector::DataColumn("j", jv), Zaki::Vector::DataColumn("z", zv)});
+  Zaki::Math::GridVals_2D gv(ds, 0, nx, 1, ny, 2);
+  CONFIND::ContourFinder con;
+  con.SetGrid(g);
+  con.SetContVal(lv);
+  con.SetGridVals(&gv);
+  return con.GetContourSet();
+}
+
+static Field g_callable;
+static double callable_trampoline(double x, double y) { return g_callable(x, y); }
+
+static std::vector<CONFIND::Cont2D> run_callable(const Zaki::Math::Grid2D& g, const Field& f,
+                                                 const std::vector<double>& lv,
+                                                 CONFIND::ContourFinder::Mode m, int threads = 1)
+{
+  g_callable = f;
+  CONFIND::ContourFinder con;
+  con.SetGrid(g);
+  con.SetContVal(lv);
+  con.SetFunc(&callable_trampoline);
+#ifndef CONFIND_MODERN
+  con.SetThreads(threads);
+#else
+  (void)threads;
+#endif
+  con.SetGridVals(m);
+  return con.GetContourSet();
+}
+
+int main(int argc, char** argv)
+{
+  OUT = std::fopen(argc > 1 ? argv[1] : "oracle_out.txt", "w");
+  if(!OUT) throw std::runtime_error("cannot open output");
+  Zaki::Util::LogManager::SetLogLevels(Zaki::Util::LogLevel::Error);
+
+  // F16 OpenMP modes (square grid avoids res_x = yAxis.res heap overflow in Ludicrous)
+  {
+    Field f = [](double x, double y) { return (x - 0.3) * (x - 0.3) + (y - 0.2) * (y - 0.2); };
+    auto g = grid(-2, 2, 16, -2, 2, 16);
+    analyse("F16a_Fast_serial", run_callable(g, f, {1.7, 0.9}, CONFIND::ContourFinder::Fast), 0);
+    for (int t : {1, 2, 4})
+    {
+      std::string n1 = "F16b_Parallel_t" + std::to_string(t), n2 = "F16c_Ludicrous_t" + std::to_string(t);
+      analyse(n1.c_str(), run_callable(g, f, {1.7, 0.9}, CONFIND::ContourFinder::Parallel, t), 0);
+      analyse(n2.c_str(), run_callable(g, f, {1.7, 0.9}, CONFIND::ContourFinder::Ludicrous, t), 0);
+    }
+    // res_x = yAxis.res defect: nx=16 > ny=8 (safe direction: truncation, no overflow)
+    auto gr = grid(-2, 2, 16, -2, 2, 8);
+    analyse("F16d_Fast_nx16_ny8", run_callable(gr, f, {1.7}, CONFIND::ContourFinder::Fast), 0);
+    analyse("F16e_Parallel_t1_nx16_ny8", run_callable(gr, f, {1.7}, CONFIND::ContourFinder::Parallel, 1), 0);
+  }
+
+  std::fclose(OUT);
+  return 0;
+}
