@@ -1,6 +1,6 @@
 file(SHA256 "${REFERENCE}" expected)
 file(WRITE "${OUTPUT}/stress-hashes.tsv" "workers\trun\tsha256\n")
-foreach(workers 1 2 4 8)
+foreach(workers 1 2 3 4 6 8)
   foreach(run RANGE 1 20)
     set(record "${OUTPUT}/stress-${workers}-${run}.tsv")
     execute_process(COMMAND "${PROGRAM}" "${record}" "${workers}" perturb

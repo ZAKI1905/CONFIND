@@ -14,7 +14,7 @@ add_test(NAME historical_export COMMAND ${CMAKE_COMMAND}
   -DPROGRAM=$<TARGET_FILE:confind_export> -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/export
   -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference -P ${CMAKE_CURRENT_SOURCE_DIR}/export.cmake)
 
-foreach(workers 1 2 4 8)
+foreach(workers 1 2 3 4 6 8)
   add_test(NAME historical_samples_workers_${workers} COMMAND ${CMAKE_COMMAND}
     -DPROGRAM=$<TARGET_FILE:confind_characterize> -DWORKERS=${workers}
     -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/samples-${workers}.tsv
@@ -27,10 +27,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(AppleClang|Clang|GNU)$")
   target_compile_options(confind_safety PRIVATE -ffp-contract=off)
 endif()
 add_test(NAME ownership_inputs_exceptions COMMAND confind_safety ${CMAKE_CURRENT_BINARY_DIR}/safety-output)
-add_test(NAME scheduler_stress_80_runs COMMAND ${CMAKE_COMMAND}
+add_test(NAME scheduler_stress_120_runs COMMAND ${CMAKE_COMMAND}
   -DPROGRAM=$<TARGET_FILE:confind_characterize> -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}
   -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference/serial.tsv -P ${CMAKE_CURRENT_SOURCE_DIR}/stress.cmake)
-set_tests_properties(scheduler_stress_80_runs PROPERTIES TIMEOUT 240)
+set_tests_properties(scheduler_stress_120_runs PROPERTIES TIMEOUT 240)
 option(CONFIND_BUILD_BENCHMARK "Build the deterministic expensive-evaluator benchmark" OFF)
 if(CONFIND_BUILD_BENCHMARK)
   add_executable(confind_benchmark benchmark.cpp)
@@ -75,3 +75,21 @@ foreach(mode log linear)
     -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference/m1-${mode}.tsv
     -P ${CMAKE_CURRENT_SOURCE_DIR}/m1_differential.cmake)
 endforeach()
+
+add_executable(confind_thread_discrimination thread_discrimination.cpp)
+target_link_libraries(confind_thread_discrimination PRIVATE CONFIND::CONFIND)
+set_target_properties(confind_thread_discrimination PROPERTIES CXX_EXTENSIONS OFF)
+add_test(NAME threading_discrimination COMMAND confind_thread_discrimination ${CMAKE_CURRENT_SOURCE_DIR}/reference/m1-nodes.tsv)
+set_tests_properties(threading_discrimination PROPERTIES TIMEOUT 90)
+foreach(workers 1 2 3 4 6 8)
+  foreach(mode small stellar)
+    add_test(NAME m1_${mode}_workers_${workers} COMMAND ${CMAKE_COMMAND}
+      -DPROGRAM=$<TARGET_FILE:confind_m1_characterize> -DMODE=${mode} -DWORKERS=${workers}
+      -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}/m1-${mode}-${workers}.tsv
+      -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference/m1-${mode}.tsv
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/m1_compare.cmake)
+  endforeach()
+endforeach()
+add_test(NAME m1_scheduler_stress_120_runs COMMAND ${CMAKE_COMMAND}
+  -DPROGRAM=$<TARGET_FILE:confind_m1_characterize> -DOUTPUT=${CMAKE_CURRENT_BINARY_DIR}
+  -DREFERENCE=${CMAKE_CURRENT_SOURCE_DIR}/reference/m1-small.tsv -P ${CMAKE_CURRENT_SOURCE_DIR}/m1_stress.cmake)

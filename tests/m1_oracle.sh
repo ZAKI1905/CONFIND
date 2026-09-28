@@ -9,7 +9,7 @@ dep="$COMPACTSTAR/dependencies"
 mkdir -p "$OUTPUT"
 test "$(shasum -a 256 "$dep/lib/Confind/Darwin/arm64/libConfind.a" | cut -d ' ' -f1)" = 09ed1a7c43a83b42f64ee8e0bda3b879af970126ee75159a802179a4d0a49eb2
 test "$(shasum -a 256 "$dep/lib/Zaki/Darwin/arm64/libZaki.a" | cut -d ' ' -f1)" = 3dd4789a20c35064b3133bb863c54c4f64e7df31c94b83201d68f5463902dfef
-for name in characterize differential; do
+for name in characterize differential nodes_oracle; do
   xcrun clang++ -std=c++17 -O0 -ffp-contract=off -isysroot "$sdk" -arch arm64 \
     -I"$dep/include" -I/opt/local/include -I/opt/homebrew/opt/libomp/include \
     -c "$root/tests/m1_$name.cpp" -o "$OUTPUT/$name.o"
@@ -33,3 +33,7 @@ for spec in log:1 linear:2; do
   cmp "$OUTPUT/m1-$name.tsv" "$OUTPUT/m1-$name-repeat.tsv"
   cmp "$OUTPUT/m1-$name.tsv" "$root/tests/reference/m1-$name.tsv"
 done
+"$OUTPUT/nodes_oracle" "$OUTPUT/m1-nodes.tsv"
+"$OUTPUT/nodes_oracle" "$OUTPUT/m1-nodes-repeat.tsv"
+cmp "$OUTPUT/m1-nodes.tsv" "$OUTPUT/m1-nodes-repeat.tsv"
+cmp "$OUTPUT/m1-nodes.tsv" "$root/tests/reference/m1-nodes.tsv"
