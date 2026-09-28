@@ -5,48 +5,30 @@
 #include <stdexcept>
 #include "IndexedExecutor.hpp"
 
-// Root
-// #include <TGraph.h>
-// #include <TMultiGraph.h>
-// #include <TAxis.h>
-// #include <TCanvas.h>
-// #include <TStyle.h>
-// #include <TLegend.h>
 
-#include <Zaki/Util/Logger.hpp>
-#include <Zaki/Util/Profile_Timer.hpp>
-#include <Zaki/Util/ObjObserver.hpp>
 #include <Zaki/Vector/Vector_Basic.hpp>
 
 
 // Local headers
 #include "Confind/ContourFinder.hpp"
 #include "Confind/Bundle.hpp"
-#include "Confind/Common.hpp"
 
 //==============================================================
 //  ContourFinder Class begins
 //--------------------------------------------------------------
 // Default Constructor
 CONFIND::ContourFinder::ContourFinder() 
-  : Base("ContourFinder", true)
+  : Base("ContourFinder")
 {
-  Z_LOG_NOTE("ContourFinder constructor called from " 
-              + PtrStr() + ".") ;
+  (void)0 ;
 
-  // These two are automatically deleted by root:
-  // graph = new TMultiGraph()  ; 
-  // legend = new TLegend(0.7, 0.9, 0.7, 0.9) ;
 } 
 
 //--------------------------------------------------------------
 // Destructor
 CONFIND::ContourFinder::~ContourFinder() 
 { 
-  Z_LOG_NOTE("ContourFinder destructor called from " 
-              + PtrStr() + ".") ;
-  // delete graph ;
-  // delete legend ;
+  (void)0 ;
   // if (cpy_cons_called)  delete genFuncPtr; 
 } 
 
@@ -55,37 +37,23 @@ CONFIND::ContourFinder::~ContourFinder()
 CONFIND::ContourFinder&
 CONFIND::ContourFinder::operator=(const ContourFinder &other) 
 {
-  Z_LOG_NOTE("ContourFinder '=' operator called: " +
-               PtrStr() + " <-- " + other.PtrStr() + ".") ;
+  (void)0 ;
 
   if(this == &other) return *this ;
   else
   {
-  set_height_flag = other.set_height_flag ;
-  set_width_flag = other.set_width_flag ;
   set_grid_flag = other.set_grid_flag ;
   set_grid_vals_flag = other.set_grid_vals_flag ;
   set_func_flag = other.set_func_flag ;
   set_cont_val_flag = other.set_cont_val_flag ;
   set_mem_func_flag = other.set_mem_func_flag ;
-  set_plotX_label_flag = other.set_plotX_label_flag ;
-  set_plotY_label_flag = other.set_plotY_label_flag ;
-  set_plot_label_flag = other.set_plot_label_flag ;
-  set_plot_connected_flag = other.set_plot_connected_flag ;
   cpy_cons_called = other.cpy_cons_called ;
   set_scan_mode_flage = other.set_scan_mode_flage ;
-  set_leg_lab_flag = other.set_leg_lab_flag ;
-  make_legend_flag = other.make_legend_flag ;
   scan_mode = other.scan_mode ;
   algorithm = other.algorithm ;
   func = other.func ;
-  legend_label_set = other.legend_label_set ;
-  legend_header = other.legend_header ;
-  default_legend_opt = other.default_legend_opt ;
-  grid = other.grid ; width = other.width ; height = other.height ;
-  delta_x = other.delta_x ; delta_y = other.delta_y ; 
-  x_label = other.x_label ; y_label = other.y_label ;
-  plot_label = other.plot_label ; connected_plot = other.connected_plot ;
+  grid = other.grid ;
+  delta_x = other.delta_x ; delta_y = other.delta_y ;
   cont_set = other.cont_set ;
   unfound_contours = other.unfound_contours ;
 
@@ -93,11 +61,7 @@ CONFIND::ContourFinder::operator=(const ContourFinder &other)
   if(other.genFuncPtr)
     genFuncPtr = other.genFuncPtr->Clone() ;
 
-  // if(other.graph)
-  //   graph = dynamic_cast<TMultiGraph*> (other.graph->Clone());
 
-  // if(other.legend)
-  //   legend = dynamic_cast<TLegend*>(other.legend->Clone()) ;
 
   return *this ;
   }
@@ -107,50 +71,29 @@ CONFIND::ContourFinder::operator=(const ContourFinder &other)
 // Copy constructor
 // Copies everything!
 CONFIND::ContourFinder::ContourFinder(const ContourFinder &zc2) 
-  : Base("ContourFinder", true),
-  set_height_flag(zc2.set_height_flag),
-  set_width_flag(zc2.set_width_flag),
+  : Base("ContourFinder"),
   set_grid_flag(zc2.set_grid_flag),
   set_grid_vals_flag(zc2.set_grid_vals_flag),
   set_func_flag(zc2.set_func_flag),
   set_cont_val_flag(zc2.set_cont_val_flag),
   set_mem_func_flag(zc2.set_mem_func_flag),
-  set_plotX_label_flag(zc2.set_plotX_label_flag),
-  set_plotY_label_flag(zc2.set_plotY_label_flag),
-  set_plot_label_flag(zc2.set_plot_label_flag),
-  set_plot_connected_flag(zc2.set_plot_connected_flag),
   cpy_cons_called(zc2.cpy_cons_called),
   set_scan_mode_flage(zc2.set_scan_mode_flage),
-  set_leg_lab_flag(zc2.set_leg_lab_flag),
-  make_legend_flag(zc2.make_legend_flag),
   scan_mode(zc2.scan_mode),
   algorithm(zc2.algorithm),
   func(zc2.func),
-  legend_label_set(zc2.legend_label_set),
-  legend_header(zc2.legend_header),
-  default_legend_opt(zc2.default_legend_opt),
-  grid(zc2.grid), width(zc2.width), height(zc2.height),
-  delta_x(zc2.delta_x), delta_y(zc2.delta_y), 
-  x_label(zc2.x_label), y_label(zc2.y_label),
-  plot_label(zc2.plot_label), connected_plot(zc2.connected_plot),
+  grid(zc2.grid),
+  delta_x(zc2.delta_x), delta_y(zc2.delta_y),
   cont_set(zc2.cont_set),
   unfound_contours(zc2.unfound_contours)
 {
-  Z_LOG_NOTE("ContourFinder copy constructor: from " 
-              + zc2.PtrStr() + " --> " + PtrStr() + ".") ;
+  (void)0 ;
     
-#if CONFIND_BASE_DEBUG_MODE
-  Z_OBJ_CCTR(this, (void*)(&zc2), "ContourFinder", "ContourFinder") ;
-#endif
     
   if(zc2.genFuncPtr)
     genFuncPtr = zc2.genFuncPtr->Clone() ;
 
-  // if(zc2.graph)
-  //   graph = dynamic_cast<TMultiGraph*> (zc2.graph->Clone());
 
-  // if(zc2.legend)
-  //   legend = dynamic_cast<TLegend*>(zc2.legend->Clone()) ;
 }
 
 //--------------------------------------------------------------
@@ -162,25 +105,17 @@ void CONFIND::ContourFinder::SetGrid(const Zaki::Math::Grid2D& g)
 }
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetWidth(const size_t& width_in)  
-{
-  width = width_in ;
-  set_width_flag = true ;
-}
+
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetHeight(const size_t& height_in)  
-{
-  height = height_in ;
-  set_height_flag = true ;
-}
+
 
 //--------------------------------------------------------------
 size_t CONFIND::ContourFinder::GetN_X() const
 {
   if(! set_grid_flag)
   {
-    Z_LOG_ERROR("Grid not set!") ;
+    (void)0 ;
     return 0 ;
   }
 
@@ -192,7 +127,7 @@ size_t CONFIND::ContourFinder::GetN_Y() const
 {
   if(! set_grid_flag)
   {
-    Z_LOG_ERROR("Grid not set!") ;
+    (void)0 ;
     return 0 ;
   }
 
@@ -204,7 +139,7 @@ double CONFIND::ContourFinder::GetX_Min() const
 {
   if(! set_grid_flag)
   {
-    Z_LOG_ERROR("Grid not set!") ;
+    (void)0 ;
     return 0 ;
   }
 
@@ -216,7 +151,7 @@ double CONFIND::ContourFinder::GetX_Max() const
 {  
   if(! set_grid_flag)
   {
-    Z_LOG_ERROR("Grid not set!") ;
+    (void)0 ;
     return 0 ;
   }
 
@@ -228,7 +163,7 @@ double CONFIND::ContourFinder::GetY_Min() const
 {
   if(! set_grid_flag)
   {
-    Z_LOG_ERROR("Grid not set!") ;
+    (void)0 ;
     return 0 ;
   }
 
@@ -240,7 +175,7 @@ double CONFIND::ContourFinder::GetY_Max() const
 {
   if(! set_grid_flag)
   {
-    Z_LOG_ERROR("Grid not set!") ;
+    (void)0 ;
     return 0 ;
   }
 
@@ -289,7 +224,7 @@ void CONFIND::ContourFinder::SetGridVals(const Mode& in_mode)
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::SetGridVals(Zaki::Math::GridVals_2D* in_grid_v_2d)
 {
-  Z_LOG_INFO("==> Setting grid values ...");
+  (void)0;
 
   FindNextContours(in_grid_v_2d->m_GridValArr) ;
 
@@ -323,7 +258,7 @@ std::pair<double, double> CONFIND::ContourFinder::GetDeltas() const
 {
   if (!set_grid_flag)
     {
-      Z_LOG_ERROR("Grid is not set!") ;
+      (void)0 ;
       return {-1, -1};
     }
   return {delta_x, delta_y} ;
@@ -334,8 +269,7 @@ void CONFIND::ContourFinder::SetScanMode(const char in_scan_mode)
 {
   if(in_scan_mode != 'X' || in_scan_mode != 'Y')
   {
-    Z_LOG_ERROR("Valid scan modes are 'X' & 'Y' only!\
-    Ignoring the input scan mode, 'X' is assumed.") ;
+    (void)0 ;
     return;
   }
 
@@ -343,7 +277,7 @@ void CONFIND::ContourFinder::SetScanMode(const char in_scan_mode)
   set_scan_mode_flage = true ;
   char tmp[100] ;
   snprintf(tmp, sizeof(tmp), "Scan mode is set to '%c'.", in_scan_mode) ;
-  Z_LOG_INFO(tmp) ;
+  (void)0 ;
 }
 
 //--------------------------------------------------------------
@@ -374,12 +308,9 @@ char CONFIND::ContourFinder::GetScanMode() const
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::FindContour(Cont2D& cont)
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
-  char tmp[150] ;
-  snprintf(tmp, sizeof(tmp), "==> Finding contour for c = %.2e (%s)...", cont.val,
-          cont.color.name().c_str()) ;
-  Z_LOG_INFO(tmp) ;
+  (void)0 ;
 
   // SetDeltas() ;
 
@@ -420,12 +351,11 @@ void CONFIND::ContourFinder::FindContour(Cont2D& cont)
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr)
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
   char tmp[150] ;
   snprintf(tmp, sizeof(tmp), "%.2e", cont.val) ;
     
-  Z_LOG_INFO("==> Finding contour for c= " + std::string(tmp) + " ("+cont.color.name()+")...") ;
 
   // SetDeltas() ;
 
@@ -514,7 +444,7 @@ void CONFIND::ContourFinder::FindContourFast(Cont2D& cont, double* in_gridValArr
 //--------------------------------------------------------------
 void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
   // ......................
   // May 17, 2022: 
@@ -531,10 +461,7 @@ void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
       continue ;
     }
     
-    char tmp[150] ;
-    snprintf(tmp, sizeof(tmp), "==> Finding contour for c = %.2e (%s)...", cont_set[k].val, 
-            cont_set[k].color.name().c_str()) ;
-    Z_LOG_INFO(tmp) ;
+    (void)0 ;
 
     // SetDeltas() ;
 
@@ -574,19 +501,15 @@ void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
 }
 
 //--------------------------------------------------------------
-//  Ludicrous mode: Combination of fast & parallel modes
 
 
 //--------------------------------------------------------------
-//  Ludicrous mode: Combination of fast & parallel modes
 
 
 //--------------------------------------------------------------
-// Task for each thread
 
 
 //--------------------------------------------------------------
-// Setting the number of threads
 
 
 //--------------------------------------------------------------
@@ -594,7 +517,6 @@ void CONFIND::ContourFinder::FindNextContours(double* in_gridValArr)
 
 
 //--------------------------------------------------------------
-// Task for each thread
 
                  
 //--------------------------------------------------------------
@@ -602,7 +524,7 @@ void CONFIND::ContourFinder::Print() const
 {
   if (! set_grid_vals_flag )
     {
-      Z_LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
+      (void)0;
       return ;
     }
   
@@ -610,7 +532,7 @@ void CONFIND::ContourFinder::Print() const
   {
     char tmp[100] ;
     snprintf(tmp, sizeof(tmp), "==> Printing Contour = %f ...", cont_set[i].val) ;
-    Z_LOG_INFO(tmp);
+    (void)0;
 
     std::cout << cont_set[i] ;
   }
@@ -623,7 +545,7 @@ void CONFIND::ContourFinder::SetFunc(double (*f)(double, double) )
 
   if(func) 
   {
-    Z_LOG_INFO("Function is set.") ;
+    (void)0 ;
     set_func_flag = true ;
 
     // Reseting 'genFuncPtr'
@@ -634,7 +556,7 @@ void CONFIND::ContourFinder::SetFunc(double (*f)(double, double) )
     }
   }
   else
-    Z_LOG_INFO("Function is not set, because the input is a nullptr.") ;
+    (void)0 ;
 
 }
 
@@ -646,7 +568,7 @@ void CONFIND::ContourFinder::SetMemFunc(Zaki::Math::Func2D* gen_Fun)
 
   if(genFuncPtr) 
   {
-    Z_LOG_INFO("Member function is set.") ;
+    (void)0 ;
     set_mem_func_flag = true ;
 
     // Reseting 'func'
@@ -657,7 +579,7 @@ void CONFIND::ContourFinder::SetMemFunc(Zaki::Math::Func2D* gen_Fun)
     }
   }
   else
-    Z_LOG_INFO("Member function is not set, because the input is a nullptr.") ;
+    (void)0 ;
 }
 
 //--------------------------------------------------------------
@@ -667,7 +589,6 @@ void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in)
   for (size_t i = 0; i < cont_val_in.size(); i++)
   {
     cont_set.emplace_back(cont_val_in[i]) ;
-    cont_set[cont_set.size()-1].SetColor(cont_set.size()-1) ;
   }
 
   // Kepping track of contours
@@ -683,7 +604,6 @@ void CONFIND::ContourFinder::SetContVal(const std::vector<double>& cont_val_in,
   for (size_t i = 0; i < cont_val_in.size(); i++)
   {
     cont_set.emplace_back(cont_val_in[i]) ;
-    cont_set[cont_set.size()-1].SetColor(cont_set.size()-1) ;
     cont_set[cont_set.size()-1].SetLabel(in_label[i]) ;
   }
 
@@ -698,7 +618,7 @@ void CONFIND::ContourFinder::ExportContour(const Zaki::String::Directory& f_name
 {
   if (! set_grid_vals_flag )
   {
-    Z_LOG_ERROR("Grid values are not set yet, use 'SetGridVals()' first!");
+    (void)0;
     return ;
   }
 
@@ -708,98 +628,47 @@ void CONFIND::ContourFinder::ExportContour(const Zaki::String::Directory& f_name
     {
       char tmp[150] ;
       snprintf(tmp, sizeof(tmp), "Contour '%.2e' hasn't been found yet, skipping to the next one.", cont_set[i].val) ;
-      Z_LOG_WARNING(tmp) ;
+      (void)0 ;
       continue ;
     }  
     cont_set[i].Export(wrk_dir + f_name, mode) ;
   }
 
-  Z_LOG_INFO("Contours exported to '"+f_name.Str()+"_[CONT].dat'.") ;
+  (void)0 ;
 }
 //--------------------------------------------------------------
-// Plot options
-void CONFIND::ContourFinder::SetPlotXLabel(const std::string& in_x_label)
-{
-  x_label = in_x_label;
-  set_plotX_label_flag = true ;
-}
+
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetPlotYLabel(const std::string& in_y_label)
-{
-  y_label = in_y_label;
-  set_plotY_label_flag = true ;
-}
+
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetPlotXRange(
-  const Zaki::Math::Range<double>& in_x_range) 
-{
-  plot_x_range = in_x_range ;
-  set_plotX_range_flag = true ;
-}
-//--------------------------------------------------------------
-void CONFIND::ContourFinder::SetPlotYRange(
-  const Zaki::Math::Range<double>& in_y_range) 
-{
-  plot_y_range = in_y_range ;
-  set_plotY_range_flag = true ;
-}
-//--------------------------------------------------------------
-void CONFIND::ContourFinder::SetPlotLabel(const std::string& in_label) 
-{
-  plot_label = in_label ;
-  set_plot_label_flag = true ;
-}
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetPlotConnected(const bool in_connected)     
-{
-  connected_plot = in_connected ;
-  set_plot_connected_flag = true ;
-}
 
 //--------------------------------------------------------------
-// TMultiGraph* CONFIND::ContourFinder::GetGraph() 
+
+
+//--------------------------------------------------------------
+
+
+//--------------------------------------------------------------
 // {
-//   return graph ;
 // }
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::MakeLegend(const bool in_make_leg,
-                               const char* const in_head,
-                               const char* const in_option) 
-{
-  make_legend_flag = in_make_leg ;
 
-  if(in_head != nullptr)
-    legend_header = in_head ;
-  
-  if(strcmp(in_option, "user") == 0)
-    default_legend_opt = false ;
-}
 
 //--------------------------------------------------------------
-// TLegend* CONFIND::ContourFinder::GetLegend() 
 // {
-//   return legend;
 // }
 
 //--------------------------------------------------------------
-void CONFIND::ContourFinder::SetLegendLabels(const std::vector<std::string>& in_labels) 
-{
-  legend_label_set = in_labels ;
-  set_leg_lab_flag = true ;
-}
+
 
 //--------------------------------------------------------------
 // Commented on May 1, 2023:
-// Root needs to be replaced by matplotlib
-void CONFIND::ContourFinder::Plot(const Zaki::String::Directory& f_name, 
-                         const char* const in_main_title,
-                         const char* const in_x_title,
-                         const char* const in_y_title)
-{}
+
 
 //--------------------------------------------------------------
 std::string CONFIND::ContourFinder::GetXScale()  const

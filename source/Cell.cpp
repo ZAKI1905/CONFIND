@@ -8,25 +8,22 @@
 //==============================================================
 // Default Constructor
 CONFIND::Cell::Cell() 
-  : Base("Cell", true)
+  : Base("Cell")
 {
-  // Z_LOG_NOTE("Cell constructor called from " + PtrStr()) ;
 } 
 
 //--------------------------------------------------------------
 // Destructor
 CONFIND::Cell::~Cell() 
 {
-  // Z_LOG_NOTE("Cell destructor called from " + PtrStr()) ;
 } 
 
 //--------------------------------------------------------------
 // Constructor 2
 CONFIND::Cell::Cell(const size_t& i_in, const double& lx, 
                     const size_t& j_in, const double& ly) 
-  : Base("Cell", true)
+  : Base("Cell")
 {
-  // Z_LOG_NOTE("Cell constructor called from " + PtrStr()) ;
 
   SetSize(lx, ly) ;
   SetIdx(i_in, j_in) ;
@@ -37,12 +34,11 @@ CONFIND::Cell::Cell(const size_t& i_in, const double& lx,
 CONFIND::Cell::Cell(const size_t& i_in, const double& lx,
                     const size_t& j_in, const double& ly, Bundle* bun_in,
                     const double& cont_val_in) 
-  :  Base("Cell", true),
+  :  Base("Cell"),
 l_x(lx), l_y(ly), idx(i_in, j_in), contour_val(cont_val_in), BundlePtr(bun_in),
 set_idx_flag(true), set_bundle_ptr_flag(true), set_size_flag(true),
 set_contour_val_flag(true), set_full_constructor(true)
 {
-  // Z_LOG_NOTE("Cell constructor called from " + PtrStr()) ;
 
   // FindVerts() ;
   BundlePtr->Grid.xAxis.scale == "Log" ? G_x_min = log10(BundlePtr->Grid.xAxis.Min()) : G_x_min = BundlePtr->Grid.xAxis.Min() ;
@@ -82,7 +78,7 @@ void CONFIND::Cell::SetVertexZ(const size_t& idx_in, const double& val_z)
 {
   if (idx_in > 4 || idx_in < 1)
   {
-    Z_LOG_ERROR("Index out of bound, must be less than 5 and greater than 0!") ;
+    (void)0 ;
     return ;
   }
   
@@ -100,7 +96,7 @@ void CONFIND::Cell::SetVertex(const size_t& idx_in, const double& val_x,
 {
   if (idx_in > 4)
   {
-    Z_LOG_ERROR("Index out of bound, must be less than 5!") ;
+    (void)0 ;
     return ;
   }
   verts_set[idx_in].xyz.x = val_x ;
@@ -114,10 +110,10 @@ void CONFIND::Cell::SetVertex(const size_t& idx_in, const double& val_x,
 void CONFIND::Cell::SetVertex(const size_t& idx_in, 
                               const Zaki::Physics::Coord3D& val)
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
   if (idx_in > 4)
   {
-    Z_LOG_ERROR("Index out of bound, must be less than 5!") ;
+    (void)0 ;
     return ;
   }
 
@@ -133,7 +129,7 @@ std::pair<size_t, size_t> CONFIND::Cell::GetIdx() const
 {
   if(!set_idx_flag)
   {
-    Z_LOG_ERROR("variable not set!") ;
+    (void)0 ;
     return {-1, -1};
   }
 
@@ -145,7 +141,7 @@ CONFIND::vertex CONFIND::Cell::operator[](const size_t idx_in) const
 {
   if( set_vertex_flag[idx_in] )
   {
-    Z_LOG_ERROR("vertex not set!") ;
+    (void)0 ;
   }
   
   return verts_set[idx_in] ;
@@ -162,7 +158,7 @@ double CONFIND::Cell::GetFuncVals(const size_t& i) const
 //--------------------------------------------------------------
 void CONFIND::Cell::EvalCenter()
 { 
-  PROFILE_FUNCTION() ;
+  (void)0 ;
   double cen_x  = (verts_set[B_Left].xyz.x + verts_set[B_Right].xyz.x) / 2 ;
   double cen_y  = (verts_set[B_Left].xyz.y + verts_set[T_Left].xyz.y) / 2 ;
   double cen_z  = (  verts_set[B_Left].xyz.z + verts_set[B_Right].xyz.z
@@ -186,7 +182,7 @@ double CONFIND::Cell::GetLX()  const
 {
   if ( !set_size_flag )
   {
-    Z_LOG_ERROR("Cell size not set!") ;
+    (void)0 ;
     return -1;
   }  
 
@@ -198,7 +194,7 @@ double CONFIND::Cell::GetLY()  const
 {
   if ( !set_size_flag )
   {
-    Z_LOG_ERROR("Cell size not set!") ;
+    (void)0 ;
     return -1;
   }  
 
@@ -208,7 +204,7 @@ double CONFIND::Cell::GetLY()  const
 //--------------------------------------------------------------
 double CONFIND::Cell::EvalFunc(const double& x, const double& y)
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
   if ( BundlePtr->Func )
     return EvalSimpleFunc(x, y) ;
   else
@@ -232,7 +228,7 @@ double CONFIND::Cell::EvalMemFunc(const double& x, const double& y)
   
   else
   {
-   Z_LOG_ERROR("Invalid axis scale!") ;
+   (void)0 ;
     return -1 ;
   } 
 }
@@ -254,7 +250,7 @@ double CONFIND::Cell::EvalSimpleFunc(const double& x, const double& y)
   
   else
   {
-   Z_LOG_ERROR("Invalid axis scale!") ;
+   (void)0 ;
     return -1 ;
   } 
 }
@@ -262,24 +258,24 @@ double CONFIND::Cell::EvalSimpleFunc(const double& x, const double& y)
 //--------------------------------------------------------------
 void CONFIND::Cell::FindVerts() 
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
   // If made from the full constructor no need to check
   //  other conditions
   if(!set_full_constructor)
   {
     if (!set_bundle_ptr_flag)
     {
-      Z_LOG_ERROR("ContourFinder pointer not set!") ;
+      (void)0 ;
       return ;
     }
     if(!set_idx_flag)
     {
-      Z_LOG_ERROR("Cell index is not set!") ;
+      (void)0 ;
       return ;
     }
     if(!set_size_flag)
     {
-      Z_LOG_ERROR("Cell size is not set!") ;
+      (void)0 ;
       return ;
     }
   }
@@ -323,7 +319,7 @@ void CONFIND::Cell::FindVerts()
 //--------------------------------------------------------------
 void CONFIND::Cell::SetTriangles()
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
   triangle_set.reserve(4) ;
 
   // 0: Bottom triangle
@@ -351,7 +347,7 @@ double CONFIND::Cell::GetContourValue() const
 {
   if (!set_contour_val_flag)
   {
-    Z_LOG_ERROR("Contour value not set!") ;
+    (void)0 ;
     return -1;
   }
   return contour_val  ;
@@ -360,16 +356,16 @@ double CONFIND::Cell::GetContourValue() const
 //--------------------------------------------------------------
 int CONFIND::Cell::GetStatus()
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
   if (!found_verts_flag)
   {
-    Z_LOG_ERROR("FindVerts() first!") ;
+    (void)0 ;
     return -1;
   }
 
   if (!set_contour_val_flag)
   {
-    Z_LOG_ERROR("Contour value not set!") ;
+    (void)0 ;
     return -1;
   }
 

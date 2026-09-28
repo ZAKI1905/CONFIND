@@ -4,9 +4,6 @@
 
 // #include <random>
 
-// Root
-// #include <TMultiGraph.h>
-// #include <TLegend.h>
 
 
 #include <Zaki/Physics/Coordinate.hpp>
@@ -34,12 +31,9 @@ class Cont2D : public Base
     // Copy Constructor
     Cont2D(const Cont2D&) ;
 
-    void SetColor(const CONFIND::Color&) ;
-    void SetColor(const unsigned int&) ;
     void SetFound(const bool=true) ;
     void SetLabel(const std::string&) ;
 
-    CONFIND::Color GetColor() const ;
     double GetVal() const ;
     bool GetFound() const ;
 
@@ -59,7 +53,6 @@ class Cont2D : public Base
   private:
     double val;
     std::vector<Zaki::Physics::Coord3D> pts;
-    CONFIND::Color color ;
     std::string label ;
 
     bool set_label_flag = false ;

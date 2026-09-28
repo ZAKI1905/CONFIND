@@ -4,12 +4,9 @@
 #include <functional>
 #include "Confind/ThreadingOptions.hpp"
 
-// Root
-// #include <TMultiGraph.h>
-// #include <TLegend.h>
 
-#include <gsl/gsl_interp2d.h>
-#include <gsl/gsl_spline2d.h>
+
+
 
 #include <Zaki/Math/Func2D.hpp>
 #include <Zaki/Math/MemFuncWrapper.hpp>
@@ -58,8 +55,6 @@ class ContourFinder : public Base
     // Setters
     //............................................
     void SetGrid(const Zaki::Math::Grid2D&)  ;
-    void SetWidth(const size_t&) ;
-    void SetHeight(const size_t&) ;
     void SetDeltas()      ;
     // Historical callable modes remain serial (including their coordinate rounding).
     void SetGridVals(const Mode& = Fast)    ;
@@ -78,15 +73,6 @@ class ContourFinder : public Base
 
     
 
-    // Plot options
-    void SetPlotXLabel(const std::string&) ;
-    void SetPlotYLabel(const std::string&) ;
-    void SetPlotXRange(const Zaki::Math::Range<double>&) ;
-    void SetPlotYRange(const Zaki::Math::Range<double>&) ;
-    void SetPlotLabel(const std::string&)  ;
-    void SetPlotConnected(const bool=true) ;
-    void SetLegendLabels(const std::vector<std::string>& ); 
-    void MakeLegend(const bool=true, const char* const=nullptr, const char* const=nullptr) ;
     //............................................
 
     void Clear() ;
@@ -113,11 +99,7 @@ class ContourFinder : public Base
     void Print() const override;
     void ExportContour(const Zaki::String::Directory& f_name, const Zaki::File::FileMode& mode) ;
 
-    // TMultiGraph* GetGraph() ;
-    // TLegend* GetLegend() ;
 
-    void Plot(const Zaki::String::Directory& f_name, const char* const=nullptr, 
-              const char* const=nullptr, const char* const=nullptr) ;
 
  //--------------------------------------------------------------
   private:
@@ -133,53 +115,32 @@ class ContourFinder : public Base
 
 
     // flags
-    bool set_height_flag      = false ;
-    bool set_width_flag       = false ;
     bool set_grid_flag        = false ;
     bool set_grid_vals_flag   = false ;
     bool set_func_flag        = false ;
     bool set_cont_val_flag    = false ;
     bool set_mem_func_flag    = false ;
-    bool set_plotX_label_flag = false ;
-    bool set_plotY_label_flag = false ;
-    bool set_plotX_range_flag = false ;
-    bool set_plotY_range_flag = false ;
-    bool set_plot_label_flag  = false ;
-    bool set_plot_connected_flag = false ;
     bool cpy_cons_called      = false ;
     bool set_scan_mode_flage  = false ;
-    bool set_leg_lab_flag     = false ;
-    bool make_legend_flag     = false  ;
 
     char scan_mode = 'X' ; 
-    Mode algorithm ;
+    Mode algorithm = Fast ;
 
     //............................................
     /// Pointer to the function
     double (*func) (double, double)= nullptr ;
     /// Unique pointer to the member-function
     std::unique_ptr<Zaki::Math::Func2D> genFuncPtr = nullptr ;
-    /// TMultiGraph* is Automatically managed by root
-    // TMultiGraph* graph = nullptr ;
-    /// TLegend* is Automatically managed by root
-    // TLegend* legend = nullptr ;
     //............................................
 
-    std::vector<std::string> legend_label_set ;
-    std::string legend_header = "Contours" ;
-    bool default_legend_opt = true ; 
 
 
 
 
 
 
-    Zaki::Math::Grid2D grid ;
-    unsigned int width = 1000, height = 1000 ;
-    double delta_x, delta_y ;
-    std::string x_label="X", y_label ="Y", plot_label="" ;
-    Zaki::Math::Range<double> plot_x_range, plot_y_range ;
-    bool connected_plot = false  ;
+    Zaki::Math::Grid2D grid{} ;
+    double delta_x = 0, delta_y = 0 ;
     std::vector<Cont2D> cont_set ;
 
 
@@ -197,24 +158,21 @@ class MemFuncContWrapper : public Base
 
   public:
     MemFuncContWrapper(const FuncObj& obj, const MemFuncPtr& memFn)
-      : Base("MemFuncContWrapper", true)
+      : Base("MemFuncContWrapper")
     {
-      Z_LOG_NOTE("Member function wrapper initializing...") ;
+      (void)0 ;
       cont_finder.SetMemFunc(new Zaki::Math::MemFuncWrapper<FuncObj, double (FuncObj::*)(double, double)>(obj, memFn)) ;
     }
     ~MemFuncContWrapper(){}
 
     MemFuncContWrapper(const MemFuncContWrapper& other)
-    : Base("MemFuncContWrapper", true), cont_finder(other.cont_finder)
+    : Base("MemFuncContWrapper"), cont_finder(other.cont_finder)
     {
-#if CONFIND_BASE_DEBUG_MODE
-        Z_OBJ_CCTR(this, (void*)(&other), "MemFuncContWrapper", "MemFuncContWrapper") ;
-#endif
     }
 
     void UpdateMemFunc(const FuncObj& obj, const MemFuncPtr& memFn)
     {
-      Z_LOG_NOTE("Updating the member function wrapper...") ;
+      (void)0 ;
       cont_finder.SetMemFunc(new Zaki::Math::MemFuncWrapper<FuncObj, double (FuncObj::*)(double, double)>(obj, memFn)) ;
     }
 

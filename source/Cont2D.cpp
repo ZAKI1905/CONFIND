@@ -2,7 +2,6 @@
 
 #include <Zaki/Vector/Vector_Basic.hpp>
 
-#include <Zaki/Util/ObjObserver.hpp>
 
 #include <Zaki/Math/Math_Core.hpp>
 
@@ -14,18 +13,15 @@
 //--------------------------------------------------------------
 // Constructors
 CONFIND::Cont2D::Cont2D(double in_val) 
-  : Base("Cont2D", true), val(in_val) { }
+  : Base("Cont2D"), val(in_val) { }
 
 //--------------------------------------------------------------
 // Copy Constructor
 CONFIND::Cont2D::Cont2D(const Cont2D& other) 
-  : Base("Cont2D", true)
+  : Base("Cont2D")
 {
   *this = other ;
     
-#if CONFIND_BASE_DEBUG_MODE
-  Z_OBJ_CCTR(this, (void*)(&other), "Cont2D", "Cont2D") ;
-#endif
     
 }
 
@@ -43,24 +39,13 @@ void CONFIND::Cont2D::SetLabel(const std::string& in_label)
 }
 
 //--------------------------------------------------------------
-void CONFIND::Cont2D::SetColor(const CONFIND::Color& in_color)
-{
-  color = in_color ;
-  Z_LOG_INFO("Contour color set to '" + color.name() + "'.") ;
-}
+
 
 //--------------------------------------------------------------
-void CONFIND::Cont2D::SetColor(const unsigned int& in_idx)
-{
-  color.idx = in_idx ;
-  Z_LOG_INFO("Contour color set to '" + color.name() + "'.") ;
-}
+
 
 //--------------------------------------------------------------    
-CONFIND::Color CONFIND::Cont2D::GetColor() const 
-{
-  return color;
-}
+
 
 //--------------------------------------------------------------
 double CONFIND::Cont2D::GetVal() const 
@@ -121,7 +106,7 @@ Zaki::Physics::Coord3D CONFIND::Cont2D::operator[](const size_t& idx_in) const
 CONFIND::Cont2D CONFIND::Cont2D::operator+(const Cont2D& in_c) const 
 {
   if(in_c.val != val)
-    Z_LOG_ERROR("Contours with different values cannot be added!") ;
+    (void)0 ;
   
   Cont2D out_c(val) ;
   out_c.pts.reserve(size() + in_c.size()) ;
@@ -138,7 +123,7 @@ CONFIND::Cont2D CONFIND::Cont2D::operator+(const Cont2D& in_c) const
 void CONFIND::Cont2D::operator+=(const Cont2D& in_c) 
 {
   if(in_c.val != val)
-    Z_LOG_ERROR("Contours with different values cannot be added!") ;
+    (void)0 ;
   
   pts.reserve(size() + in_c.size()) ;
 
@@ -148,7 +133,7 @@ void CONFIND::Cont2D::operator+=(const Cont2D& in_c)
 //--------------------------------------------------------------
 void CONFIND::Cont2D::AddPts(const std::vector<Zaki::Physics::Coord3D>& in_pts) 
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
   for (size_t i = 0; i < in_pts.size(); i++)
   {
@@ -164,7 +149,7 @@ void CONFIND::Cont2D::Export(const Zaki::String::Directory& f_name,
   {
     char tmp[150] ;
     snprintf(tmp, sizeof(tmp), "Contour '%.2e' has no points within the specified range.", val) ;
-    Z_LOG_ERROR(tmp) ;
+    (void)0 ;
     return ;
   }  
 
@@ -239,7 +224,7 @@ bool CONFIND::Cont2D::comp_Orient(const Zaki::Physics::Coord3D &a, const Zaki::P
 //--------------------------------------------------------------
 void CONFIND::Cont2D::RMDuplicates()
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
   std::set<Zaki::Physics::Coord3D> tmp_set(pts.begin(), pts.end());
 
@@ -252,18 +237,18 @@ void CONFIND::Cont2D::RMDuplicates()
 // void CONFIND::Cont2D::SortNew(const std::pair<double, double>& del) 
 void CONFIND::Cont2D::SortNew() 
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
   if (already_sorted)
     return;
 
   if (!is_found_flag)
   {
-    Z_LOG_ERROR("Contour values hasn't been found yet!") ;
+    (void)0 ;
     return ; 
   }
 
-  Z_LOG_INFO("==> Sorting the points...") ;
+  (void)0 ;
 
   RMDuplicates() ;
 
@@ -314,18 +299,18 @@ void CONFIND::Cont2D::SortNew()
 //--------------------------------------------------------------
 void CONFIND::Cont2D::Sort()
 {
-  PROFILE_FUNCTION() ;
+  (void)0 ;
 
   if (already_sorted)
     return;
 
   if (!is_found_flag)
   {
-    Z_LOG_ERROR("Contour values hasn't been found yet!") ;
+    (void)0 ;
     return ; 
   }
 
-  Z_LOG_INFO("==> Sorting the points...");
+  (void)0;
 
   RMDuplicates() ;
 

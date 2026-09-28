@@ -4,13 +4,9 @@
 
 // #include <random>
 
-// Root
-// #include <TMultiGraph.h>
-// #include <TLegend.h>
 
 
 #include <Zaki/Math/Func2D.hpp>
-#include <Zaki/Util/ObjObserver.hpp>
 #include <Zaki/Math/Math_Core.hpp>
 // #include <Zaki/File/VecSaver.hpp>
 
@@ -24,8 +20,6 @@ namespace CONFIND
 {
 
 //==============================================================
-// Bundle Class is used for sending information to each thread
-//  in a multi-threaded scenario to avoid racing.
 class Bundle : public Base
 {
   friend class ContourFinder;
@@ -33,17 +27,17 @@ class Bundle : public Base
 
   public:
     // Constructor 0
-    Bundle() : Base("Bundle", true), Con(0)
+    Bundle() : Base("Bundle"), Con(0)
     {
-        Z_LOG_NOTE("Bundle constructor: from " + PtrStr() + ".") ;
+        (void)0 ;
     }
 
     // Constructor 1
     Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
     const std::unique_ptr<Zaki::Math::Func2D>& in_mf) 
-        : Base("Bundle", true), Grid(in_g), Con(in_c)
+        : Base("Bundle"), Grid(in_g), Con(in_c)
     {
-        Z_LOG_NOTE("Bundle constructor: from " + PtrStr() + ".") ;
+        (void)0 ;
       if(in_mf)
         MemFunc = in_mf->Clone() ;
     }
@@ -51,18 +45,18 @@ class Bundle : public Base
     // Constructor 2
     Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
     double (*in_f)(const double, const double)) 
-        : Base("Bundle", true), Grid(in_g), Con(in_c), Func(in_f)
+        : Base("Bundle"), Grid(in_g), Con(in_c), Func(in_f)
     {
-        Z_LOG_NOTE("Bundle constructor: from " + PtrStr() + ".") ;
+        (void)0 ;
     }
 
     // Constructor 3
     Bundle(const Zaki::Math::Grid2D& in_g, const Cont2D& in_c,
     const std::unique_ptr<Zaki::Math::Func2D>& in_mf,
     double (*in_f)(const double, const double)) 
-        : Base("Bundle", true), Grid(in_g), Con(in_c), Func(in_f)
+        : Base("Bundle"), Grid(in_g), Con(in_c), Func(in_f)
     {
-        Z_LOG_NOTE("Bundle constructor: from " + PtrStr() + ".") ;
+        (void)0 ;
       if(in_mf)
         MemFunc = in_mf->Clone() ;
     }
@@ -71,23 +65,19 @@ class Bundle : public Base
     Bundle(const Zaki::Math::Grid2D& in_g,
     const std::unique_ptr<Zaki::Math::Func2D>& in_mf,
     double (*in_f)(const double, const double)) 
-        : Base("Bundle", true), Grid(in_g), Con(0), Func(in_f)
+        : Base("Bundle"), Grid(in_g), Con(0), Func(in_f)
     {
-        Z_LOG_NOTE("Bundle constructor: from " + PtrStr() + ".") ;
+        (void)0 ;
       if(in_mf)
         MemFunc = in_mf->Clone() ;
     }
 
     // Copy constructor
     Bundle(const Bundle& other)
-      : Base("Bundle", true), Grid(other.Grid), Con(other.Con), Func(other.Func)
+      : Base("Bundle"), Grid(other.Grid), Con(other.Con), Func(other.Func)
     {
-      Z_LOG_NOTE("Bundle copy constructor: from " 
-              + other.PtrStr() + " --> " + PtrStr() + ".") ;
+      (void)0 ;
 
-#if CONFIND_BASE_DEBUG_MODE
-      Z_OBJ_CCTR(this, (void*)(&other), "Bundle", "Bundle") ;
-#endif
 
         if(other.MemFunc)
         MemFunc = other.MemFunc->Clone() ;
@@ -96,7 +86,7 @@ class Bundle : public Base
 
     ~Bundle()
     {
-        Z_LOG_NOTE("Bundle destructor: from "+ PtrStr() + ".") ;
+        (void)0 ;
     }
     
     void AddCont(const Cont2D& in_c) { Con = in_c; }
@@ -107,7 +97,7 @@ class Bundle : public Base
       if(in_mf)
         MemFunc  = in_mf->Clone(); 
       else
-        Z_LOG_NOTE("Input member function is nullptr!") ;
+        (void)0 ;
     }
     
     void AddFunc(double (*in_f)(const double, const double)) 
@@ -115,7 +105,7 @@ class Bundle : public Base
       if(in_f)
         Func = in_f;
       else
-        Z_LOG_NOTE("Input function is nullptr!") ;
+        (void)0 ;
     }
 
     Cont2D GetCont() {return Con;}

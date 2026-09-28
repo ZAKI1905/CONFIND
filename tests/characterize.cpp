@@ -4,7 +4,6 @@
 // Deliberately does NOT use Coord3D::operator< / operator== / XYDist2 so that this
 // translation unit emits no competing weak definitions of the comparator.
 #include <Confind/ContourFinder.hpp>
-#include <Zaki/Util/Logger.hpp>
 #include <Zaki/Vector/DataSet.hpp>
 
 #include <algorithm>
@@ -163,11 +162,7 @@ static std::vector<CONFIND::Cont2D> run_callable(const Zaki::Math::Grid2D& g, co
   con.SetGrid(g);
   con.SetContVal(lv);
   con.SetFunc(&callable_trampoline);
-#ifndef CONFIND_MODERN
   (void)threads;
-#else
-  (void)threads;
-#endif
   con.SetGridVals(m);
   return con.GetContourSet();
 }
@@ -178,7 +173,6 @@ int main(int argc, char** argv)
   if(!OUT) throw std::runtime_error("cannot open output");
   if(argc>2) worker_count=std::stoul(argv[2]);
   perturb=argc>3;
-  Zaki::Util::LogManager::SetLogLevels(Zaki::Util::LogLevel::Error);
 
   // F01 constant field (ConvertToCurve2D deliberately skipped: SortNew reads pts[0] on empty -> UB)
   analyse("F01_constant", run_sampled(grid(0, 4, 4, 0, 4, 4), [](double, double) { return 1.0; }, {0.5, 1.0, 2.0}), 4, false);
@@ -252,10 +246,7 @@ int main(int argc, char** argv)
     Zaki::Math::GridVals_2D gv(ds, 0, n, 1, n, 2);
     CONFIND::ContourFinder con; con.SetGrid(g); con.SetContVal({1.7}); con.SetGridVals(&gv);
     analyse("F19a_before_Plot", con.GetContourSet(), 0);
-#ifndef CONFIND_MODERN
-    con.SetPlotConnected();
-    con.Plot("scratch_plot_probe");
-#endif
+
     analyse("F19b_after_Plot", con.GetContourSet(), 0);
   }
 
